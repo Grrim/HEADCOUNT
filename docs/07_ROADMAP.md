@@ -9,7 +9,7 @@ Stan na 2026-11-07. Kolejność wynika z ryzyka: najpierw sprawdzamy, czy gra dz
 - pełna Misja 001 „Zebranie” z kamerą, taśmami, Kadrowym, zagadkami i zakończeniem,
 - mechaniki wycięcia, ratunku i omenów,
 - tymczasowa oprawa z generatorów,
-- teksty PL/EN oraz sterowanie na PC, kontroler i ekran dotykowy.
+- teksty po angielsku (polskie tłumaczenie czeka wyłączone) oraz sterowanie na PC, kontroler i ekran dotykowy.
 
 **Niesprawdzone:** gra człowieka, 2–4 graczy, telefon, kontroler, teleport i zapis postępów. Do tego czasu slice nie jest uznany za działający.
 

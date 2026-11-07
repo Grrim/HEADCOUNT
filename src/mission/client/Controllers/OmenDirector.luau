@@ -276,20 +276,23 @@ local function theDouble(): boolean
 	clone.Name = "Double"
 	clone:PivotTo(first)
 	clone.Parent = Workspace
+	-- A copy, because the memory keeps shifting while the double walks and would rush it along.
+	local route = table.clone(pathMemory)
 	task.spawn(function()
 		local seenFor = 0
 		for index = 0, steps do
-			local from = pathMemory[start + index]
-			local to = pathMemory[start + index + 1]
+			local from = route[start + index]
+			local to = route[start + index + 1]
 			if not from or not to then
 				break
 			end
 			local progress = 0
 			while progress < 0.5 do
-				progress += RunService.Heartbeat:Wait()
+				local dt = RunService.Heartbeat:Wait()
+				progress += dt
 				clone:PivotTo(from:Lerp(to, math.min(progress / 0.5, 1)))
 				if not isOutOfView(clone:GetPivot().Position) then
-					seenFor += 1 / 60
+					seenFor += dt
 				end
 			end
 			if seenFor >= 1.4 then

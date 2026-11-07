@@ -118,6 +118,11 @@ local function onRecordStop(player: Player, rawTrack: unknown)
 	local start = recording.startPos
 	-- The camera sits a couple of studs above the root.
 	local track, reason = Tape.sanitize(rawTrack, LIMITS, start.X, start.Y + 2, start.Z)
+	-- A slip of the finger must not spend one of the very few tapes a player gets.
+	if reason == "too_short" or (track and Tape.duration(track, CFG.SampleHz) < CFG.MinSeconds) then
+		services.Session.notifyOne(player, "tape_too_short")
+		return
+	end
 	if not track then
 		warn(`[Tapes] refused a tape from {player.Name}: {reason}`)
 		return

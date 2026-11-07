@@ -15,6 +15,7 @@ return {
 	Tape = {
 		PerPlayer = 3,
 		MaxSeconds = 12,
+		MinSeconds = 1,
 		SampleHz = 10,
 		MaxSamples = 130,
 		MaxSpeed = 60,

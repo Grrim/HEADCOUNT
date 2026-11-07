@@ -75,6 +75,8 @@ function Silence.start()
 	-- With the mains gone, the hum everyone had stopped noticing is gone too.
 	Net.get("SessionState").OnClientEvent:Connect(function(state)
 		blackout = state.phase == "Power"
+		-- The one place music plays in the mission itself. The final tape brings it back on its own.
+		AudioDirector.setLoop("Music", state.phase == "Climax", 0.3)
 	end)
 	-- Behind the lens you can hear them breathing.
 	LensView.onChanged(function(raised)

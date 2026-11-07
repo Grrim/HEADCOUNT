@@ -19,7 +19,6 @@ local Ui = require(ReplicatedStorage.ClientCommon.Ui)
 local EndTape = {}
 
 local controllers: { [string]: any }
-local BUS_Y = 800
 
 local function formatTime(seconds: number): string
 	return string.format("%02d:%02d", seconds // 60, seconds % 60)
@@ -38,11 +37,21 @@ local function setControls(enabled: boolean)
 	end)
 end
 
--- The next mission's bus, for a few seconds. Built only here, nowhere in the level.
-local function buildBus(): Folder
+-- The next mission's bus, for a few seconds. Built only here, nowhere in the level. It lives in a
+-- ViewportFrame because the shot is too short for the engine to light a new place in the world:
+-- out there it renders as black with white bars, while a viewport has its own light at once.
+local function buildBus(gui: ScreenGui): ViewportFrame
+	local viewport = Instance.new("ViewportFrame")
+	viewport.Name = "NextTape"
+	viewport.Size = UDim2.fromScale(1, 1)
+	viewport.BackgroundColor3 = Color3.new(0, 0, 0)
+	viewport.BorderSizePixel = 0
+	viewport.ZIndex = 0
+	viewport.Ambient = Color3.fromRGB(74, 80, 76)
+	viewport.LightColor = Palette.Fluorescent
+	viewport.LightDirection = Vector3.new(0.2, -1, -0.35)
 	local folder = Instance.new("Folder")
-	folder.Name = "NextTape"
-	local floorY = BUS_Y
+	local floorY = 0
 	Build.box(
 		folder,
 		"Floor",
@@ -71,8 +80,14 @@ local function buildBus(): Folder
 	-- Someone is standing at the far end, far too tall for the ceiling.
 	local figure = Build.box(folder, "Figure", -1, floorY, -37, 1, floorY + 8, -36, Palette.Ink)
 	figure.CanCollide = false
-	folder.Parent = Workspace
-	return folder
+	folder.Parent = viewport
+	local shot = Instance.new("Camera")
+	shot.FieldOfView = 50
+	shot.CFrame = CFrame.lookAt(Vector3.new(0, floorY + 5, 2), Vector3.new(0, floorY + 4, -36))
+	shot.Parent = viewport
+	viewport.CurrentCamera = shot
+	viewport.Parent = gui
+	return viewport
 end
 
 local function report(result: any)
@@ -164,6 +179,7 @@ local function play(result: any)
 	AudioDirector.setAbsolute(true)
 	task.wait(1.4)
 	AudioDirector.setLoop("TapeMotor", true, 0.3, 0.9)
+	AudioDirector.setLoop("Music", true, 0.22)
 	TweenService:Create(cover, TweenInfo.new(1.6), { BackgroundTransparency = 1 }):Play()
 	local startCf = CFrame.lookAt(Vector3.new(0, 8.5, -21), Vector3.new(0, 4, -3))
 	local endCf = CFrame.lookAt(Vector3.new(0, 7, -14.5), Vector3.new(4, 4, -3))
@@ -176,11 +192,11 @@ local function play(result: any)
 	task.wait(duration)
 	connection:Disconnect()
 
-	-- A hard cut to somewhere new.
+	-- A hard cut to somewhere new, and the music does not come along.
+	AudioDirector.setLoop("Music", false)
 	cover.BackgroundTransparency = 0
 	task.wait(0.5)
-	local bus = buildBus()
-	camera.CFrame = CFrame.lookAt(Vector3.new(0, BUS_Y + 5, 2), Vector3.new(0, BUS_Y + 4, -36))
+	local bus = buildBus(gui)
 	cover.BackgroundTransparency = 1
 	task.wait(3)
 	cover.BackgroundTransparency = 0

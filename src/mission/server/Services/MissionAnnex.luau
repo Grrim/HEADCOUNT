@@ -41,7 +41,7 @@ local function office(map: Folder, prompts: { [string]: ProximityPrompt })
 	Build.wallZ(map, "OfficeEast", O.maxX, O.minZ, O.maxZ, 0, O.height, {})
 	Build.wallX(map, "OfficeNorth", O.minZ, O.minX, O.maxX, 0, O.height, {})
 	Build.wallX(map, "OfficeSouth", O.maxZ, O.minX, O.maxX, 0, O.height, {})
-	Build.box(map, "OfficeRug", 44, 0, 16, 56, 0.05, 30, Color3.fromRGB(70, 28, 30), F).CanCollide =
+	Build.box(map, "OfficeRug", 44, 0, 16, 56, 0.1, 30, Color3.fromRGB(70, 28, 30), F).CanCollide =
 		false
 
 	-- The director's desk faces the door, the way such desks always did.
@@ -206,7 +206,7 @@ local function basement(map: Folder, prompts: { [string]: ProximityPrompt })
 		Palette.Metal,
 		Enum.Material.Metal
 	)
-	Build.label(panel, Enum.NormalId.Front, "GŁÓWNY", Palette.Paper)
+	Build.label(panel, Enum.NormalId.Front, "MAIN", Palette.Paper)
 	local prompt = Build.prompt(panel, "act_keypad", "obj_breaker", nil, PD)
 	prompt:AddTag("BreakerPrompt")
 	prompts.Breaker = prompt

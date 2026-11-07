@@ -77,7 +77,7 @@ local function hall(folder: Folder)
 		6,
 		1,
 		Enum.NormalId.Left,
-		"DYREKCJA",
+		"DIRECTOR",
 		Palette.Paper,
 		Palette.Ink
 	)
@@ -183,7 +183,7 @@ local function hall(folder: Folder)
 		30,
 		2,
 		Enum.NormalId.Back,
-		"ZEBRANIE KADROWE  12 XI 1987",
+		"STAFF MEETING  12 XI 1987",
 		Palette.Paper,
 		Palette.Rec
 	)
@@ -218,7 +218,7 @@ local function hall(folder: Folder)
 		5,
 		1,
 		Enum.NormalId.Front,
-		"WYJŚCIE",
+		"EXIT",
 		Color3.fromRGB(40, 90, 50),
 		Palette.Paper
 	)
@@ -230,7 +230,7 @@ local function hall(folder: Folder)
 		5,
 		1,
 		Enum.NormalId.Right,
-		"ZAPLECZE",
+		"BACKSTAGE",
 		Palette.Ink,
 		Palette.Paper
 	)
@@ -265,21 +265,10 @@ local function foyer(folder: Folder)
 		Enum.Material.Wood
 	)
 	-- Doormat and a worn runner leading to the hall, so the floor points the way.
-	decor(
-		folder,
-		"Runner",
-		-3,
-		0,
-		46,
-		3,
-		0.05,
-		72,
-		Color3.fromRGB(58, 34, 34),
-		Enum.Material.Fabric
-	).CastShadow =
+	decor(folder, "Runner", -3, 0, 46, 3, 0.1, 72, Color3.fromRGB(58, 34, 34), Enum.Material.Fabric).CastShadow =
 		false
 	-- Ticket window
-	sign(folder, 19, 8, 45.2, 8, 1.6, Enum.NormalId.Back, "KASA", Palette.Paper, Palette.Ink)
+	sign(folder, 19, 8, 45.2, 8, 1.6, Enum.NormalId.Back, "TICKETS", Palette.Paper, Palette.Ink)
 	decor(folder, "TicketGlass", 13, 3.4, 45.4, 25, 7, 45.7, Palette.Shadow, Enum.Material.Glass).Transparency =
 		0.5
 	-- Notice boards: readable set dressing that also tells the story.
@@ -303,7 +292,7 @@ local function foyer(folder: Folder)
 		5,
 		5,
 		Enum.NormalId.Front,
-		"ZEBRANIE\n12 XI\ngodz. 18:00\nOBECNOŚĆ\nOBOWIĄZKOWA",
+		"MEETING\n12 XI\n18:00\nATTENDANCE\nCOMPULSORY",
 		Palette.Paper,
 		Palette.Ink
 	)
@@ -315,7 +304,7 @@ local function foyer(folder: Folder)
 		4.4,
 		4,
 		Enum.NormalId.Front,
-		"Prosimy nie\nwynosić\nkrzeseł\nz sali.",
+		"Please do\nnot remove\nchairs from\nthe hall.",
 		Palette.Paper,
 		Palette.Ink
 	)
@@ -327,7 +316,7 @@ local function foyer(folder: Folder)
 		3.8,
 		5,
 		Enum.NormalId.Front,
-		"LISTA\nZAMKNIĘTA\n192 / 192",
+		"LIST\nCLOSED\n192 / 192",
 		Palette.Paper,
 		Palette.Rec
 	)
@@ -343,7 +332,7 @@ local function foyer(folder: Folder)
 		7,
 		1.4,
 		Enum.NormalId.Left,
-		"SZATNIA",
+		"CLOAKROOM",
 		Palette.Paper,
 		Palette.Ink
 	)
@@ -360,7 +349,7 @@ local function foyer(folder: Folder)
 		Enum.Material.Wood
 	)
 	-- Direction to the booth, at the foot of the ramp.
-	sign(folder, -23.3, 7, 70, 5, 1.2, Enum.NormalId.Right, "KABINA", Palette.Paper, Palette.Ink)
+	sign(folder, -23.3, 7, 70, 5, 1.2, Enum.NormalId.Right, "BOOTH", Palette.Paper, Palette.Ink)
 end
 
 local function booth(folder: Folder)
@@ -424,7 +413,7 @@ local function corridor(folder: Folder)
 		0,
 		-21,
 		Layout.HALL.minX - 1.5,
-		0.05,
+		0.1,
 		-5,
 		Color3.fromRGB(58, 34, 34),
 		Enum.Material.Fabric
@@ -461,11 +450,15 @@ local function archive(folder: Folder)
 		10,
 		1.8,
 		Enum.NormalId.Back,
-		"KADRY",
+		"PERSONNEL",
 		Palette.Paper,
 		Palette.Ink
 	)
 end
+
+-- How far a door frame reaches into its opening. It must cover the cut edge of the wall: a frame
+-- that merely touches it shares a plane with the wall and flickers as the player moves.
+local FRAME_INSET = 0.15
 
 -- A wooden door frame around an opening in a wall along X (fixed z) or Z (fixed x).
 local function frameX(
@@ -478,9 +471,10 @@ local function frameX(
 )
 	local c = Palette.WoodDark
 	local m = Enum.Material.Wood
-	decor(folder, "DoorFrame", minX - 0.5, bottom, z - 0.7, minX, top + 0.5, z + 0.7, c, m)
-	decor(folder, "DoorFrame", maxX, bottom, z - 0.7, maxX + 0.5, top + 0.5, z + 0.7, c, m)
-	decor(folder, "DoorFrame", minX, top, z - 0.7, maxX, top + 0.5, z + 0.7, c, m)
+	local i = FRAME_INSET
+	decor(folder, "DoorFrame", minX - 0.5, bottom, z - 0.7, minX + i, top + 0.5, z + 0.7, c, m)
+	decor(folder, "DoorFrame", maxX - i, bottom, z - 0.7, maxX + 0.5, top + 0.5, z + 0.7, c, m)
+	decor(folder, "DoorFrame", minX + i, top - i, z - 0.7, maxX - i, top + 0.5, z + 0.7, c, m)
 end
 
 local function frameZ(
@@ -493,9 +487,10 @@ local function frameZ(
 )
 	local c = Palette.WoodDark
 	local m = Enum.Material.Wood
-	decor(folder, "DoorFrame", x - 0.7, bottom, minZ - 0.5, x + 0.7, top + 0.5, minZ, c, m)
-	decor(folder, "DoorFrame", x - 0.7, bottom, maxZ, x + 0.7, top + 0.5, maxZ + 0.5, c, m)
-	decor(folder, "DoorFrame", x - 0.7, top, minZ, x + 0.7, top + 0.5, maxZ, c, m)
+	local i = FRAME_INSET
+	decor(folder, "DoorFrame", x - 0.7, bottom, minZ - 0.5, x + 0.7, top + 0.5, minZ + i, c, m)
+	decor(folder, "DoorFrame", x - 0.7, bottom, maxZ - i, x + 0.7, top + 0.5, maxZ + 0.5, c, m)
+	decor(folder, "DoorFrame", x - 0.7, top - i, minZ + i, x + 0.7, top + 0.5, maxZ - i, c, m)
 end
 
 local function openings(folder: Folder)
@@ -578,9 +573,11 @@ end
 -- Warm wall lamps: small pools between the cold ceiling panels.
 local function sconces(folder: Folder)
 	local H = Layout.HALL
-	for _, z in { 8, 22, 36 } do
+	for _, wallZ in { 8, 22, 36 } do
 		for side = -1, 1, 2 do
 			local x = side * (H.maxX - 1)
+			-- The office door takes up the east wall at 22, so that lamp hangs beside it instead.
+			local z = if side > 0 and wallZ == 22 then 17.5 else wallZ
 			local lamp = decor(
 				folder,
 				"Sconce",

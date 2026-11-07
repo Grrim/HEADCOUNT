@@ -147,7 +147,7 @@ function StaffRoom.start()
 	local prompt = machine and machine:FindFirstChildOfClass("ProximityPrompt")
 	if prompt then
 		prompt.Triggered:Connect(function()
-			AudioDirector.play("Radio", 0.3, 0.7)
+			AudioDirector.play("RecStart", 0.5, 0.7)
 		end)
 	end
 end

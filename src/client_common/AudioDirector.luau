@@ -112,14 +112,27 @@ function AudioDirector.play(name: string, volume: number?, pitch: number?)
 	end)
 end
 
+-- Is there a wall between the listener and this point? Stops just short of the point, because a
+-- knock is placed on the very surface it comes from.
+local function isBehindWall(position: Vector3): boolean
+	local camera = Workspace.CurrentCamera
+	local map = Workspace:FindFirstChild("Map")
+	if not camera or not map then
+		return false
+	end
+	local origin = camera.CFrame.Position
+	local offset = position - origin
+	if offset.Magnitude < 2 then
+		return false
+	end
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Include
+	params.FilterDescendantsInstances = { map }
+	return Workspace:Raycast(origin, offset.Unit * (offset.Magnitude - 1.5), params) ~= nil
+end
+
 -- A sound placed in the world, so direction and distance do the work.
-function AudioDirector.playAt(
-	name: string,
-	position: Vector3,
-	volume: number?,
-	range: number?,
-	muffled: boolean?
-)
+function AudioDirector.playAt(name: string, position: Vector3, volume: number?, range: number?)
 	local asset = assetFor(name)
 	if not asset then
 		return
@@ -139,7 +152,7 @@ function AudioDirector.playAt(
 	sound.RollOffMinDistance = 8
 	sound.RollOffMaxDistance = range or 120
 	sound.Parent = holder
-	if muffled then
+	if isBehindWall(position) then
 		-- Through a wall the top end disappears: this is what makes a sound feel like "next door".
 		local eq = Instance.new("EqualizerSoundEffect")
 		eq.HighGain = -30

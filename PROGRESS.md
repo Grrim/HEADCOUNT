@@ -12,6 +12,14 @@ Kooperacyjny horror psychologiczny na Roblox w fazie Vertical Slice (Misja 001).
 - **Publikacja na Roblox:** nic nie zostało opublikowane. `Config/Places` ma identyfikatory 0, więc teleport między miejscami nie może jeszcze działać. Publikacja wymaga wyraźnej zgody właściciela.
 - **Grywalność:** gry nie przeszedł jeszcze żaden człowiek.
 
+## Wykonane dzisiaj (pakiet przed testem)
+
+- Angielski jest językiem podstawowym, także na szyldach. Polskie tłumaczenie jest wyłączone flagą `POLISH_TRANSLATION` w `Strings.luau`.
+- Usunięte migotanie przy drzwiach (z-fighting) w lobby i misji. Zasada na przyszłość: elementy mają się stykać krawędziami albo wyraźnie przykrywać, nigdy nie leżeć w tej samej płaszczyźnie.
+- Nowe dźwięki, klik błędu, muzyka w kulminacji i na końcu, tłumienie za ścianą. Nikt ich jeszcze nie słyszał.
+- Autobus na końcu w `ViewportFrame`, ochrona taśmy przed przypadkowym R-R, poprawki sobowtóra.
+- Szczegóły i testy: `docs/05_STATUS.md`, siódmy przebieg.
+
 ## Wykonane dzisiaj (przejście pieszo)
 
 - Przejście całej misji Humanoidem: raz z wstrzymanym Kadrowym, raz z aktywnym. Bez blokad na trasach.
@@ -73,13 +81,13 @@ Brak gita oznacza brak pełnego diffu. Wcześniejsze etapy tego samego dnia zmie
 
 Pomiar sprzed tego etapu, ze Studio na tym komputerze: misja 1637 części, 482 siatki, 53–65 FPS; lobby 321 części, 184 siatki, 65 FPS.
 
-**Tylko przed zmianą grafiki i skryptami:** szafka, wstawanie rzędów, Dubel 3.
+**Tylko przed zmianą grafiki i skryptami:** wstawanie rzędów, Dubel 3.
 
 **Nigdy nietestowane:**
 - gra człowieka, czas przejścia, 2–4 graczy, telefon i fizyczny kontroler,
 - teleport między miejscami i zapis w DataStore,
 - brzmienie dźwięków,
-- migawka autobusu, Dubel 2 w grze oraz sobowtór oglądany w ruchu w misji.
+- wygląd sobowtóra w ruchu w misji, pełny łańcuch misji po ostatnich zmianach geometrii.
 
 ## Dokładny następny krok
 

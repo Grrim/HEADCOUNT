@@ -8,6 +8,44 @@ Kooperacyjny horror na Roblox (1–4 graczy). Kamera pokazuje to, czego nie widz
 - Plan rozwoju: [docs/07_ROADMAP.md](docs/07_ROADMAP.md)
 - Punkt wznowienia pracy: [PROGRESS.md](PROGRESS.md)
 
+Język gry to angielski, także na szyldach w świecie. Polskie tłumaczenie czeka w `src/shared/Strings.luau`, wyłączone flagą `POLISH_TRANSLATION`.
+
+## Co jest zrobione
+
+Stan na 2026-11-07. Faza Vertical Slice: jedna misja i lobby, z tymczasową grafiką i tymczasowymi dźwiękami.
+
+- **Lobby Archiwum 03:** intro z kamerą, drużyny 1–4 osób, terminal ekspedycji, archiwum dokumentów, szafka z ramkami wizjera, ukryty pokój.
+- **Misja 001 „The Meeting”:** cały łańcuch od weryfikacji obecności przez krzesła, szatnię, zanik prądu, kod na bezpieczniku, magnetofon, projektor, ukryte drzwi i rejestr po dzwonek i finałową taśmę.
+- **Mechaniki:** wizjer pokazujący niewidzialną widownię, nagrywanie i odtwarzanie taśm, Kadrowy przybliżany każdym odtworzeniem, wycięcie z kadru z powrotem, anomalie i sobowtór.
+- **Dane i sterowanie (napisane, nieprzetestowane):** teleport między miejscami, zapis w DataStore, przyciski dotykowe i kontroler.
+
+Ostatnio:
+
+- Cała misja i droga do terminala przeszły pieszo w Studio, bez teleportów.
+- Dokumenty w misji da się zamknąć, a wskazówka z magnetofonu nie nachodzi na napisy radia.
+- Usunięte migotanie grafiki przy drzwiach (nakładające się powierzchnie) w lobby i misji.
+- Uzupełniony tymczasowy zestaw dźwięków: szum budynku, sygnał błędu, muzyka w kulminacji i na końcu, tłumienie dźwięków za ścianą.
+- Czytelna scena autobusu na końcu, ochrona taśm przed przypadkowym podwójnym R, poprawki sobowtóra.
+
+**Czego jeszcze nikt nie sprawdził:** gry człowieka, czasu przejścia, brzmienia dźwięków, 2–4 graczy, telefonu, fizycznego kontrolera, teleportu i zapisu. Do tego czasu slice nie jest uznany za działający. Wyniki testów są w [docs/05_STATUS.md](docs/05_STATUS.md).
+
+## Plany rozwoju
+
+Kolejność wynika z ryzyka: najpierw sprawdzamy, czy gra działa i czy straszy, a dopiero potem rozbudowujemy treść. Szczegóły są w [docs/07_ROADMAP.md](docs/07_ROADMAP.md).
+
+1. **Domknięcie slice (teraz):**
+   - właściciel przechodzi grę sam, od początku do końca,
+   - 2–3 osoby grają bez instrukcji,
+   - publikacja próbna i testy na niej: teleport, zapis, rozłączenia, 2 i 4 graczy,
+   - telefon: minimum 30 FPS, przyciski, czytelność,
+   - strojenie długości misji (cel 15–25 minut), trudności Kadrowego, jasności i dźwięku.
+2. **Jakość przed premierą:** ręcznie robione modele Kadrowego i widowni, własny zestaw dźwięków, ikona, miniatury i opis, kwestionariusz Maturity & Compliance (cel Mild), podstawowa analityka, testy zamknięte.
+3. **Premiera Misji 001:** serwery prywatne jako pierwsza płatność, zbieranie danych o retencji, poprawki.
+4. **Sezon 1:** misje 002 „Kurs 17”, 003 „Pion”, 004 „Turnus” i 005 „Taśma Zero”. Kolejna rusza dopiero, gdy poprzednia się sprawdzi.
+5. **Po sezonie:** warianty kamery, personalizacja szafki, stroje i identyfikatory, pakiet drużynowy. Bez przewagi w grze: nigdy dodatkowe taśmy, baterie, „ożywienia” za pieniądze ani płatne losowe przedmioty.
+
+Jeśli testerzy się nie boją albo nie rozumieją mechaniki, poprawiamy rdzeń gry, zanim powstanie kolejna misja.
+
 ## Praca z projektem
 
 Narzędzia są przypięte w `rokit.toml`:

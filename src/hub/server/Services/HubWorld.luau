@@ -33,7 +33,8 @@ local function structure(map: Folder)
 
 	-- Corridor
 	Build.box(map, "CorridorFloor", -4, -1, 20, 4, 0, 40, carpet, F)
-	Build.box(map, "CorridorCeiling", -4, 9, 20, 4, 10, 40, C)
+	-- Stops short of the hall wall, whose lintel sits at this same height.
+	Build.box(map, "CorridorCeiling", -4, 9, 20.5, 4, 10, 40, C)
 	Build.wallZ(map, "CorridorWest", -4, 20, 40, 0, 9, {})
 	Build.wallZ(map, "CorridorEast", 4, 20, 40, 0, 9, {})
 
@@ -68,7 +69,8 @@ local function structure(map: Folder)
 
 	-- The room with no door, west
 	Build.box(map, "SecretFloor", -60, -1, -14, -40, 0, 10, carpet, F)
-	Build.box(map, "SecretCeiling", -60, 9, -14, -40, 10, 10, C)
+	-- Same here: the lintel of the hidden door is at this height.
+	Build.box(map, "SecretCeiling", -60, 9, -14, -40.5, 10, 10, C)
 	Build.wallZ(map, "SecretWest", -60, -14, 10, 0, 9, {})
 	Build.wallX(map, "SecretNorth", -14, -60, -40, 0, 9, {})
 	Build.wallX(map, "SecretSouth", 10, -60, -40, 0, 9, {})
@@ -126,7 +128,7 @@ local function dressing(map: Folder)
 
 	-- Expedition terminal and the board of case files beside it.
 	local terminal = Build.box(map, "Terminal", -5, 0, -33, 5, 6, -31, Palette.Metal)
-	Build.label(terminal, Enum.NormalId.Back, "ARCHIWUM 03", Palette.Crt)
+	Build.label(terminal, Enum.NormalId.Back, "ARCHIVE 03", Palette.Crt)
 	HubWorld.prompts.Terminal = Build.prompt(terminal, "hub_open", "hub_terminal", nil, 9)
 	terminal:AddTag("ExpeditionTerminal")
 	local board = Build.box(map, "CaseBoard", 8, 4, -39.4, 16, 14, -39, Palette.WoodDark)

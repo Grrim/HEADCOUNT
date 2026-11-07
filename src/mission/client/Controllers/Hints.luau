@@ -24,7 +24,7 @@ local function keyFor(action: string): string
 	if UserInputService.GamepadEnabled and not UserInputService.KeyboardEnabled then
 		return ({ lens = "L2", rec = "R2", play = "Y" } :: any)[action]
 	end
-	return ({ lens = "Q / PPM", rec = "R", play = "T" } :: any)[action]
+	return ({ lens = "Q / RMB", rec = "R", play = "T" } :: any)[action]
 end
 
 local function show(text: string)

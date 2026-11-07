@@ -51,7 +51,7 @@ end
 
 local function send(name: string, arg: any?)
 	errorLabel.Text = ""
-	AudioDirector.play("Radio", 0.2)
+	AudioDirector.play("RecStart", 0.4)
 	action:FireServer(name, arg)
 end
 

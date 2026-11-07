@@ -20,25 +20,16 @@ local function pointAround(origin: Vector3): Vector3
 		+ Vector3.new(math.cos(angle) * radius, random:NextNumber(-2, 4), math.sin(angle) * radius)
 end
 
-local function isBlocked(from: Vector3, to: Vector3, map: Instance): boolean
-	local params = RaycastParams.new()
-	params.FilterType = Enum.RaycastFilterType.Include
-	params.FilterDescendantsInstances = { map }
-	return Workspace:Raycast(from, to - from, params) ~= nil
-end
-
 function RoomTone.start(pool: { string })
 	local cfg = Config.RoomTone
 	task.spawn(function()
-		local map = Workspace:WaitForChild("Map")
 		while true do
 			task.wait(random:NextNumber(cfg.MinGap, cfg.MaxGap))
 			local camera = Workspace.CurrentCamera
 			if camera and not AudioDirector.isSilent() then
-				local origin = camera.CFrame.Position
-				local point = pointAround(origin)
+				local point = pointAround(camera.CFrame.Position)
 				local name = pool[random:NextInteger(1, #pool)]
-				AudioDirector.playAt(name, point, cfg.Volume, 60, isBlocked(origin, point, map))
+				AudioDirector.playAt(name, point, cfg.Volume, 60)
 			end
 		end
 	end)

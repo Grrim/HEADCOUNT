@@ -16,6 +16,9 @@ local Ui = require(ReplicatedStorage.ClientCommon.Ui)
 
 local Hud = {}
 
+-- A guess that came to nothing gets one dry click, so a wrong answer is heard as well as read.
+local WRONG_ANSWERS = { seat_empty = true, hook_empty = true, code_wrong = true, reel_wrong = true }
+
 local gui: ScreenGui
 local objectiveLabel: TextLabel
 local detailLabel: TextLabel
@@ -234,6 +237,9 @@ function Hud.start()
 		end
 	end)
 	Net.get("Notify").OnClientEvent:Connect(function(key: string, ...)
+		if WRONG_ANSWERS[key] then
+			AudioDirector.play("Wrong", 0.6)
+		end
 		Hud.subtitle(Strings.get(key, ...))
 	end)
 	Net.get("DocShown").OnClientEvent:Connect(function(docId: string)

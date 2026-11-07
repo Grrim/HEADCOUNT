@@ -1,7 +1,10 @@
 --!strict
--- All player-facing text. Polish and English; a missing Polish line falls back to English, and a
--- missing key shows the key, which is ugly on purpose so it gets noticed in a playtest.
+-- All player-facing text. English is the game's original language. The Polish table is a dormant
+-- translation behind POLISH_TRANSLATION. A missing key shows the key, which is ugly on purpose so
+-- it gets noticed in a playtest. World signs are written in English in the level code.
 local Strings = {}
+
+local POLISH_TRANSLATION = false
 
 local EN: { [string]: string } = {
 	hint_lens = "[{1}] raise the camera",
@@ -113,6 +116,7 @@ local EN: { [string]: string } = {
 	standby = "STBY",
 	tapes_left = "TAPES {1}",
 	tape_saved = "Tape {1} saved.",
+	tape_too_short = "Too short to keep. The tape was not used.",
 	no_tapes = "No tape left.",
 	no_recordings = "Nothing recorded yet.",
 	play = "PLAY",
@@ -424,7 +428,7 @@ local active: { [string]: string }? = nil
 
 function Strings.get(key: string, ...: any): string
 	if active == nil then
-		active = if localeIsPolish() then PL else EN
+		active = if POLISH_TRANSLATION and localeIsPolish() then PL else EN
 	end
 	local text = (active :: { [string]: string })[key] or EN[key] or key
 	for index = 1, select("#", ...) do

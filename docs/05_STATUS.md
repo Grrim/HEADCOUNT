@@ -206,3 +206,41 @@ Do obserwacji:
 - **Balans:** testowy spacer nie reaguje na Kadrowego. Wycięcia po 2–3 minutach nie mówią więc, jak trudna jest gra dla człowieka, który może go sfilmować w ciągu 1,5 s.
 
 Bez zmian niesprawdzone: gra człowieka, czas przejścia, 2–4 graczy, telefon, fizyczny kontroler, teleport, DataStore, brzmienie dźwięków.
+
+## Siódmy przebieg: pakiet przed testem właściciela
+
+Stan na 2026-11-07. Solo w Studio. Pełnego łańcucha misji nie powtarzałem po tych zmianach. Sprawdziłem pieszo trasy przez zmienione progi, a resztę osobno, częściowo przez ręczne wysłanie zdarzeń `EndMission` i `SessionState`.
+
+**Język:** angielski jest teraz językiem podstawowym, także dla kont z językiem polskim. Szyldy w świecie są po angielsku. Polskie tłumaczenie zostaje w `Strings.luau`, wyłączone flagą `POLISH_TRANSLATION`.
+
+**Migotanie przy drzwiach (zgłoszone przez właściciela):** to z-fighting, czyli powierzchnie w tej samej płaszczyźnie. Skan wszystkich prostopadłościanów znalazł przyczyny:
+
+- ramy drzwi misji leżały w płaszczyźnie cięcia ściany; teraz wchodzą 0,15 w otwór i je przykrywają,
+- w lobby `LockerWestLow` nachodziła na `HallEast`, a sufity korytarza i ukrytego pokoju pokrywały się z nadprożami,
+- progi drzwi przy kulisach i ukrytych drzwiach pokrywały się z podłogą; otwory sięgają teraz ziemi, a podłogi je wypełniają,
+- sufit foyer pokrywał się z dołem ścian kabiny i rampy,
+- chodniki, dywan i znacznik podniesione z 0,05–0,06 do 0,1.
+
+Ponowny skan: w lobby brak konfliktów, w misji zostały tylko styki niewidoczne dla gracza. Skan nie obejmuje siatek (`MeshPart`), a samo migotanie w ruchu musi potwierdzić właściciel, bo zrzut jest nieruchomy.
+
+Przy okazji: tabliczki rzędów i kinkiet wisiały w otworach drzwi. Tabliczek przy drzwiach już nie ma (litera została na drugiej ścianie), a kinkiet wisi obok.
+
+**Dźwięk:** dobrane `Hum`, `Wrong`, `Music`, `LensUp`, `RecStart`, `Radio`, `Projector`, `TapeMotor`. Wszystkie ładują się w Studio i mają zmierzoną długość. **Nikt ich nie słyszał**: wybór opiera się na nazwach i długościach. Podłączone: klik przy błędnej odpowiedzi, muzyka w kulminacji i na finałowej taśmie, automatyczne tłumienie dźwięków za ścianą w `playAt`. Terminal i ekspres mają własny klik zamiast szumu radia.
+
+**Autobus na końcu:** w świecie renderował się jako czerń z trzema białymi plamami, bo silnik nie zdążał oświetlić nowego miejsca. Jest teraz w `ViewportFrame` z własnym światłem i obejrzany na zrzucie: rzędy krzeseł, lampy, wysoka postać w głębi.
+
+**Taśmy:** nagranie krótsze niż 1 s nie zużywa taśmy (sprawdzone: R-R zostawia licznik na 3). Przyczyny jednorazowego podwójnego liczenia nie ustaliłem. W lobby zaobserwowałem coś, co wygląda na podwójne wykonanie wywołania narzędzia testowego, ale związku nie potwierdziłem.
+
+**Sobowtór:** naprawione przyspieszanie po ok. 90 s gry oraz czas patrzenia zależny od FPS. Pozycje pokazują przejście trasy i zniknięcie po ok. 13 s. Wyglądu w ruchu w misji nie udało się złapać na zrzucie.
+
+| Test (solo, Studio) | Wynik |
+|---|---|
+| Dubel 2: odwrócony co czwarty rząd, Kadrowy aktywny od startu | OK |
+| Szafka: otwarcie, zmiana ramki na Amber, zablokowana ramka bez skutku, zamknięcie | OK |
+| Klik przy błędnym krześle, muzyka w sztucznie wywołanej fazie Climax i jej wyłączenie | OK |
+| Tłumienie: dźwięk za ścianą z EQ, w linii wzroku bez | OK |
+| Humanoid przez drzwi kulis i oba otwory ukrytych drzwi (ściana wyłączona skryptem), wysokość stabilna | OK |
+| Błędy skryptów w logach lobby | Brak |
+| Bramki: rojo, lune (46 testów), selene, stylua | Zielone |
+
+Uwaga do `DevPauseRegistrar`: działa tylko na budzenie, więc w Dublu 2 Kadrowy i tak poluje.

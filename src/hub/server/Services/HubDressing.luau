@@ -37,7 +37,8 @@ local function lockerRoom(folder: Folder)
 	Build.box(folder, "LockerCeiling", 40, 11, 8, 58, 12, 24, C)
 	Build.wallZ(folder, "LockerEast", 58, 8, 24, 0, 11, {})
 	Build.wallX(folder, "LockerSouth", 24, 40, 58, 0, 11, {})
-	Build.wallZ(folder, "LockerWestLow", 40, 18, 24, 0, 11, {}, Palette.WallDark)
+	-- Starts where the hall's own east wall ends: overlapping it makes both surfaces flicker.
+	Build.wallZ(folder, "LockerWestLow", 40, 20, 24, 0, 11, {}, Palette.WallDark)
 	-- A row of grey lockers. The last one has the player's name on it (added by the client).
 	for index = 0, 6 do
 		local x = 42 + index * 2.2
@@ -88,7 +89,7 @@ local function hallDetails(folder: Folder)
 	-- Coffee machine beside reception: something to do with your hands while you wait.
 	local machine =
 		Build.box(folder, "CoffeeMachine", 12, 0, -2, 15, 7, 0, Palette.Metal, Enum.Material.Metal)
-	Build.label(machine, Enum.NormalId.Back, "KAWA", Palette.Crt)
+	Build.label(machine, Enum.NormalId.Back, "COFFEE", Palette.Crt)
 	HubDressing.prompts.Coffee =
 		Build.prompt(machine, "act_coffee", "hub_coffee", nil, Config.Puzzle.PromptDistance)
 
@@ -118,10 +119,10 @@ local function hallDetails(folder: Folder)
 		plate.CastShadow = false
 		Build.label(plate, face, text, Palette.Ink)
 	end
-	sign(-3, 9.6, 19.3, 3, 11, 19.5, Enum.NormalId.Front, "STANOWISKA")
-	sign(39.2, 9.6, -9, 39.4, 11, -3, Enum.NormalId.Left, "POKÓJ TAŚM")
-	sign(39.2, 9.6, 11, 39.4, 11, 17, Enum.NormalId.Left, "PERSONEL")
-	sign(-4, 7.2, -30.9, 4, 8.4, -30.7, Enum.NormalId.Back, "EKSPEDYCJE")
+	sign(-3, 9.6, 19.3, 3, 11, 19.5, Enum.NormalId.Front, "WORKSTATIONS")
+	sign(39.2, 9.6, -9, 39.4, 11, -3, Enum.NormalId.Left, "TAPE ROOM")
+	sign(39.2, 9.6, 11, 39.4, 11, 17, Enum.NormalId.Left, "PERSONNEL")
+	sign(-4, 7.2, -30.9, 4, 8.4, -30.7, Enum.NormalId.Back, "EXPEDITIONS")
 end
 
 -- The archive looks in use: stacked boxes, a tape cart, a ladder, a desk someone just left.
@@ -206,7 +207,7 @@ local function archiveClutter(folder: Folder)
 		0,
 		-30,
 		3,
-		0.05,
+		0.1,
 		19.5,
 		Color3.fromRGB(58, 34, 34),
 		Enum.Material.Fabric
@@ -278,14 +279,14 @@ function HubDressing.start()
 		Vector3.new(1.21, 1.24, 0.83)
 	)
 	local coffeeSign = decor(folder, "CoffeeSign", 12.4, 7.1, -0.9, 14.6, 7.9, -0.8, Palette.Shadow)
-	Build.label(coffeeSign, Enum.NormalId.Back, "KAWA", Palette.Crt)
+	Build.label(coffeeSign, Enum.NormalId.Back, "COFFEE", Palette.Crt)
 	-- The expedition terminal is an old set on a desk, with the sign on its screen.
 	hide(map, "Terminal")
 	Props.place(folder, "Desk", CFrame.new(0, 0, -32) * facingHall, Vector3.new(1.43, 1.02, 1))
 	Props.place(folder, "Crt", CFrame.new(0, 3.2, -32) * facingHall)
 	local terminalScreen =
 		decor(folder, "TerminalScreen", -1.25, 5.3, -31.2, 1.05, 6.9, -31.1, Palette.Shadow)
-	Build.label(terminalScreen, Enum.NormalId.Back, "ARCHIWUM 03", Palette.Crt)
+	Build.label(terminalScreen, Enum.NormalId.Back, "ARCHIVE 03", Palette.Crt)
 	hide(map, "ArchiveTerminal")
 	Props.place(folder, "Crt", CFrame.new(57.5, 0, -5) * CFrame.Angles(0, math.pi / 2, 0), 1.2)
 	folder.Parent = map

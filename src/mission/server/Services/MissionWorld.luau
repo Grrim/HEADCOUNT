@@ -39,15 +39,17 @@ local function structure(map: Folder)
 	local H = Layout.HALL
 	Build.box(map, "HallFloor", H.minX, -1, H.minZ, H.maxX, 0, H.maxZ, carpet, F)
 	Build.box(map, "HallCeiling", H.minX, H.height, H.minZ, H.maxX, H.height + 1, H.maxZ, C)
+	-- Raised doors are cut to the ground: the stage and corridor floors fill the bottom, and a sill
+	-- left in the wall would share a plane with them and flicker underfoot.
 	Build.wallZ(map, "HallWest", H.minX, H.minZ, H.maxZ, 0, H.height, {
 		{ -13, -5, 0, 10 },
-		{ -38, -30, 3, 12 },
+		{ -38, -30, 0, 12 },
 	})
 	Build.wallZ(map, "HallEast", H.maxX, H.minZ, H.maxZ, 0, H.height, { { 20, 28, 0, 10 } })
 	local X = Layout.DOOR_OFFSET_X
 	Build.wallX(map, "StageBack", H.minZ, H.minX, H.maxX, 0, H.height, {
-		{ -X - 4, -X + 4, 3, 12 },
-		{ X - 4, X + 4, 3, 12 },
+		{ -X - 4, -X + 4, 0, 12 },
+		{ X - 4, X + 4, 0, 12 },
 	}, Palette.WallDark)
 	Build.wallX(map, "HallSouth", H.maxZ, H.minX, H.maxX, 0, H.height, {
 		{ -5, 5, 0, 10 },
@@ -132,7 +134,10 @@ local function structure(map: Folder)
 	Build.wallZ(map, "FoyerEast", Fy.maxX, Fy.minZ, Fy.maxZ, 0, Fy.height, { { 54, 66, 0, 9 } })
 	Build.wallX(map, "FoyerSouth", Fy.maxZ, Fy.minX, -24, 0, 25, {})
 	Build.wallX(map, "FoyerSouth", Fy.maxZ, -24, Fy.maxX, 0, Fy.height, {})
-	Build.box(map, "FoyerCeiling", -24, Fy.height, 56, Fy.maxX, Fy.height + 1, Fy.maxZ, C)
+	-- The ceiling butts against the booth's south wall and the ramp's side wall, which both start at
+	-- this height. East of the booth a short piece closes the gap the wall does not cover.
+	Build.box(map, "FoyerCeiling", -23.5, Fy.height, 56.5, Fy.maxX, Fy.height + 1, Fy.maxZ, C)
+	Build.box(map, "FoyerCeiling", 20, Fy.height, 56, Fy.maxX, Fy.height + 1, 56.5, C)
 	Build.wallZ(map, "RampSide", -24, 56, 72, 0, 25, {})
 	Build.wallZ(map, "RampSideHigh", -24, 72, 76, Fy.height, 25, {})
 	Build.ramp(map, "BoothRamp", Fy.minX, -24, 0, 73, 14, 56, carpet, F)
@@ -303,12 +308,16 @@ local function seating(map: Folder)
 	for row = 1, Seats.ROWS do
 		local _, z = Seats.position(Seats.id(row, 1))
 		for side = -1, 1, 2 do
-			local x = side * (Layout.HALL.maxX - 0.7)
-			local plate =
-				Build.box(map, "RowSign", x - 0.1, 6, z - 1, x + 0.1, 8, z + 1, Palette.Paper)
-			plate.CanCollide = false
-			local face = if side < 0 then Enum.NormalId.Right else Enum.NormalId.Left
-			Build.label(plate, face, Seats.rowLetter(row), Palette.Ink)
+			-- No wall to hang on where a door is, frame included; the far wall still has the letter.
+			local door = if side < 0 then { -13, -5 } else { 20, 28 }
+			if z + 1 <= door[1] - 0.5 or z - 1 >= door[2] + 0.5 then
+				local x = side * (Layout.HALL.maxX - 0.7)
+				local plate =
+					Build.box(map, "RowSign", x - 0.1, 6, z - 1, x + 0.1, 8, z + 1, Palette.Paper)
+				plate.CanCollide = false
+				local face = if side < 0 then Enum.NormalId.Right else Enum.NormalId.Left
+				Build.label(plate, face, Seats.rowLetter(row), Palette.Ink)
+			end
 		end
 	end
 end
@@ -512,7 +521,7 @@ local function setPieces(map: Folder)
 		0,
 		mark.z - 3,
 		mark.x + 3,
-		0.06,
+		0.1,
 		mark.z + 3,
 		Palette.Paper
 	)
@@ -570,7 +579,6 @@ function MissionWorld.showFilm(doorSide: number)
 			sound.SoundId = `rbxassetid://{id}`
 			sound.Looped = true
 			sound.Volume = 0.4
-			sound.PlaybackSpeed = 1.4
 			sound.RollOffMode = Enum.RollOffMode.InverseTapered
 			sound.RollOffMinDistance = 6
 			sound.RollOffMaxDistance = 60
