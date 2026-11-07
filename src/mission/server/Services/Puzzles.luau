@@ -140,6 +140,17 @@ local function onCode(player: Player, entry: unknown)
 	session.broadcast()
 end
 
+-- A loaded reel leaves the table, so the team can see which ones are already in the projector.
+local function setCanOnTable(prompt: ProximityPrompt, onTable: boolean)
+	local can = prompt.Parent :: BasePart
+	can.Transparency = if onTable then 0 else 1
+	local label = can:FindFirstChildOfClass("SurfaceGui")
+	if label then
+		label.Enabled = onTable
+	end
+	prompt.Enabled = onTable
+end
+
 local function onReel(player: Player, letter: string, prompt: ProximityPrompt)
 	if not allowed(player, prompt) then
 		return
@@ -154,12 +165,12 @@ local function onReel(player: Player, letter: string, prompt: ProximityPrompt)
 	local world = services.MissionWorld
 	if mistake then
 		for _, name in { "A", "B", "C" } do
-			world.prompts[`Reel{name}`].Enabled = true
+			setCanOnTable(world.prompts[`Reel{name}`], true)
 		end
 		wrong(player, "reel_wrong")
 		return
 	end
-	prompt.Enabled = false
+	setCanOnTable(prompt, false)
 	session.notify("reel_loaded", letter, loaded)
 	if loaded >= #session.puzzle.reelOrder and Flow.filmPlayed(session.flow) then
 		world.showFilm(session.puzzle.doorSide)

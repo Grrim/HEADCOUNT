@@ -48,8 +48,9 @@ local function office(map: Folder, prompts: { [string]: ProximityPrompt })
 	Build.box(map, "DirectorDesk", 50, 0, 18, 54, 3.2, 28, Palette.Wood, Enum.Material.Wood)
 	Build.chair(map, "DirectorChair", CFrame.new(56, 0, 23) * CFrame.Angles(0, math.rad(90), 0)).CanCollide =
 		true
-	for z = 13, 29, 8 do
-		Build.shelf(map, 58, z, 59.4, z + 6, 0, 10)
+	-- Units stick out 0.5 past these bounds, so this keeps them off the east and south walls.
+	for z = 13, 27, 7 do
+		Build.shelf(map, 57.6, z, 59, z + 6, 0, 10)
 	end
 
 	-- The recorder: its tape names the order of the reels, at the usual price of watching.
@@ -232,9 +233,10 @@ end
 
 local function reels(map: Folder, prompts: { [string]: ProximityPrompt })
 	-- Three cans on a table by the projector, loaded one at a time, in the order the tape gives.
-	Build.box(map, "ReelTable", -8, 14, 45.6, -1, 17, 49, Palette.WoodDark, Enum.Material.Wood)
+	-- Clear of the projector, whose model reaches x = -1.9.
+	Build.box(map, "ReelTable", -9.5, 14, 45.6, -2.5, 17, 49, Palette.WoodDark, Enum.Material.Wood)
 	for index, letter in { "A", "B", "C" } do
-		local x = -7.6 + (index - 1) * 2.2
+		local x = -9.1 + (index - 1) * 2.2
 		local can = Build.box(
 			map,
 			`Reel{letter}`,

@@ -68,6 +68,17 @@ return {
 		end
 	end,
 
+	["the final tape keeps four different seats free in row C"] = function()
+		local seen = {}
+		for index = 1, 4 do
+			local id = Seats.castSeat(index)
+			assert(Seats.isValidId(id))
+			assert(Seats.fromId(id) == 3)
+			assert(not seen[id])
+			seen[id] = true
+		end
+	end,
+
 	["seat labels read like a ticket"] = function()
 		assert(Seats.label(1) == "A-01")
 		assert(Seats.label(Seats.TOTAL) == "L-16")
@@ -316,6 +327,22 @@ return {
 		events = Registrar.step(state, CONFIG, Layout.NODES, 2, {}, players, 1)
 		assert(hasEvent(events, "jump"))
 		assert(state.node == "stage")
+	end,
+
+	["a faster pace cuts the running countdown at once, a slower one never stretches it"] = function()
+		local state = Registrar.new("archive", CONFIG)
+		local players = { farPlayer(1) }
+		Registrar.step(state, CONFIG, Layout.NODES, 1, {}, players, 1.5)
+		assert(state.timer == 9)
+		Registrar.hasten(state, CONFIG, 0.45)
+		assert(state.timer == 4.5)
+		Registrar.hasten(state, CONFIG, 1.5)
+		assert(state.timer == 4.5, "hasten must not give him more time")
+		-- The cut countdown still warns before the jump.
+		local events = Registrar.step(state, CONFIG, Layout.NODES, 2.6, {}, players, 0.45)
+		assert(hasEvent(events, "preJump") and not hasEvent(events, "jump"))
+		events = Registrar.step(state, CONFIG, Layout.NODES, 2, {}, players, 0.45)
+		assert(hasEvent(events, "jump"))
 	end,
 
 	["framing him stops the clock but registers the watcher at the threshold"] = function()

@@ -249,3 +249,46 @@ Dodane później tego samego dnia:
 
 - **Ramy drzwi w lobby:** cztery wejścia. Przejście pieszo przez wszystkie i skan bez widocznych konfliktów. Obejrzane na zrzucie: wejście do pokoju taśm.
 - **Kulminacja:** po przeczytaniu rejestru zegar w foyer przeskakuje z 18:04 na 18:05, a EXIT zmienia się w NO EXIT. W Studio ta sama pętla uruchomiona ręcznie trafiła w oba napisy, a zegar obejrzałem na zrzucie. Nie sprawdziłem tego przez prawdziwy odczyt rejestru ani wyglądu NO EXIT na tablicy.
+
+## Ósmy przebieg: playtest kontrolny
+
+Stan na 2026-11-07. Solo w Studio, na kodzie z niezacommitowanymi poprawkami scenografii i finałowej taśmy. Postać szła przez `Humanoid:MoveTo`, prompty i taśmy obsługiwały prawdziwe klawisze, klawiaturę kodu i X dokumentu prawdziwe kliknięcia. Skrypt ustawiał kamerę i znał rozwiązanie z Output, więc to nadal **nie jest gra człowieka**.
+
+| Test (solo, Studio) | Wynik |
+|---|---|
+| Bramki: rojo, lune (47 testów), selene, stylua | Zielone |
+| Pełny łańcuch Protocol → Done, Kadrowy wstrzymany | OK |
+| Pełny łańcuch Protocol → Done, Kadrowy aktywny, wizjer kierowany na niego z bliska | OK, bez wycięcia |
+| Nagranie i odtworzenie, licznik taśm po jednym nagraniu | OK, zostały 2 |
+| Karta kodu przez wizjer (2/3) zgodna z kodem z Output | OK |
+| Rejestr przez prawdziwy odczyt: zegar 18:05 i NO EXIT | OK |
+| Finałowa taśma: data za tydzień, „192 + 1”, awatar przy pustym krześle w rzędzie C | OK, obejrzane na zrzucie |
+| Raport po sukcesie z wyróżnieniami | OK |
+| Lobby: drabina oparta o regał, kartony bez różowej tekstury | OK, obejrzane na zrzucie |
+| Błędy skryptów w logach misji (oba przebiegi) i lobby | Brak |
+
+Znalezione problemy:
+
+1. **Napis „Press again to stop” chowa się pod podpowiedzią** podczas odtwarzania taśmy. Oba siedzą przy dolnej krawędzi (0,95 i 0,965 wysokości) i nachodzą na siebie.
+2. **Kulminacja nie przyspiesza Kadrowego od razu.** `setClimax` nie skraca bieżącego odliczania, więc pierwszy skok po przeczytaniu rejestru przychodzi w starym tempie (solo ok. 25 s). W tym przebiegu od rejestru do dzwonka minęło ok. 20 s i Kadrowy ani razu nie skoczył szybciej.
+3. **„Tags: 30, 38, 5” zostaje w HUD do końca misji**, także po zdjęciu wszystkich szpul.
+4. **Puszki A, B, C zostają na stole po załadowaniu** do projektora. Gracz nie widzi, które już włożył.
+5. **NO EXIT jest mały** i ze sceny ledwo widać, że napis się zmienił.
+6. Kotary przy ekranie są prawie czarne, a okienko kasy w foyer to jednolicie czarny prostokąt.
+
+Niesprawdzone w tym przebiegu: magnetofon w gabinecie (kolejność szpul wzięta z Output), wycięcie i powrót, porażka, migawka autobusu (zrzut trafił już w raport). Czas 10:25 z raportu obejmuje pracę skryptu testowego i nie mówi nic o czasie przejścia człowieka.
+
+**Poprawki po przebiegu (punkty 1–4)** i trzeci przebieg z aktywnym Kadrowym na tym kodzie:
+
+| Poprawka | Plik | Sprawdzone w Studio |
+|---|---|---|
+| „Press again to stop” podniesiony na 0,9 wysokości | `Playback.luau` | Podczas odtwarzania napis zajmuje y 583–607, podpowiedź y 627–655 (ekran 739 px) |
+| Wiersz „Tags” tylko w fazie Protocol | `Hud.luau` | Widoczny przy płaszczach, znika po zdjęciu ostatniej szpuli |
+| Załadowana puszka znika ze stołu, zła szpula przywraca wszystkie | `Puzzles.luau` | Zła B: wszystkie trzy widoczne; potem A i C znikają, zostaje B (zrzut) |
+| `Registrar.hasten` skraca bieżące odliczanie przy kulminacji | `Core/Registrar.luau`, `RegistrarAi.luau`, test w `Core.spec.luau` | Rejestr w 265,3 s, pierwszy skok w 276,6 s (11,3 s; wcześniej do ok. 25 s) |
+
+Bramki zielone, 48 testów. Kod trafił do otwartego Studio przez łatki `Source`, nie przez ponowne otwarcie buildu.
+
+W tym przebiegu Kadrowy w kulminacji wskoczył na scenę i wyciął gracza stojącego przy dzwonku, bo skrypt przestał go śledzić wizjerem. Węzeł `stage` jest ok. 10 jednostek od dzwonka, czyli w promieniu kontaktu. Powrót pieszo na znacznik w foyer zadziałał („is back in frame”), a drugie podejście do dzwonka zakończyło misję. Finałowa taśma pokazała wysoką postać w drzwiach. Błędów skryptów brak.
+
+Nowa uwaga: płaszcze wiszą co 2,4 jednostki, a E łapie najbliższy prompt, nie ten na środku ekranu. Z odległości kilku kroków skrypt trafił w hak 24 zamiast 33. Człowiek może mieć ten sam problem.

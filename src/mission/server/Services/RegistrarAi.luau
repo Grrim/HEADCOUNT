@@ -39,6 +39,14 @@ local function placeAnchor(nodeName: string)
 	anchor:SetAttribute("Node", nodeName)
 end
 
+-- How much of the base interval he waits between jumps right now.
+local function currentScale(): number
+	local take = services.Session.take
+	return take.jumpScale
+		* Take.partyScale(services.Session.playerCount)
+		* (if climax then CFG.ClimaxScale else 1)
+end
+
 local function send(kind: string, id: number?)
 	eventRemote:FireAllClients(kind, id)
 end
@@ -82,6 +90,9 @@ end
 function RegistrarAi.setClimax()
 	climax = true
 	wake()
+	if state and not state.dormant then
+		Registrar.hasten(state, RULES, currentScale())
+	end
 	anchor:SetAttribute("Climax", true)
 end
 
@@ -207,12 +218,16 @@ function RegistrarAi.start()
 			eventRemote:FireClient(player, "exposure", math.min(exposure / RULES.registerTime, 1))
 		end
 		local players = gatherPlayers()
-		local take = services.Session.take
-		local scale = take.jumpScale
-			* Take.partyScale(services.Session.playerCount)
-			* (if climax then CFG.ClimaxScale else 1)
 		apply(
-			Registrar.step(current, RULES, Layout.NODES, CFG.StepSeconds, framedBy, players, scale)
+			Registrar.step(
+				current,
+				RULES,
+				Layout.NODES,
+				CFG.StepSeconds,
+				framedBy,
+				players,
+				currentScale()
+			)
 		)
 
 		-- Now and then silence means nothing, so the team can never fully trust it.

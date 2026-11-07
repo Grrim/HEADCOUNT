@@ -144,17 +144,17 @@ local function hall(folder: Folder)
 		strip.CastShadow = false
 		gridX += 6
 	end
-	-- Stage drapes either side of the screen, leaving the back wall clear where the door will be.
+	-- Stage drapes between the screen (out to 14) and the hidden doors (from 16).
 	for side = -1, 1, 2 do
 		for fold = 0, 2 do
-			local x = side * (15 + fold * 0.9)
+			local x = side * (14.5 + fold * 0.5)
 			decor(
 				folder,
 				"Drape",
-				x - 0.45,
+				x - 0.25,
 				3,
 				-39.3,
-				x + 0.45,
+				x + 0.25,
 				23,
 				-38.7 + (fold % 2) * 0.4,
 				Color3.fromRGB(70, 28, 30),
@@ -389,9 +389,9 @@ end
 
 local function corridor(folder: Folder)
 	local R = Layout.CORRIDOR
-	-- Framed photographs of past meetings, each a row of pale dots on black.
-	local z = -18
-	while z < -6 do
+	-- Framed photographs of past meetings, each a row of pale dots on black. They hang north of the
+	-- door into the hall, which is open from -13 to -5.
+	for _, z in { -28, -24, -20, -16 } do
 		sign(
 			folder,
 			Layout.HALL.minX - 0.6,
@@ -404,7 +404,6 @@ local function corridor(folder: Folder)
 			Palette.Ink,
 			Palette.Paper
 		)
-		z += 4
 	end
 	decor(
 		folder,
@@ -423,12 +422,12 @@ end
 
 local function archive(folder: Folder)
 	local A = Layout.ARCHIVE
-	-- Tapes spilled across the floor near the register.
+	-- Tapes spilled across the floor near the register, inside the aisle between the shelves.
 	for index = 0, 14 do
 		local angle = index * 2.4
-		local radius = 3 + index * 0.45
+		local radius = 3 + index * 0.25
 		local x = math.cos(angle) * radius
-		local z = A.minZ + 12 + math.sin(angle) * radius
+		local z = A.minZ + 14 + math.sin(angle) * radius
 		local tape = decor(
 			folder,
 			"Tape",
@@ -438,7 +437,8 @@ local function archive(folder: Folder)
 			x + 0.7,
 			A.floorY + 0.28,
 			z + 0.4,
-			Palette.Ink
+			-- Pure ink reads as a stain on this carpet, not as an object.
+			Color3.fromRGB(74, 70, 64)
 		)
 		tape.CFrame *= CFrame.Angles(0, angle, 0)
 	end

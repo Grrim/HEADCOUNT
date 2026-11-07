@@ -224,7 +224,8 @@ function Hud.start()
 		objectiveLabel.Text = Strings.get(state.objective)
 		objectiveLabel.TextColor3 = if state.phase == "Climax" then Palette.Rec else Palette.Paper
 		local details = {}
-		if #state.tags > 0 then
+		-- Tags only matter while the coats still hold reels.
+		if state.phase == "Protocol" and #state.tags > 0 then
 			table.insert(details, Strings.get("tags_label", table.concat(state.tags, ", ")))
 		end
 		if state.phase == "Protocol" and state.reels > 0 then

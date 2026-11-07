@@ -127,7 +127,7 @@ end
 
 -- The archive looks in use: stacked boxes, a tape cart, a ladder, a desk someone just left.
 local function archiveClutter(folder: Folder)
-	for index, spot in { { -14, -16 }, { -9, 10 }, { 12, -22 }, { 16, 8 }, { 8, -12 } } do
+	for index, spot in { { -14, -16 }, { -9, 10 }, { 12, -22 }, { 13, 8 }, { 8, -12 } } do
 		local x, z = spot[1], spot[2]
 		local height = 2 * (index % 3 + 1)
 		local box = Build.box(
@@ -143,12 +143,16 @@ local function archiveClutter(folder: Folder)
 			Enum.Material.Cardboard
 		)
 		box.Transparency = 1
-		Props.place(
+		local boxes = Props.place(
 			folder,
 			"Boxes",
 			CFrame.new(x + 1.3, 0, z + 1.05) * CFrame.Angles(0, index * 0.5, 0),
 			Vector3.new(2.4, height / 2, 2.2)
 		)
+		-- The generated texture came out pink and a texture ignores Color, so these go plain card.
+		boxes.TextureID = ""
+		boxes.Color = Color3.fromRGB(122, 98, 68)
+		boxes.Material = Enum.Material.Cardboard
 	end
 	-- A tape cart mid-aisle
 	Build.box(
@@ -169,32 +173,38 @@ local function archiveClutter(folder: Folder)
 		decor(folder, "CartTape", x, 1.7, -7.8, x + 0.42, 3.2, -5, Palette.Ink)
 		decor(folder, "CartTape", x, 4.1, -7.8, x + 0.42, 5.6, -5, Palette.Paper)
 	end
-	-- A ladder against the shelves
+	-- A ladder leaning on the west face of the shelves, whose units start at x = 17.5.
+	local lean = math.rad(8)
+	local footX = 14.6
 	for side = 0, 1 do
+		local z = -28 + side * 2
 		local rail = decor(
 			folder,
 			"LadderRail",
-			17 + side * 2,
 			0,
-			-24,
-			17.3 + side * 2,
+			0,
+			z,
+			0.3,
 			20,
-			-23.7,
+			z + 0.3,
 			Palette.Metal,
 			Enum.Material.Metal
 		)
-		rail.CFrame *= CFrame.Angles(math.rad(-8), 0, 0)
+		rail.CFrame = CFrame.new(footX + math.sin(lean) * 10, math.cos(lean) * 10, z + 0.15)
+			* CFrame.Angles(0, 0, -lean)
 	end
 	for rung = 1, 11 do
+		local y = rung * 1.65
+		local x = footX + y * math.tan(lean)
 		decor(
 			folder,
 			"LadderRung",
-			17,
-			rung * 1.65,
-			-23.95 + rung * 0.23,
-			19.3,
-			rung * 1.65 + 0.2,
-			-23.75 + rung * 0.23,
+			x - 0.1,
+			y,
+			-28,
+			x + 0.1,
+			y + 0.2,
+			-25.7,
 			Palette.Metal,
 			Enum.Material.Metal
 		)

@@ -195,7 +195,8 @@ function Session.isClimaxOrLater(): boolean
 	return phase == "Climax" or phase == "Done"
 end
 
--- Clones each player's character into the audience, row C, where the final tape will find them.
+-- Clones each player's character into the audience, standing just behind an emptied seat in row C,
+-- where the final tape will find them.
 local function seatTheCast(): { { number } }
 	local folder = Instance.new("Folder")
 	folder.Name = "FinalCast"
@@ -218,9 +219,9 @@ local function seatTheCast(): { { number } }
 						item.CanQuery = false
 					end
 				end
-				local x, z = Seats.position(Seats.id(3, 6 + index * 2))
+				local x, z = Seats.position(Seats.castSeat(index))
 				-- Facing the stage, which is where the final tape shoots from.
-				clone:PivotTo(CFrame.new(x, 3.2, z))
+				clone:PivotTo(CFrame.new(x, 3.2, z + 2))
 				clone.Parent = folder
 				table.insert(spots, { x, z })
 			end

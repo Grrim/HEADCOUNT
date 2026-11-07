@@ -76,6 +76,12 @@ local function resetTimer(state: State, config: Config, scale: number)
 	state.warned = false
 end
 
+-- A faster pace takes effect at once: the countdown already running is cut to the new interval,
+-- never lengthened. Without this the first jump after the change still comes at the old pace.
+function Registrar.hasten(state: State, config: Config, scale: number)
+	state.timer = math.min(state.timer, config.jumpInterval * scale)
+end
+
 -- Advances the rules by dt and returns what happened, for the service to act on.
 function Registrar.step(
 	state: State,

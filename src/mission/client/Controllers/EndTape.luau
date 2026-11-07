@@ -145,6 +145,7 @@ local function play(result: any)
 		return
 	end
 
+	controllers.Audience.vacateForCast(#result.names)
 	local camera = Workspace.CurrentCamera
 	camera.CameraType = Enum.CameraType.Scriptable
 	camera.FieldOfView = 50

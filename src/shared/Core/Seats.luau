@@ -16,6 +16,11 @@ function Seats.id(row: number, col: number): number
 	return (row - 1) * Seats.COLS + col
 end
 
+-- The seat left empty for each member of the team on the final tape: row C, near the aisle.
+function Seats.castSeat(index: number): number
+	return Seats.id(3, 6 + index * 2)
+end
+
 function Seats.fromId(id: number): (number, number)
 	local zeroBased = id - 1
 	return zeroBased // Seats.COLS + 1, zeroBased % Seats.COLS + 1

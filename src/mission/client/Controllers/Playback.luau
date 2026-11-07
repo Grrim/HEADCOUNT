@@ -77,7 +77,8 @@ local function buildGui()
 	}, gui)
 	Ui.text({
 		AnchorPoint = Vector2.new(0.5, 1),
-		Position = UDim2.fromScale(0.5, 0.95),
+		-- Above the hints line, which sits at the bottom edge and draws over this gui.
+		Position = UDim2.fromScale(0.5, 0.9),
 		Size = UDim2.fromOffset(420, 24),
 		TextXAlignment = Enum.TextXAlignment.Center,
 		TextSize = 15,

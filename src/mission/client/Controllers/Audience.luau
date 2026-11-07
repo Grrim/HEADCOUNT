@@ -165,6 +165,18 @@ function Audience.refresh()
 	end
 end
 
+-- The final tape keeps a seat free for each member of the team. Call after the last refresh.
+function Audience.vacateForCast(teamSize: number)
+	for index = 1, teamSize do
+		local figure = figures[Seats.castSeat(index)]
+		if figure then
+			for _, item in figure.parts do
+				item.LocalTransparencyModifier = 1
+			end
+		end
+	end
+end
+
 function Audience.setPlayback(on: boolean, seats: { number }?)
 	Audience.playback = on
 	local changed = {}
