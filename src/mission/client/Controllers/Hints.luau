@@ -52,16 +52,11 @@ end
 
 function Hints.init()
 	local gui = Ui.screen("Hints", 6)
-	label = Ui.text({
+	label = Ui.caption({
 		AnchorPoint = Vector2.new(0.5, 1),
 		Position = UDim2.fromScale(0.5, 0.965),
-		Size = UDim2.new(0.7, 0, 0, 28),
 		TextSize = 16,
 		TextColor3 = Palette.Crt,
-		TextXAlignment = Enum.TextXAlignment.Center,
-		TextYAlignment = Enum.TextYAlignment.Bottom,
-		TextStrokeTransparency = 0.5,
-		Visible = false,
 		Text = "",
 	}, gui)
 end

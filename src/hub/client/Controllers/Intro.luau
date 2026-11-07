@@ -29,9 +29,29 @@ local raises = 0
 local hasCamera = false
 local screenLabel: TextLabel? = nil
 local introComplete = false
+local terminalVisited = false
 
 local function hint(text: string)
 	hintLabel.Text = text
+end
+
+-- Until the player has opened the terminal once, the hall tells them where it is.
+local function pointToTerminal()
+	if not terminalVisited then
+		hint(Strings.get("intro_terminal"))
+	end
+end
+
+-- The camcorder is a holder box with its visible parts inside; taking it hides them all.
+local function hideCamera(part: BasePart)
+	part.Transparency = 1
+	for _, item in part:GetDescendants() do
+		if item:IsA("BasePart") then
+			item.Transparency = 1
+		elseif item:IsA("Light") then
+			item.Enabled = false
+		end
+	end
 end
 
 local function ghostPart(parent: Instance, size: Vector3, cf: CFrame, color: Color3, ball: boolean?)
@@ -89,15 +109,19 @@ local function completeIntro(silently: boolean)
 	introComplete = true
 	enableLens()
 	openDoor()
+	-- The starting room keeps only its hum; music begins where the building opens up.
+	AudioDirector.setBed("LobbyMusic", true, 0.18, 6)
 	hint("")
-	if not silently then
+	if silently then
+		pointToTerminal()
+	else
 		hint(Strings.get("intro_door"))
-		task.delay(6, hint, "")
+		task.delay(5, pointToTerminal)
 		Net.get("IntroAction"):FireServer("done")
 	end
 	for _, camera in CollectionService:GetTagged("IntroCamera") do
 		local part = camera :: BasePart
-		part.Transparency = 1
+		hideCamera(part)
 		local prompt = part:FindFirstChildOfClass("ProximityPrompt")
 		if prompt then
 			prompt.Enabled = false
@@ -133,7 +157,7 @@ local function setupCamera()
 			prompt.ObjectText = Strings.get("obj_camera")
 		end)
 		prompt.Triggered:Connect(function()
-			part.Transparency = 1
+			hideCamera(part)
 			prompt.Enabled = false
 			enableLens()
 			hint(Strings.get("intro_raise"))
@@ -189,14 +213,10 @@ function Intro.init()
 	layer.Name = "LensLayer"
 	sitter = buildSitter(layer, CFrame.new(-7, 0, 52) * CFrame.Angles(0, math.rad(40), 0))
 	gui = Ui.screen("Intro", 2)
-	hintLabel = Ui.text({
+	hintLabel = Ui.caption({
 		AnchorPoint = Vector2.new(0.5, 1),
-		Position = UDim2.fromScale(0.5, 0.86),
-		Size = UDim2.new(0.6, 0, 0, 60),
+		Position = UDim2.fromScale(0.5, 0.88),
 		TextSize = 19,
-		TextXAlignment = Enum.TextXAlignment.Center,
-		TextYAlignment = Enum.TextYAlignment.Bottom,
-		TextStrokeTransparency = 0.4,
 		Text = "",
 	}, gui)
 end
@@ -208,6 +228,17 @@ function Intro.start()
 	LensView.onChanged(onLens)
 	setupCamera()
 	setupHiddenDoor()
+	for _, terminal in CollectionService:GetTagged("ExpeditionTerminal") do
+		local prompt = terminal:FindFirstChildOfClass("ProximityPrompt")
+		if prompt then
+			prompt.Triggered:Connect(function()
+				if not terminalVisited then
+					terminalVisited = true
+					hint("")
+				end
+			end)
+		end
+	end
 	hint(Strings.get("intro_folder"))
 	task.delay(6, function()
 		if not hasCamera then

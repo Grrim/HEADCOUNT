@@ -89,11 +89,135 @@ local function lights(map: Folder)
 	glow.Parent = lamp
 	Build.panel(map, 0, 9.9, 54, 3, 2, 0.9, 16)
 	Build.panel(map, 0, 8.9, 30, 3, 2, 1.8, 22)
+	-- The hall sits in half-light; the one warm pool is on the terminal, where every visit ends.
 	for _, z in { -28, -6, 12 } do
-		Build.panel(map, 0, 25.9, z, 16, 3, 2.4, 52)
+		Build.panel(map, 0, 25.9, z, 16, 3, 1.6, 52)
 	end
+	local beam = Instance.new("Part")
+	beam.Name = "TerminalSpot"
+	beam.Anchored = true
+	beam.CanCollide = false
+	beam.CanQuery = false
+	beam.CastShadow = false
+	beam.Transparency = 1
+	beam.Size = Vector3.new(1, 1, 1)
+	beam.CFrame = CFrame.lookAt(Vector3.new(0, 18, -22), Vector3.new(0, 3, -32))
+	beam.Parent = map
+	local spot = Instance.new("SpotLight")
+	spot.Face = Enum.NormalId.Front
+	spot.Color = Palette.Bulb
+	spot.Brightness = 4
+	spot.Range = 30
+	spot.Angle = 34
+	spot.Shadows = true
+	spot.Parent = beam
+	-- A few motes of dust turning in that light, the only movement in a still room.
+	local air = Instance.new("Part")
+	air.Name = "TerminalDust"
+	air.Anchored = true
+	air.CanCollide = false
+	air.CanQuery = false
+	air.CanTouch = false
+	air.CastShadow = false
+	air.Transparency = 1
+	air.Size = Vector3.new(10, 9, 8)
+	air.Position = Vector3.new(0, 7, -29)
+	air.Parent = map
+	local dust = Instance.new("ParticleEmitter")
+	dust.Rate = 5
+	dust.Lifetime = NumberRange.new(7, 11)
+	dust.Speed = NumberRange.new(0.05, 0.25)
+	dust.SpreadAngle = Vector2.new(180, 180)
+	dust.Size = NumberSequence.new(0.07)
+	dust.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 1),
+		NumberSequenceKeypoint.new(0.3, 0.45),
+		NumberSequenceKeypoint.new(0.7, 0.45),
+		NumberSequenceKeypoint.new(1, 1),
+	})
+	dust.Color = ColorSequence.new(Palette.Bulb)
+	dust.LightEmission = 0.4
+	dust.RotSpeed = NumberRange.new(-20, 20)
+	dust.Parent = air
 	Build.panel(map, 50, 10.9, -6, 6, 3, 2.2, 26)
 	Build.panel(map, -50, 8.9, -2, 3, 2, 1.6, 20, Palette.Bulb, true)
+end
+
+-- A camcorder in profile, lens towards the CRT, built from parts so it reads at a glance where
+-- the old black box did not. The box stays, invisible, for the prompt and the intro tag; the
+-- intro hides these parts with it when the camera is taken.
+local function camcorderModel(holder: BasePart)
+	holder.Transparency = 1
+	local base = CFrame.new(3.7, 3.2, 45.3)
+	local function piece(
+		name: string,
+		size: Vector3,
+		offset: CFrame,
+		color: Color3,
+		shape: Enum.PartType?
+	)
+		local p = Instance.new("Part")
+		p.Name = name
+		p.Anchored = true
+		p.CanCollide = false
+		p.CanQuery = false
+		p.CanTouch = false
+		p.Size = size
+		p.CFrame = base * offset
+		p.Color = color
+		p.Material = Enum.Material.SmoothPlastic
+		if shape then
+			p.Shape = shape
+		end
+		p.Parent = holder
+		return p
+	end
+	local body = Color3.fromRGB(38, 38, 42)
+	piece("Body", Vector3.new(1.3, 0.62, 0.55), CFrame.new(0.1, 0.31, 0), body)
+	piece(
+		"Grip",
+		Vector3.new(0.9, 0.35, 0.2),
+		CFrame.new(0.15, 0.32, -0.36),
+		Color3.fromRGB(24, 24, 26)
+	)
+	-- Cylinders run along their X axis, which is the lens axis here.
+	piece(
+		"Lens",
+		Vector3.new(0.45, 0.46, 0.46),
+		CFrame.new(-0.72, 0.33, 0),
+		body,
+		Enum.PartType.Cylinder
+	)
+	local glass = piece(
+		"Glass",
+		Vector3.new(0.04, 0.36, 0.36),
+		CFrame.new(-0.96, 0.33, 0),
+		Color3.fromRGB(60, 80, 110),
+		Enum.PartType.Cylinder
+	)
+	glass.Material = Enum.Material.Glass
+	glass.Reflectance = 0.3
+	piece(
+		"Viewfinder",
+		Vector3.new(0.5, 0.2, 0.2),
+		CFrame.new(0.55, 0.72, 0.12),
+		body,
+		Enum.PartType.Cylinder
+	)
+	local rec = piece(
+		"RecLight",
+		Vector3.new(0.08, 0.08, 0.08),
+		CFrame.new(-0.3, 0.55, 0.28),
+		Palette.Rec,
+		Enum.PartType.Ball
+	)
+	rec.Material = Enum.Material.Neon
+	-- A little light of its own, so the one thing to pick up is the one thing that shines.
+	local cue = Instance.new("PointLight")
+	cue.Color = Palette.Rec
+	cue.Brightness = 0.6
+	cue.Range = 3
+	cue.Parent = rec
 end
 
 local function dressing(map: Folder)
@@ -109,18 +233,20 @@ local function dressing(map: Folder)
 	HubWorld.prompts.Rules = Build.prompt(folder, "act_read", "obj_document", nil, PD)
 	local camcorder = Build.box(map, "Camcorder", 3.1, 3.2, 44.8, 4.3, 3.9, 45.8, Palette.Ink)
 	camcorder:AddTag("IntroCamera")
+	camcorderModel(camcorder)
 	local chair =
 		Build.chair(map, "IntroChair", CFrame.new(-7, 0, 52) * CFrame.Angles(0, math.rad(40), 0))
 	chair.CanCollide = true
 
-	-- Registry Hall: reception with a bell to ring while waiting.
-	Build.box(map, "Reception", -8, 0, -3, 8, 3.6, 1, Palette.Wood, Enum.Material.Wood)
+	-- Registry Hall: reception with a bell to ring while waiting. It stands east of the runner,
+	-- so the way from the corridor to the terminal is a straight, open line.
+	Build.box(map, "Reception", 5, 0, -3, 17, 3.6, 1, Palette.Wood, Enum.Material.Wood)
 	local bell = Instance.new("Part")
 	bell.Name = "ReceptionBell"
 	bell.Shape = Enum.PartType.Ball
 	bell.Anchored = true
 	bell.Size = Vector3.new(0.9, 0.9, 0.9)
-	bell.Position = Vector3.new(3, 4, -1)
+	bell.Position = Vector3.new(14, 4, -1)
 	bell.Color = Palette.Bulb
 	bell.Material = Enum.Material.Metal
 	bell.Parent = map

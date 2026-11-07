@@ -145,26 +145,28 @@ local function renderMyParty(party: any)
 		},
 	}
 	for index, entry in entries do
-		Ui.button(entry[1], {
+		-- Ready is what everyone in a party has to press; the other two are secondary.
+		local make = if index == 1 and not amReady then Ui.primary else Ui.button
+		make(entry[1], {
 			Position = UDim2.new((index - 1) / 3, 2, 0, 0),
 			Size = UDim2.new(1 / 3, -4, 1, 0),
 			TextSize = 15,
 		}, actions, entry[2])
 	end
 	if amLeader then
-		Ui.button(
+		Ui.primary(
 			Strings.get("hub_start"),
 			{
 				Position = UDim2.new(0, 2, 0, y + 52),
 				Size = UDim2.new(1, -4, 0, 46),
 				TextSize = 20,
-				TextColor3 = Palette.Rec,
-				BorderColor3 = Palette.Rec,
+				TextColor3 = Palette.Paper,
 			},
 			content,
 			function()
 				send("start")
-			end
+			end,
+			Palette.Rec
 		)
 	end
 end
@@ -180,7 +182,7 @@ local function renderLobby()
 			TextColor3 = if mission.available then Palette.Paper else Palette.WallDark,
 		}, line)
 		if mission.available then
-			Ui.button(
+			Ui.primary(
 				Strings.get("hub_create"),
 				{
 					AnchorPoint = Vector2.new(1, 0),
@@ -206,6 +208,7 @@ local function renderLobby()
 			Text = Strings.get("hub_none_open"),
 			TextSize = 15,
 		}, content)
+		y += 26
 	end
 	for _, party in parties do
 		local line = row(y, 42)
@@ -230,6 +233,15 @@ local function renderLobby()
 		)
 		y += 44
 	end
+	-- What to do here, for anyone who has never seen this screen.
+	Ui.text({
+		Position = UDim2.new(0, 0, 0, y + 14),
+		Size = UDim2.new(1, 0, 0, 40),
+		Text = Strings.get("hub_help"),
+		TextSize = 14,
+		TextColor3 = Palette.Crt,
+		TextTransparency = 0.35,
+	}, content)
 end
 
 local function render()
@@ -253,15 +265,30 @@ local function buildGui()
 	panel = Ui.frame({
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.fromScale(0.5, 0.5),
-		Size = UDim2.new(0.64, 0, 0.8, 0),
+		Size = UDim2.new(0.6, 0, 0.66, 0),
 		BackgroundColor3 = Color3.fromRGB(10, 14, 10),
-		BorderSizePixel = 2,
-		BorderColor3 = Palette.Crt,
+		BorderSizePixel = 0,
 		Visible = false,
 	}, gui)
 	Ui.make("UISizeConstraint", {
 		MinSize = Vector2.new(340, 300),
-		MaxSize = Vector2.new(720, 560),
+		MaxSize = Vector2.new(660, 440),
+	}, panel)
+	-- A sharp border and a soft second one outside it: the phosphor bleeding past the glass.
+	Ui.make("UIStroke", { Color = Palette.Crt, Thickness = 2 }, panel)
+	local glow = Ui.frame({
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.5),
+		Size = UDim2.new(1, 14, 1, 14),
+		BackgroundTransparency = 1,
+		ZIndex = 0,
+	}, panel)
+	Ui.make("UIStroke", { Color = Palette.Crt, Thickness = 6, Transparency = 0.85 }, glow)
+	Ui.frame({
+		Position = UDim2.new(0, 16, 0, 40),
+		Size = UDim2.new(1, -32, 0, 1),
+		BackgroundColor3 = Palette.Crt,
+		BackgroundTransparency = 0.6,
 	}, panel)
 	Ui.text({
 		Position = UDim2.new(0, 16, 0, 12),

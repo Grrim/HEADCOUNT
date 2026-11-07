@@ -77,6 +77,12 @@ function Silence.start()
 		blackout = state.phase == "Power"
 		-- The one place music plays in the mission itself. The final tape brings it back on its own.
 		AudioDirector.setLoop("Music", state.phase == "Climax", 0.3)
+		-- Under the searching, a low bed; it hands over to the climax music and is gone by the end.
+		local searching = state.phase ~= "Waiting"
+			and state.phase ~= "Climax"
+			and state.phase ~= "Done"
+			and state.phase ~= "Failed"
+		AudioDirector.setBed("MissionBed", searching, 0.16, if searching then 8 else 1.5)
 	end)
 	-- Behind the lens you can hear them breathing.
 	LensView.onChanged(function(raised)

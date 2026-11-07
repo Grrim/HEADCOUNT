@@ -8,6 +8,8 @@ local Strings = require(ReplicatedStorage.Shared.Strings)
 local PromptText = {}
 
 local function apply(prompt: ProximityPrompt)
+	-- Drawn by PromptUi instead of the engine's default card. Local only: the server never sees it.
+	prompt.Style = Enum.ProximityPromptStyle.Custom
 	local actionKey = prompt:GetAttribute("ActionKey")
 	if typeof(actionKey) == "string" then
 		prompt.ActionText = Strings.get(actionKey)

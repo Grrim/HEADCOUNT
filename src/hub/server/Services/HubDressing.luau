@@ -70,6 +70,27 @@ local function lockerRoom(folder: Folder)
 	Build.panel(folder, 49, 10.9, 16, 6, 2, 1.6, 22)
 end
 
+-- A lit box sign over the terminal, readable from the corridor door sixty studs away.
+local function expeditionSign(folder: Folder)
+	local box = decor(folder, "ExpeditionSign", -7, 9.4, -31.2, 7, 12.2, -30.6, Palette.Shadow)
+	box.CastShadow = false
+	local label = Build.label(box, Enum.NormalId.Back, "EXPEDITIONS", Palette.Crt)
+	local gui = label.Parent :: SurfaceGui
+	gui.LightInfluence = 0
+	gui.Brightness = 1.6
+	local glow = Instance.new("SurfaceLight")
+	glow.Face = Enum.NormalId.Back
+	glow.Color = Palette.Crt
+	glow.Brightness = 1.2
+	glow.Range = 14
+	glow.Angle = 100
+	glow.Parent = box
+	-- Two wires to the ceiling, so it hangs rather than floats.
+	for _, x in { -6, 6 } do
+		decor(folder, "SignWire", x - 0.04, 12.2, -30.94, x + 0.04, 26, -30.86, Palette.Metal)
+	end
+end
+
 local function hallDetails(folder: Folder)
 	-- Personnel board on the south wall of the hall, filled in by each client with their own face.
 	local board = decor(
@@ -88,7 +109,7 @@ local function hallDetails(folder: Folder)
 
 	-- Coffee machine beside reception: something to do with your hands while you wait.
 	local machine =
-		Build.box(folder, "CoffeeMachine", 12, 0, -2, 15, 7, 0, Palette.Metal, Enum.Material.Metal)
+		Build.box(folder, "CoffeeMachine", 19, 0, -2, 22, 7, 0, Palette.Metal, Enum.Material.Metal)
 	Build.label(machine, Enum.NormalId.Back, "COFFEE", Palette.Crt)
 	HubDressing.prompts.Coffee =
 		Build.prompt(machine, "act_coffee", "hub_coffee", nil, Config.Puzzle.PromptDistance)
@@ -122,7 +143,7 @@ local function hallDetails(folder: Folder)
 	sign(-3, 9.6, 19.3, 3, 11, 19.5, Enum.NormalId.Front, "WORKSTATIONS")
 	sign(39.2, 9.6, -9, 39.4, 11, -3, Enum.NormalId.Left, "TAPE ROOM")
 	sign(39.2, 9.6, 11, 39.4, 11, 17, Enum.NormalId.Left, "PERSONNEL")
-	sign(-4, 7.2, -30.9, 4, 8.4, -30.7, Enum.NormalId.Back, "EXPEDITIONS")
+	expeditionSign(folder)
 end
 
 -- The archive looks in use: stacked boxes, a tape cart, a ladder, a desk someone just left.
@@ -294,6 +315,17 @@ function HubDressing.start()
 			Vector3.new(1.43, 1.02, 1)
 		)
 	end
+	-- The lamp's light stays on the old glowing box; the box itself gives way to the lamp model.
+	local lampBox = map2:FindFirstChild("DeskLamp") :: BasePart?
+	if lampBox then
+		lampBox.Transparency = 1
+		Props.place(
+			folder,
+			"DeskLamp",
+			CFrame.new(-0.6, 3.2, 44.1) * CFrame.Angles(0, math.rad(-120), 0),
+			1.1
+		)
+	end
 	local bell = map2:FindFirstChild("ReceptionBell") :: BasePart?
 	if bell then
 		bell.Transparency = 1
@@ -328,15 +360,15 @@ function HubDressing.start()
 	end
 	local facingHall = CFrame.Angles(0, math.pi, 0)
 	-- Reception keeps its veneer box; a dark laminate top makes it read as a counter.
-	decor(folder, "CounterTop", -8.3, 3.6, -3.3, 8.3, 3.8, 1.3, Color3.fromRGB(46, 36, 30))
+	decor(folder, "CounterTop", 4.7, 3.6, -3.3, 17.3, 3.8, 1.3, Color3.fromRGB(46, 36, 30))
 	hide(folder, "CoffeeMachine")
 	Props.place(
 		folder,
 		"CoffeeMachine",
-		CFrame.new(13.5, 0, -1) * facingHall,
+		CFrame.new(20.5, 0, -1) * facingHall,
 		Vector3.new(1.21, 1.24, 0.83)
 	)
-	local coffeeSign = decor(folder, "CoffeeSign", 12.4, 7.1, -0.9, 14.6, 7.9, -0.8, Palette.Shadow)
+	local coffeeSign = decor(folder, "CoffeeSign", 19.4, 7.1, -0.9, 21.6, 7.9, -0.8, Palette.Shadow)
 	Build.label(coffeeSign, Enum.NormalId.Back, "COFFEE", Palette.Crt)
 	-- The expedition terminal is an old set on a desk, with the sign on its screen.
 	hide(map, "Terminal")
@@ -344,7 +376,14 @@ function HubDressing.start()
 	Props.place(folder, "Crt", CFrame.new(0, 3.2, -32) * facingHall)
 	local terminalScreen =
 		decor(folder, "TerminalScreen", -1.25, 5.3, -31.2, 1.05, 6.9, -31.1, Palette.Shadow)
-	Build.label(terminalScreen, Enum.NormalId.Back, "ARCHIVE 03", Palette.Crt)
+	local screenText = Build.label(terminalScreen, Enum.NormalId.Back, "ARCHIVE 03", Palette.Crt)
+	local screenGui = screenText.Parent :: SurfaceGui
+	screenGui.LightInfluence = 0
+	local screenGlow = Instance.new("PointLight")
+	screenGlow.Color = Palette.Crt
+	screenGlow.Brightness = 1.4
+	screenGlow.Range = 10
+	screenGlow.Parent = terminalScreen
 	hide(map, "ArchiveTerminal")
 	Props.place(folder, "Crt", CFrame.new(57.5, 0, -5) * CFrame.Angles(0, math.pi / 2, 0), 1.2)
 	folder.Parent = map

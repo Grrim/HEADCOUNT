@@ -24,4 +24,8 @@ return {
 	Paper = 9118835414, -- pages turned
 	Wrong = 9120089728, -- "Toggle Switches Moviola Editing Machine 17", 0.36 s
 	Music = 9043359270, -- "DARK DRONE 06", 69 s
+	-- Picked 2026-11-07 by search and measured length only; nobody has listened yet. Spare for the
+	-- lobby if the piano is wrong: 139053896078359 "Eerie Music Box", 83 s.
+	LobbyMusic = 71416456879020, -- "Dark Ambient Piano", 171 s
+	MissionBed = 99895453377463, -- "Existential Dread (Deep Dark Ambient Drone)", 238 s
 } :: { [string]: number }

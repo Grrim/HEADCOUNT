@@ -292,3 +292,25 @@ Bramki zielone, 48 testów. Kod trafił do otwartego Studio przez łatki `Source
 W tym przebiegu Kadrowy w kulminacji wskoczył na scenę i wyciął gracza stojącego przy dzwonku, bo skrypt przestał go śledzić wizjerem. Węzeł `stage` jest ok. 10 jednostek od dzwonka, czyli w promieniu kontaktu. Powrót pieszo na znacznik w foyer zadziałał („is back in frame”), a drugie podejście do dzwonka zakończyło misję. Finałowa taśma pokazała wysoką postać w drzwiach. Błędów skryptów brak.
 
 Nowa uwaga: płaszcze wiszą co 2,4 jednostki, a E łapie najbliższy prompt, nie ten na środku ekranu. Z odległości kilku kroków skrypt trafił w hak 24 zamiast 33. Człowiek może mieć ten sam problem.
+
+## Dziewiąty przebieg: oprawa, lobby, muzyka, UI
+
+Stan na 2026-11-07, po uwadze właściciela, że całość wygląda nudno, lobby nie jest intuicyjne i brakuje muzyki. Sprawdzone w Studio na świeżych kopiach buildu (`build/HubCheck*.rbxl`, `build/MissionCheck.rbxl`). Bramki zielone, 48 testów.
+
+| Zmiana | Pliki | Sprawdzone |
+|---|---|---|
+| Płaszcze: E działa tylko na płaszcz najbliżej środka widoku (lokalnie zerowany `MaxActivationDistance` pozostałych) | `Controllers/CoatAim.luau` | Patrząc na 15, 24, 33 i 5, aktywny jest zawsze ten jeden |
+| NO EXIT w kulminacji: szeroki czerwony neon z poświatą, mruga przy zapaleniu | `MissionWorld.sealExit` | Na zrzucie ze sceny czytelny. Wywołany przez `sealExit` na prawdziwym znaku, nie przez odczyt rejestru |
+| Lobby: lada recepcji zjechała z osi, chodnik prowadzi prosto do terminala | `HubWorld`, `HubDressing` | Przejście pieszo z korytarza do terminala bez omijania |
+| Terminal: ciepły reflektor, świecący ekran, podświetlany szyld EXPEDITIONS na linkach, kurz w świetle | `HubWorld`, `HubDressing` | Zrzut z wejścia do hali |
+| Po intrze cel „Sign up for an expedition at the terminal, end of the hall.”, znika po otwarciu terminala | `Intro.luau`, `Strings` | Tak |
+| Kamera na biurku złożona z części (korpus, obiektyw, wizjer, dioda REC), lampa biurowa jako model | `HubWorld`, `HubDressing`, `Intro` | Zrzut; po zabraniu wszystkie części znikają |
+| Muzyka: w lobby od otwarcia drzwi, w misji niski dron od Protocol do kulminacji. Obie w grupie ambientu, więc cichną przed skokiem Kadrowego | `AudioDirector.setBed`, `Sounds`, `Silence`, `Intro` | Grają, załadowane, 171 s i 238 s. **Nikt ich nie słyszał** |
+| Własne prompty: klawisz w ramce, akcja, obiekt na zielono, czerwony pasek przytrzymania, na dotyku stuknięcie | `PromptUi.luau`, `PromptText` | Wygląd przez kopię karty w `ScreenGui` (zrzut nie rysuje billboardów); na dotyku nie sprawdzone |
+| Karta celu w misji, podpowiedzi i radio na ciemnym tle | `Hud`, `Hints`, `Ui.caption` | Zrzuty |
+| Terminal: wypełnione przyciski główne, linia pod tytułem, poświata, instrukcja | `Terminal.luau`, `Ui.primary` | Zrzut panelu lobby; widok drużyny niesprawdzony |
+| Światło `Future`, mocniejszy kontrast i bloom, niższy ambient, winieta | `*.project.json`, `Config/Lighting`, `Vignette.luau` | Zrzuty obu miejsc |
+
+Wybór muzyki: z Creator Store, po wyszukaniu i zmierzeniu długości w Studio (`work/sfx`, poza repozytorium). Lobby: „Dark Ambient Piano”, misja: „Existential Dread (Deep Dark Ambient Drone)”. Zapasowa dla lobby w komentarzu w `Sounds.luau`.
+
+Niesprawdzone: brzmienie muzyki, wydajność `Future` na telefonie, prompty na dotyku i kontrolerze, NO EXIT przez prawdziwy odczyt rejestru, wygląd terminala w drużynie i na ekranie przygotowania. Okienko kasy w foyer to nadal czarny prostokąt. Dwie ostatnie drobne poprawki (obrys napisu radia gaśnie razem z tekstem, odstęp instrukcji w terminalu) są tylko w kodzie, bez zrzutu.

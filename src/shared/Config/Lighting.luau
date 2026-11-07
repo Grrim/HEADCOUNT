@@ -5,11 +5,13 @@ return {
 		Brightness = 1.2,
 		ClockTime = 0,
 		GlobalShadows = true,
-		Ambient = Color3.fromRGB(40, 46, 52),
+		-- Lower than the GDD start: under Future the lamps carry the rooms, and the space between
+		-- them should fall away into blue-black rather than sit at one even grey.
+		Ambient = Color3.fromRGB(32, 36, 44),
 		OutdoorAmbient = Color3.fromRGB(10, 12, 16),
 		EnvironmentDiffuseScale = 0.15,
 		EnvironmentSpecularScale = 0.3,
-		ExposureCompensation = 0,
+		ExposureCompensation = 0.25,
 	},
 	Atmosphere = {
 		Density = 0.32,
@@ -20,12 +22,13 @@ return {
 		Decay = Color3.fromRGB(12, 16, 20),
 	},
 	World = {
-		Contrast = 0.08,
-		Saturation = -0.12,
+		Contrast = 0.16,
+		Saturation = -0.06,
 		Brightness = 0,
-		TintColor = Color3.fromRGB(245, 250, 245),
+		TintColor = Color3.fromRGB(240, 248, 250),
 	},
-	Bloom = { Intensity = 0.35, Size = 18, Threshold = 1.6 },
+	-- Enough for neon signs, the REC light and lamp bulbs to bloom; walls stay below the threshold.
+	Bloom = { Intensity = 0.7, Size = 24, Threshold = 1.15 },
 	Lens = {
 		Contrast = 0.18,
 		Saturation = -0.45,

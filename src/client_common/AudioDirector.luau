@@ -188,6 +188,42 @@ function AudioDirector.setLoop(name: string, on: boolean, volume: number?, pitch
 	end
 end
 
+-- Background music. It lives in the ambient group, so the silence before a jump and the
+-- absolute rooms take it down with the hum: the music must never hide the warning.
+local bedFades: { [string]: Tween } = {}
+
+function AudioDirector.setBed(name: string, on: boolean, volume: number, fadeSeconds: number?)
+	local sound = loops[name]
+	if on and not sound then
+		sound = startLoop(name, 0, ambientGroup())
+	end
+	if not sound then
+		return
+	end
+	local playing = sound :: Sound
+	local previous = bedFades[name]
+	if previous then
+		previous:Cancel()
+	end
+	if on and not playing.IsPlaying then
+		playing:Play()
+	end
+	local tween = TweenService:Create(
+		playing,
+		TweenInfo.new(fadeSeconds or 4, Enum.EasingStyle.Sine),
+		{ Volume = if on then volume else 0 }
+	)
+	bedFades[name] = tween
+	if not on then
+		tween.Completed:Connect(function(state)
+			if state == Enum.PlaybackState.Completed then
+				playing:Stop()
+			end
+		end)
+	end
+	tween:Play()
+end
+
 -- The warning before a jump. Ambient falls away fast and takes a while to return.
 function AudioDirector.silence(holdSeconds: number)
 	if absolute then

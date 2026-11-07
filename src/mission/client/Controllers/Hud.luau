@@ -20,6 +20,7 @@ local Hud = {}
 local WRONG_ANSWERS = { seat_empty = true, hook_empty = true, code_wrong = true, reel_wrong = true }
 
 local gui: ScreenGui
+local objectiveCard: Frame
 local objectiveLabel: TextLabel
 local detailLabel: TextLabel
 local subtitleLabel: TextLabel
@@ -45,9 +46,7 @@ function Hud.subtitle(text: string, seconds: number?)
 end
 
 local function applyVisibility()
-	local show = not LensView.raised and not cinema
-	objectiveLabel.Visible = show
-	detailLabel.Visible = show
+	objectiveCard.Visible = not LensView.raised and not cinema
 end
 
 local function hidePanel()
@@ -111,32 +110,73 @@ end
 
 local function buildGui()
 	gui = Ui.screen("MissionHud", 2)
+	-- The objective sits on a case-file card: a red rule, a small heading, the order itself.
+	objectiveCard = Ui.frame({
+		Position = UDim2.new(0, 20, 0, 50),
+		Size = UDim2.new(0.42, 0, 0, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
+		BackgroundColor3 = Color3.fromRGB(8, 10, 12),
+		BackgroundTransparency = 0.35,
+	}, gui)
+	Ui.make("UISizeConstraint", { MaxSize = Vector2.new(520, math.huge) }, objectiveCard)
+	Ui.make("UIGradient", {
+		Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 0),
+			NumberSequenceKeypoint.new(0.7, 0.2),
+			NumberSequenceKeypoint.new(1, 1),
+		}),
+	}, objectiveCard)
+	-- The rule hangs on the card's left edge; the text stacks in a body beside it.
+	Ui.frame({
+		Name = "Rule",
+		Size = UDim2.new(0, 3, 1, 0),
+		BackgroundColor3 = Palette.Rec,
+	}, objectiveCard)
+	local body = Ui.frame({
+		Name = "Body",
+		Size = UDim2.new(1, 0, 0, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
+		BackgroundTransparency = 1,
+	}, objectiveCard)
+	Ui.make("UIPadding", {
+		PaddingLeft = UDim.new(0, 16),
+		PaddingRight = UDim.new(0, 24),
+		PaddingTop = UDim.new(0, 8),
+		PaddingBottom = UDim.new(0, 10),
+	}, body)
+	Ui.make("UIListLayout", {
+		SortOrder = Enum.SortOrder.LayoutOrder,
+		Padding = UDim.new(0, 3),
+	}, body)
+	Ui.text({
+		LayoutOrder = 1,
+		Size = UDim2.new(1, 0, 0, 14),
+		TextSize = 12,
+		TextColor3 = Palette.Rec,
+		Text = Strings.get("hud_objective"),
+	}, body)
 	objectiveLabel = Ui.text({
-		Position = UDim2.new(0, 24, 0, 54),
-		Size = UDim2.new(0.5, 0, 0, 52),
-		TextSize = 17,
-		TextStrokeTransparency = 0.6,
+		LayoutOrder = 2,
+		Size = UDim2.new(1, 0, 0, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
+		TextSize = 18,
 		Text = "",
-	}, gui)
+	}, body)
 	detailLabel = Ui.text({
-		Position = UDim2.new(0, 24, 0, 108),
-		Size = UDim2.new(0.5, 0, 0, 24),
-		TextSize = 15,
-		TextTransparency = 0.2,
-		TextStrokeTransparency = 0.6,
+		LayoutOrder = 3,
+		Size = UDim2.new(1, 0, 0, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
+		TextSize = 14,
+		TextColor3 = Palette.Crt,
 		Text = "",
-	}, gui)
-	subtitleLabel = Ui.text({
+	}, body)
+	subtitleLabel = Ui.caption({
 		AnchorPoint = Vector2.new(0.5, 1),
 		Position = UDim2.fromScale(0.5, 0.86),
-		Size = UDim2.new(0.62, 0, 0, 74),
 		TextSize = 19,
-		TextXAlignment = Enum.TextXAlignment.Center,
-		TextYAlignment = Enum.TextYAlignment.Bottom,
-		TextStrokeTransparency = 0.4,
 		Text = "",
 		ZIndex = 5,
-	}, gui)
+	}, gui, 820)
 
 	docPanel = Ui.frame({
 		AnchorPoint = Vector2.new(0.5, 0.5),
@@ -221,7 +261,17 @@ function Hud.start()
 		applyVisibility()
 	end)
 	Net.get("SessionState").OnClientEvent:Connect(function(state)
-		objectiveLabel.Text = Strings.get(state.objective)
+		local objective = Strings.get(state.objective)
+		if objective ~= objectiveLabel.Text then
+			objectiveLabel.Text = objective
+			-- A new order arrives with a brief flare of the card.
+			objectiveCard.BackgroundTransparency = 0
+			TweenService:Create(
+				objectiveCard,
+				TweenInfo.new(1.2, Enum.EasingStyle.Quad),
+				{ BackgroundTransparency = 0.35 }
+			):Play()
+		end
 		objectiveLabel.TextColor3 = if state.phase == "Climax" then Palette.Rec else Palette.Paper
 		local details = {}
 		-- Tags only matter while the coats still hold reels.
@@ -232,6 +282,7 @@ function Hud.start()
 			table.insert(details, Strings.get("reels_label", state.reels))
 		end
 		detailLabel.Text = table.concat(details, "   ")
+		detailLabel.Visible = detailLabel.Text ~= ""
 		if state.phase ~= lastPhase then
 			lastPhase = state.phase
 			AudioDirector.play("Radio", 0.35)

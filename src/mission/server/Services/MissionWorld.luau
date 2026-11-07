@@ -619,6 +619,36 @@ function MissionWorld.setMains(on: boolean)
 	end
 end
 
+-- The small green EXIT over the hall doors becomes a wide red NO EXIT that stutters on, so the
+-- change reads from the stage, the far end of the hall.
+function MissionWorld.sealExit(plate: BasePart, label: TextLabel)
+	local bottom = plate.Position.Y - plate.Size.Y / 2
+	plate.Size = Vector3.new(10, 2.6, plate.Size.Z)
+	plate.Position = Vector3.new(plate.Position.X, bottom + 1.3, plate.Position.Z)
+	plate.Color = Color3.fromRGB(120, 12, 14)
+	label.TextColor3 = Color3.fromRGB(255, 225, 215)
+	local gui = label:FindFirstAncestorOfClass("SurfaceGui")
+	if gui then
+		-- The letters carry their own light, so the dim hall cannot swallow them.
+		gui.LightInfluence = 0
+	end
+	local glow = Instance.new("SurfaceLight")
+	glow.Face = if gui then gui.Face else Enum.NormalId.Front
+	glow.Color = Color3.fromRGB(255, 40, 30)
+	glow.Range = 18
+	glow.Angle = 120
+	glow.Brightness = 0
+	glow.Parent = plate
+	task.spawn(function()
+		for _, on in { true, false, true, false, false, true } do
+			plate.Material = if on then Enum.Material.Neon else Enum.Material.SmoothPlastic
+			glow.Brightness = if on then 2 else 0
+			label.TextTransparency = if on then 0 else 0.7
+			task.wait(0.12)
+		end
+	end)
+end
+
 function MissionWorld.setClimaxLighting()
 	for _, light in MissionWorld.hallLights do
 		light.Brightness *= 0.55
@@ -630,6 +660,10 @@ function MissionWorld.setClimaxLighting()
 				item.Text = "18:05"
 			elseif item.Text == "EXIT" then
 				item.Text = "NO EXIT"
+				local plate = item:FindFirstAncestorWhichIsA("BasePart")
+				if plate then
+					MissionWorld.sealExit(plate, item)
+				end
 			end
 		end
 	end
