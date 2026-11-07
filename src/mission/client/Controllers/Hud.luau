@@ -1,5 +1,6 @@
 --!strict
 -- The minimal mission HUD: one objective, radio subtitles, documents, and pings when someone calls.
+local ContextActionService = game:GetService("ContextActionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
@@ -46,11 +47,25 @@ local function applyVisibility()
 	detailLabel.Visible = show
 end
 
+local function hidePanel()
+	docPanel.Visible = false
+	ContextActionService:UnbindAction("CloseDoc")
+end
+
 local function showPanel(title: string, body: string, color: Color3?)
 	docTitle.Text = title
 	docBody.Text = body
 	docBody.TextColor3 = color or Palette.Ink
 	docPanel.Visible = true
+	-- A controller has no cursor to reach the X with. B only closes the page while one is open;
+	-- the rest of the time it stays a radio call.
+	ContextActionService:BindActionAtPriority("CloseDoc", function(_, state)
+		if state == Enum.UserInputState.Begin then
+			hidePanel()
+			return Enum.ContextActionResult.Sink
+		end
+		return Enum.ContextActionResult.Pass
+	end, false, Enum.ContextActionPriority.High.Value, Enum.KeyCode.ButtonB)
 	AudioDirector.play("Paper", 0.5)
 end
 
@@ -149,19 +164,14 @@ local function buildGui()
 		ZIndex = 11,
 		Text = "",
 	}, docPanel)
-	Ui.button(
-		"X",
-		{
-			AnchorPoint = Vector2.new(1, 1),
-			Position = UDim2.new(0.97, 0, 0.96, 0),
-			Size = UDim2.fromOffset(64, 44),
-			ZIndex = 11,
-		},
-		docPanel,
-		function()
-			docPanel.Visible = false
-		end
-	)
+	Ui.button("X", {
+		AnchorPoint = Vector2.new(1, 1),
+		Position = UDim2.new(0.97, 0, 0.96, 0),
+		Size = UDim2.fromOffset(64, 44),
+		ZIndex = 11,
+		-- Modal releases the cursor from first-person lock, or the click can never reach the X.
+		Modal = true,
+	}, docPanel, hidePanel)
 
 	-- Touch players get the four radio calls behind one button.
 	commPanel = Ui.frame({
@@ -193,7 +203,7 @@ function Hud.setCinema(on: boolean)
 	cinema = on
 	if on then
 		-- A tape takes the whole picture: a document left open must not sit on top of it.
-		docPanel.Visible = false
+		hidePanel()
 	end
 	applyVisibility()
 end

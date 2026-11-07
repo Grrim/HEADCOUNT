@@ -104,6 +104,8 @@ function OffFrameView.init(all: { [string]: any })
 		TextSize = 16,
 		TextXAlignment = Enum.TextXAlignment.Center,
 		TextColor3 = Palette.Crt,
+		-- Sits over whatever the player faces, posters included.
+		TextStrokeTransparency = 0.2,
 		Visible = false,
 		Text = Strings.get("offframe_return"),
 	}, gui)

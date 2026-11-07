@@ -17,8 +17,8 @@ Stan na 2026-11-07. Kolejność wynika z ryzyka: najpierw sprawdzamy, czy gra dz
 
 Tu jesteśmy. Etap kończy się, gdy gra spełni wszystkie kryteria z `04_BACKLOG.md`.
 
-1. Przejść całą misję Humanoidem, bez teleportów, i naprawić znalezione blokady (krok opisany w `PROGRESS.md`).
-2. Właściciel przechodzi grę sam od początku do końca.
+1. ~~Przejść całą misję Humanoidem, bez teleportów, i naprawić znalezione blokady.~~ Zrobione 2026-11-07, wyniki w `05_STATUS.md`.
+2. Właściciel przechodzi grę sam od początku do końca. To teraz następny krok.
 3. 2–3 osoby grają bez instrukcji. Główne pytanie: czy same odkrywają, że odtworzenie nagrania przybliża Kadrowego?
 4. Publikacja próbna według README. Decyzja o nazwie zapada po sprawdzeniu dostępności „HEADCOUNT”.
 5. Testy na opublikowanej grze: teleport, zapis, rozłączenia, 2 i 4 graczy.

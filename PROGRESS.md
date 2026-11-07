@@ -4,13 +4,21 @@ Stan na 2026-11-07. Plik służy do wznowienia pracy w nowej sesji. Szczegółow
 
 ## Aktualny stan projektu
 
-Kooperacyjny horror psychologiczny na Roblox w fazie Vertical Slice (Misja 001). Lobby (Hub) i misja działają solo w Studio, z tymczasową oprawą z generatorów Roblox.
+Kooperacyjny horror psychologiczny na Roblox w fazie Vertical Slice (Misja 001). Lobby (Hub) i misja działają solo w Studio, z tymczasową oprawą z generatorów Roblox. Cała misja i droga przez lobby do terminala przeszły pieszo, bez teleportów (`docs/05_STATUS.md`, szósty przebieg).
 
 - **Budowanie i testy:** `python scripts/check.py [--fix]` uruchamia rojo, lune, selene i stylua oraz tworzy `build/Hub.rbxl` i `build/Mission.rbxl`. Ostatni wynik: wszystko zielone, 46 testów.
 - **Nazwa:** HEADCOUNT. „Poza kadrem” zostaje nazwą stanu w grze i ukrytego zakończenia. Dostępności nazwy na Roblox nie sprawdzono.
 - **Git:** gałąź `main`, zdalne repozytorium pokazuje `git remote -v`. `build/` i `Place1.rbxl` są poza repozytorium. Plan rozwoju jest w `docs/07_ROADMAP.md`.
 - **Publikacja na Roblox:** nic nie zostało opublikowane. `Config/Places` ma identyfikatory 0, więc teleport między miejscami nie może jeszcze działać. Publikacja wymaga wyraźnej zgody właściciela.
 - **Grywalność:** gry nie przeszedł jeszcze żaden człowiek.
+
+## Wykonane dzisiaj (przejście pieszo)
+
+- Przejście całej misji Humanoidem: raz z wstrzymanym Kadrowym, raz z aktywnym. Bez blokad na trasach.
+- Naprawione: dokumentów w misji nie dało się zamknąć myszą (przycisk X bez `Modal`), a na kontrolerze zamyka je teraz B.
+- Naprawione: wskazówka z magnetofonu nachodziła na napis radia. Jest u góry obrazu, na własnym tle.
+- Napis o powrocie przy znaczniku dostał obrys.
+- Pliki: `src/mission/client/Controllers/Hud.luau`, `Playback.luau`, `OffFrameView.luau`, `docs/05_STATUS.md`, ten plik.
 
 ## Wykonane dzisiaj (etap grafiki i modeli)
 
@@ -57,32 +65,30 @@ Brak gita oznacza brak pełnego diffu. Wcześniejsze etapy tego samego dnia zmie
 - PathfindingService zwraca `NoPath` dla piwnicy, biura i archiwum. Piwnica i wejście do biura przeszły pieszo, a archiwum jest zamknięte do fazy Door. Lobby zwraca `NoPath` dla wszystkich testowanych celów, ale przyczyny nie ustalono.
 - Wizualnie: kartony w lobby są różowawe, regały mają trójkątne artefakty tekstury, lada i czerwone lampy awaryjne to bryły.
 - Wszystkie modele są tymczasowe. Główne, zwłaszcza Kadrowy i widownię, trzeba przed premierą zastąpić ręcznie robionymi.
+- Raz po jednym nagraniu serwer zaliczył dwie taśmy. Nie udało się tego odtworzyć w dwóch kolejnych przebiegach (`docs/05_STATUS.md`).
 
 ## Co zostało przetestowane
 
-**Solo w Studio, na tym etapie:**
-- Humanoid doszedł ze startu do sali przez drzwi foyer (końcowa wersja, 7 s).
-- Humanoid przeszedł z sali przez korytarz i rampę do piwnicy (przed dodaniem modeli bojlera i lampy).
-- Humanoid przeszedł przez wejście z sali do biura (start skryptem tuż przed drzwiami).
-- Obejrzano na zrzutach salę, foyer, szatnię, kabinę, archiwum, biuro, piwnicę, Kadrowego i hol lobby.
-- Misja: 1637 części, 482 siatki, 53–65 FPS. Lobby: 321 części, 184 siatki, 65 FPS. Pomiar ze Studio na tym komputerze.
+**Solo w Studio, na końcowej grafice, pieszo, z prawdziwymi klawiszami:** pełny łańcuch misji od Protocol do Done, także z aktywnym Kadrowym, wycięcie i powrót na znacznik, porażka po wycięciu, intro w lobby i dojście do terminala. Skrypt testowy ustawiał kierunek kamery i znał rozwiązanie. Szczegóły: `docs/05_STATUS.md`, szósty przebieg.
 
-**Tylko przed zmianą grafiki, skryptami i z teleportami:** pełny łańcuch misji, przepływ lobby, szafka, klawiatura kodu, wstawanie rzędów, Dubel 3.
+Pomiar sprzed tego etapu, ze Studio na tym komputerze: misja 1637 części, 482 siatki, 53–65 FPS; lobby 321 części, 184 siatki, 65 FPS.
+
+**Tylko przed zmianą grafiki i skryptami:** szafka, wstawanie rzędów, Dubel 3.
 
 **Nigdy nietestowane:**
-- gra człowieka, 2–4 graczy, telefon i kontroler,
+- gra człowieka, czas przejścia, 2–4 graczy, telefon i fizyczny kontroler,
 - teleport między miejscami i zapis w DataStore,
 - brzmienie dźwięków,
-- Dubel 2 w grze oraz sobowtór oglądany w ruchu w misji.
+- migawka autobusu, Dubel 2 w grze oraz sobowtór oglądany w ruchu w misji.
 
 ## Dokładny następny krok
 
-Przejść całą Misję 001 Humanoidem, bez teleportowania postaci, na świeżym buildzie:
+Właściciel gra sam, od początku do końca (krok 2 w `docs/07_ROADMAP.md`). Tego nie zastąpi żaden skrypt, bo główne pytania to: czy gra straszy, czy jest zrozumiała i ile trwa.
 
 1. Uruchomić `python scripts/check.py` i otworzyć `build/Mission.rbxl`. Przywrócić zminimalizowane okno Studio, bo inaczej widok jest szary.
-2. Przejść kolejno fazy Protocol, Power, Projector, Door, Register, Climax i Done, korzystając z prawdziwych promptów i klawiszy.
-3. Sprawdzić szczególnie przejście przez ukryte drzwi do archiwum oraz drogę powrotną. Bojler ma nową, mniejszą bryłę kolizji, więc trzeba też sprawdzić poruszanie się po piwnicy.
-4. Po każdej znalezionej blokadzie naprawić przyczynę i dopisać wynik do `docs/05_STATUS.md`.
-5. Potem przejść pieszo intro w lobby aż do terminala, a następnie przekazać grę właścicielowi do testu na żywo.
+2. Zagrać bez korzystania z rozwiązania wypisanego w Output.
+3. Zapisać: gdzie gra stanęła, co było niejasne, czy Kadrowy jest za trudny, czas przejścia i ocenę dźwięku.
+4. Każdą blokadę naprawić u źródła i dopisać wynik do `docs/05_STATUS.md`.
+5. Następnie test 2–3 osób bez instrukcji, a potem publikacja próbna według README, która wymaga zgody właściciela.
 
-Atrybut `DevPauseRegistrar` na `Workspace`, ustawiony w trybie Edit przed Play, wstrzymuje Kadrowego na czas sprawdzania tras. Do końcowego przejścia trzeba go wyłączyć.
+Atrybut `DevPauseRegistrar` na `Workspace`, ustawiony w trybie Edit przed Play, wstrzymuje Kadrowego na czas sprawdzania tras.

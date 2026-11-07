@@ -168,3 +168,41 @@ Znane problemy:
 - kartony w lobby są różowawe, a półki mają miejscami trójkątne artefakty tekstury,
 - lada w lobby i czerwone lampy awaryjne to nadal bryły,
 - jasność piwnicy i zaciemnionych rogów archiwum trzeba ocenić na żywo.
+
+## Szósty przebieg: pełna misja pieszo
+
+Stan na 2026-11-07. Trzy przejścia misji w Studio, solo, na końcowej grafice. Postać szła wyłącznie przez `Humanoid:MoveTo`, bez teleportów. Prompty i taśmy obsługiwały prawdziwe klawisze (E, Q, R, T), a klawiaturę kodu i przyciski X prawdziwe kliknięcia. Skrypt testowy ustawiał tylko kierunek kamery i znał rozwiązanie zagadki z Output, więc to nadal **nie jest gra człowieka**.
+
+**Naprawione błędy:**
+
+1. **Dokumentów w misji nie dało się zamknąć myszą.** `LockFirstPerson` trzyma kursor na środku ekranu, a przycisk X jako jedyny nie miał `Modal`. Okno zostawało na środku widoku do następnej taśmy. X ma teraz `Modal`, a na kontrolerze dokument zamyka B, które poza tym zostaje komunikatem radiowym. Dotyczyło to każdego dokumentu, także rejestru.
+2. **Wskazówka z magnetofonu nachodziła na napis radia** i kolejność szpul była prawie nieczytelna. Napis jest teraz u góry obrazu, na własnym tle.
+3. **Napis „Możesz wrócić przy znaczniku” ginął na plakatach.** Dostał obrys.
+
+| Test (solo, Studio) | Wynik |
+|---|---|
+| Łańcuch Protocol → Done z wstrzymanym Kadrowym | OK, bez blokad na trasie |
+| Łańcuch Protocol → Done z aktywnym Kadrowym, jedno odtworzenie | OK, jedno wycięcie po drodze |
+| Trasy: start → sala → szatnia (wokół lady) → piwnica i z powrotem | OK |
+| Trasy: gabinet, kabina przez rampę, kulisy i korytarz z kotarami do piwnicy | OK |
+| Ukryte drzwi po obu stronach: bez kamery ściana blokuje, z kamerą przepuszcza | OK |
+| Droga z archiwum przez drzwi do dzwonka po przeczytaniu rejestru | OK |
+| Karty kodu ze sceny przez wizjer, poprawne cyfry | OK |
+| Film pokazuje drzwi po właściwej stronie (sprawdzone dla strony +1) | OK |
+| Wycięcie, 30 s, powrót pieszo na znacznik w foyer | OK, dwa razy |
+| Porażka: wszyscy poza kadrem, koniec karencji i raport | OK, czasu karencji nie mierzyłem dokładnie |
+| Finałowa taśma z datą za tydzień i „192 + 1”, raport po sukcesie | OK |
+| Migawka autobusu | Dalej nieobejrzana |
+| Lobby: regulamin, kamera, dwa uniesienia, drzwi, droga pieszo do terminala, panel terminala | OK |
+| Błędy skryptów w logach misji (trzeci przebieg) i lobby | Brak |
+| Bramki: rojo, lune (46 testów), selene, stylua | Zielone |
+
+Zamykanie dokumentu przyciskiem B sprawdziłem tylko symulowanym klawiszem, bez fizycznego kontrolera.
+
+Do obserwacji:
+
+- **Licznik taśm:** w pierwszym przebiegu po jednym nagraniu serwer zaliczył dwie taśmy (zostało 1 zamiast 2). Przy tej samej sekwencji klawiszy w dwóch kolejnych przebiegach licznik był poprawny. Przyczyny nie ustaliłem. W tamtym przebiegu skrypt testowy ładował też moduł `LensView`, ale związku nie potwierdziłem.
+- **Numerek z krzesła:** w drugim przebiegu E na właściwym krześle nie dało numerka. Kadrowy wyciął gracza mniej więcej w tej samej chwili, a odrzucenie po wycięciu jest zgodne z kodem. Czasu nie zmierzyłem, więc to najbardziej prawdopodobne wyjaśnienie, a nie pewność. W trzecim przebiegu wszystkie krzesła zaliczały się od razu.
+- **Balans:** testowy spacer nie reaguje na Kadrowego. Wycięcia po 2–3 minutach nie mówią więc, jak trudna jest gra dla człowieka, który może go sfilmować w ciągu 1,5 s.
+
+Bez zmian niesprawdzone: gra człowieka, czas przejścia, 2–4 graczy, telefon, fizyczny kontroler, teleport, DataStore, brzmienie dźwięków.

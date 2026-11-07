@@ -84,14 +84,19 @@ local function buildGui()
 		TextTransparency = 0.3,
 		Text = Strings.get("press_to_stop"),
 	}, gui)
+	-- At the top, on its own backing: the radio talks over every viewing, and this line is the clue.
 	captionLabel = Ui.text({
-		AnchorPoint = Vector2.new(0.5, 1),
-		Position = UDim2.fromScale(0.5, 0.86),
-		Size = UDim2.new(0.7, 0, 0, 34),
+		AnchorPoint = Vector2.new(0.5, 0),
+		Position = UDim2.fromScale(0.5, 0.16),
+		Size = UDim2.new(0.7, 0, 0, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
+		BackgroundColor3 = Color3.new(0, 0, 0),
+		BackgroundTransparency = 0.35,
 		TextSize = 22,
 		TextXAlignment = Enum.TextXAlignment.Center,
 		TextStrokeTransparency = 0.3,
 		Text = "",
+		Visible = false,
 	}, gui)
 	-- A tracking band rolling down the picture: only ever seen on a tape, where it makes sense.
 	band = Ui.frame({
@@ -182,6 +187,7 @@ local function start(clip: any)
 	captionLabel.Text = if clip.archiveOrder
 		then Strings.get("archive_order", clip.archiveOrder)
 		else ""
+	captionLabel.Visible = clip.archiveOrder ~= nil
 	AudioDirector.setLoop("TapeMotor", true, 0.35, 0.92)
 	controllers.Audience.setPlayback(true, clip.seats)
 	local ghosts = buildGhosts(clip.ghosts)
