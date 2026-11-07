@@ -1,0 +1,47 @@
+{
+  "name": "Headcount_Hub",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "Shared": {
+        "$path": "src/shared"
+      },
+      "ClientCommon": {
+        "$path": "src/client_common"
+      }
+    },
+    "ServerScriptService": {
+      "Common": {
+        "$path": "src/server_common"
+      },
+      "Hub": {
+        "$path": "src/hub/server"
+      }
+    },
+    "StarterPlayer": {
+      "$properties": {
+        "CameraMode": "LockFirstPerson",
+        "CharacterWalkSpeed": 13,
+        "CharacterJumpHeight": 3
+      },
+      "StarterPlayerScripts": {
+        "Hub": {
+          "$path": "src/hub/client"
+        }
+      }
+    },
+    "Workspace": {
+      "$properties": {
+        "StreamingEnabled": false
+      }
+    },
+    "Lighting": {
+      "$properties": {
+        "Technology": "ShadowMap"
+      }
+    },
+    "MaterialService": {
+      "$path": "src/materials"
+    }
+  }
+}

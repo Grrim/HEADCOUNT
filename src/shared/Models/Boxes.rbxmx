@@ -1,0 +1,17 @@
+<roblox version="4">
+  <Item class="MeshPart" referent="RBX0">
+    <Properties>
+      <string name="Name">Boxes</string>
+      <bool name="Anchored">true</bool>
+      <bool name="CanCollide">false</bool>
+      <bool name="CanQuery">false</bool>
+      <bool name="CanTouch">false</bool>
+      <Color3uint8 name="Color3uint8">4281216052</Color3uint8>
+      <token name="CollisionFidelity">1</token>
+      <Vector3 name="InitialSize"><X>1.0895862579345703</X><Y>2</Y><Z>0.9376999735832214</Z></Vector3>
+      <Vector3 name="size"><X>1.0895862579345703</X><Y>2</Y><Z>0.9376999735832214</Z></Vector3>
+      <Content name="MeshId"><url>rbxassetid://104865848586820</url></Content>
+      <Content name="TextureID"><url>rbxassetid://125686765064274</url></Content>
+    </Properties>
+  </Item>
+</roblox>

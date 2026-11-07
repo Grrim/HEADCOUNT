@@ -1,0 +1,47 @@
+{
+  "name": "Headcount_Mission001",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "Shared": {
+        "$path": "src/shared"
+      },
+      "ClientCommon": {
+        "$path": "src/client_common"
+      }
+    },
+    "ServerScriptService": {
+      "Common": {
+        "$path": "src/server_common"
+      },
+      "Mission": {
+        "$path": "src/mission/server"
+      }
+    },
+    "StarterPlayer": {
+      "$properties": {
+        "CameraMode": "LockFirstPerson",
+        "CharacterWalkSpeed": 13,
+        "CharacterJumpHeight": 3
+      },
+      "StarterPlayerScripts": {
+        "Mission": {
+          "$path": "src/mission/client"
+        }
+      }
+    },
+    "Workspace": {
+      "$properties": {
+        "StreamingEnabled": false
+      }
+    },
+    "Lighting": {
+      "$properties": {
+        "Technology": "ShadowMap"
+      }
+    },
+    "MaterialService": {
+      "$path": "src/materials"
+    }
+  }
+}

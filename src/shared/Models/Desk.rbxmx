@@ -1,0 +1,17 @@
+<roblox version="4">
+  <Item class="MeshPart" referent="RBX0">
+    <Properties>
+      <string name="Name">Desk</string>
+      <bool name="Anchored">true</bool>
+      <bool name="CanCollide">false</bool>
+      <bool name="CanQuery">false</bool>
+      <bool name="CanTouch">false</bool>
+      <Color3uint8 name="Color3uint8">4281216052</Color3uint8>
+      <token name="CollisionFidelity">1</token>
+      <Vector3 name="InitialSize"><X>7.003605842590332</X><Y>3.150902271270752</Y><Z>4.000000476837158</Z></Vector3>
+      <Vector3 name="size"><X>7.003605842590332</X><Y>3.150902271270752</Y><Z>4.000000476837158</Z></Vector3>
+      <Content name="MeshId"><url>rbxassetid://109596243576092</url></Content>
+      <Content name="TextureID"><url>rbxassetid://105145893598469</url></Content>
+    </Properties>
+  </Item>
+</roblox>

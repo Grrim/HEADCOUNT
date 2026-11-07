@@ -1,0 +1,17 @@
+<roblox version="4">
+  <Item class="MeshPart" referent="RBX0">
+    <Properties>
+      <string name="Name">DeskLamp</string>
+      <bool name="Anchored">true</bool>
+      <bool name="CanCollide">false</bool>
+      <bool name="CanQuery">false</bool>
+      <bool name="CanTouch">false</bool>
+      <Color3uint8 name="Color3uint8">4281216052</Color3uint8>
+      <token name="CollisionFidelity">1</token>
+      <Vector3 name="InitialSize"><X>0.9916456937789917</X><Y>2.212024688720703</Y><Z>1.4000000953674316</Z></Vector3>
+      <Vector3 name="size"><X>0.9916456937789917</X><Y>2.212024688720703</Y><Z>1.4000000953674316</Z></Vector3>
+      <Content name="MeshId"><url>rbxassetid://119210231973218</url></Content>
+      <Content name="TextureID"><url>rbxassetid://100608111146418</url></Content>
+    </Properties>
+  </Item>
+</roblox>

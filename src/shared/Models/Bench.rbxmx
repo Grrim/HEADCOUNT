@@ -1,0 +1,17 @@
+<roblox version="4">
+  <Item class="MeshPart" referent="RBX0">
+    <Properties>
+      <string name="Name">Bench</string>
+      <bool name="Anchored">true</bool>
+      <bool name="CanCollide">false</bool>
+      <bool name="CanQuery">false</bool>
+      <bool name="CanTouch">false</bool>
+      <Color3uint8 name="Color3uint8">4281216052</Color3uint8>
+      <token name="CollisionFidelity">1</token>
+      <Vector3 name="InitialSize"><X>5.195535659790039</X><Y>1.899999976158142</Y><Z>1.4337786436080933</Z></Vector3>
+      <Vector3 name="size"><X>5.195535659790039</X><Y>1.899999976158142</Y><Z>1.4337786436080933</Z></Vector3>
+      <Content name="MeshId"><url>rbxassetid://99667728327544</url></Content>
+      <Content name="TextureID"><url>rbxassetid://116157166307516</url></Content>
+    </Properties>
+  </Item>
+</roblox>

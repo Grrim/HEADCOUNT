@@ -1,0 +1,17 @@
+<roblox version="4">
+  <Item class="MeshPart" referent="RBX0">
+    <Properties>
+      <string name="Name">Bell</string>
+      <bool name="Anchored">true</bool>
+      <bool name="CanCollide">false</bool>
+      <bool name="CanQuery">false</bool>
+      <bool name="CanTouch">false</bool>
+      <Color3uint8 name="Color3uint8">4281216052</Color3uint8>
+      <token name="CollisionFidelity">1</token>
+      <Vector3 name="InitialSize"><X>0.815531849861145</X><Y>0.8999999761581421</Y><Z>0.8382195234298706</Z></Vector3>
+      <Vector3 name="size"><X>0.815531849861145</X><Y>0.8999999761581421</Y><Z>0.8382195234298706</Z></Vector3>
+      <Content name="MeshId"><url>rbxassetid://105510430440432</url></Content>
+      <Content name="TextureID"><url>rbxassetid://130075898313638</url></Content>
+    </Properties>
+  </Item>
+</roblox>

@@ -1,0 +1,20 @@
+--!strict
+return {
+	Carpet = Color3.fromRGB(24, 92, 98),
+	Wood = Color3.fromRGB(107, 58, 34),
+	WoodDark = Color3.fromRGB(62, 36, 24),
+	Wall = Color3.fromRGB(150, 142, 122),
+	WallDark = Color3.fromRGB(96, 90, 78),
+	Ceiling = Color3.fromRGB(84, 87, 90),
+	Metal = Color3.fromRGB(58, 62, 66),
+	Curtain = Color3.fromRGB(44, 58, 62),
+	Fluorescent = Color3.fromRGB(216, 230, 210),
+	Bulb = Color3.fromRGB(255, 201, 138),
+	Shadow = Color3.fromRGB(10, 14, 20),
+	Suit = Color3.fromRGB(48, 52, 58),
+	Skin = Color3.fromRGB(150, 140, 128),
+	Paper = Color3.fromRGB(214, 206, 186),
+	Rec = Color3.fromRGB(217, 52, 43),
+	Crt = Color3.fromRGB(182, 214, 150),
+	Ink = Color3.fromRGB(8, 10, 12),
+}

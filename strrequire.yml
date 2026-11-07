@@ -1,0 +1,7 @@
+---
+# Luau require-by-string ("./Sibling") is valid on Roblox and in Lune; selene's roblox std predates it.
+base: roblox
+globals:
+  require:
+    args:
+      - type: any

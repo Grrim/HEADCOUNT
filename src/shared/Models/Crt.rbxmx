@@ -1,0 +1,17 @@
+<roblox version="4">
+  <Item class="MeshPart" referent="RBX0">
+    <Properties>
+      <string name="Name">Crt</string>
+      <bool name="Anchored">true</bool>
+      <bool name="CanCollide">false</bool>
+      <bool name="CanQuery">false</bool>
+      <bool name="CanTouch">false</bool>
+      <Color3uint8 name="Color3uint8">4281216052</Color3uint8>
+      <token name="CollisionFidelity">1</token>
+      <Vector3 name="InitialSize"><X>3.0208239555358887</X><Y>4</Y><Z>1.7374961376190186</Z></Vector3>
+      <Vector3 name="size"><X>3.0208239555358887</X><Y>4</Y><Z>1.7374961376190186</Z></Vector3>
+      <Content name="MeshId"><url>rbxassetid://129726520424711</url></Content>
+      <Content name="TextureID"><url>rbxassetid://112426800249451</url></Content>
+    </Properties>
+  </Item>
+</roblox>

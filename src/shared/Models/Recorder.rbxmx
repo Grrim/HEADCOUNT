@@ -1,0 +1,17 @@
+<roblox version="4">
+  <Item class="MeshPart" referent="RBX0">
+    <Properties>
+      <string name="Name">Recorder</string>
+      <bool name="Anchored">true</bool>
+      <bool name="CanCollide">false</bool>
+      <bool name="CanQuery">false</bool>
+      <bool name="CanTouch">false</bool>
+      <Color3uint8 name="Color3uint8">4281216052</Color3uint8>
+      <token name="CollisionFidelity">1</token>
+      <Vector3 name="InitialSize"><X>1.3694045543670654</X><Y>1.2999999523162842</Y><Z>0.6325304508209229</Z></Vector3>
+      <Vector3 name="size"><X>1.3694045543670654</X><Y>1.2999999523162842</Y><Z>0.6325304508209229</Z></Vector3>
+      <Content name="MeshId"><url>rbxassetid://112528941971108</url></Content>
+      <Content name="TextureID"><url>rbxassetid://100806256540828</url></Content>
+    </Properties>
+  </Item>
+</roblox>
