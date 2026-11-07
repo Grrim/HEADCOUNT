@@ -244,3 +244,8 @@ Przy okazji: tabliczki rzędów i kinkiet wisiały w otworach drzwi. Tabliczek p
 | Bramki: rojo, lune (46 testów), selene, stylua | Zielone |
 
 Uwaga do `DevPauseRegistrar`: działa tylko na budzenie, więc w Dublu 2 Kadrowy i tak poluje.
+
+Dodane później tego samego dnia:
+
+- **Ramy drzwi w lobby:** cztery wejścia. Przejście pieszo przez wszystkie i skan bez widocznych konfliktów. Obejrzane na zrzucie: wejście do pokoju taśm.
+- **Kulminacja:** po przeczytaniu rejestru zegar w foyer przeskakuje z 18:04 na 18:05, a EXIT zmienia się w NO EXIT. W Studio ta sama pętla uruchomiona ręcznie trafiła w oba napisy, a zegar obejrzałem na zrzucie. Nie sprawdziłem tego przez prawdziwy odczyt rejestru ani wyglądu NO EXIT na tablicy.

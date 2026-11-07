@@ -623,6 +623,16 @@ function MissionWorld.setClimaxLighting()
 	for _, light in MissionWorld.hallLights do
 		light.Brightness *= 0.55
 	end
+	-- The foyer clock has said 18:04 all evening. Now the meeting has everyone on its list, it moves.
+	for _, item in (MissionWorld.map :: Folder):GetDescendants() do
+		if item:IsA("TextLabel") then
+			if item.Text == "18:04" then
+				item.Text = "18:05"
+			elseif item.Text == "EXIT" then
+				item.Text = "NO EXIT"
+			end
+		end
+	end
 end
 
 function MissionWorld.init()

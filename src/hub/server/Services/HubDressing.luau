@@ -199,6 +199,54 @@ local function archiveClutter(folder: Folder)
 			Enum.Material.Metal
 		)
 	end
+	-- Door frames. They reach 0.15 into each opening to cover the wall's cut edge: a frame that only
+	-- touches it would share a plane with the wall and flicker.
+	local wood, grain = Palette.WoodDark, Enum.Material.Wood
+	for _, door in { { 40, 3, 8 }, { 20, 4, 9 } } do
+		local z, half, top = door[1], door[2], door[3]
+		decor(
+			folder,
+			"DoorFrame",
+			-half - 0.5,
+			0,
+			z - 0.7,
+			-half + 0.15,
+			top + 0.5,
+			z + 0.7,
+			wood,
+			grain
+		)
+		decor(
+			folder,
+			"DoorFrame",
+			half - 0.15,
+			0,
+			z - 0.7,
+			half + 0.5,
+			top + 0.5,
+			z + 0.7,
+			wood,
+			grain
+		)
+		decor(
+			folder,
+			"DoorFrame",
+			-half + 0.15,
+			top - 0.15,
+			z - 0.7,
+			half - 0.15,
+			top + 0.5,
+			z + 0.7,
+			wood,
+			grain
+		)
+	end
+	for _, door in { { -10, -2 }, { 10, 18 } } do
+		local a, b = door[1], door[2]
+		decor(folder, "DoorFrame", 39.3, 0, a - 0.5, 40.7, 9.5, a + 0.15, wood, grain)
+		decor(folder, "DoorFrame", 39.3, 0, b - 0.15, 40.7, 9.5, b + 0.5, wood, grain)
+		decor(folder, "DoorFrame", 39.3, 8.85, a + 0.15, 40.7, 9.5, b - 0.15, wood, grain)
+	end
 	-- Wainscoting and a stripe of carpet that points at the terminal.
 	decor(
 		folder,

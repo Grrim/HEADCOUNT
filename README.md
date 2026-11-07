@@ -26,6 +26,7 @@ Ostatnio:
 - Usunięte migotanie grafiki przy drzwiach (nakładające się powierzchnie) w lobby i misji.
 - Uzupełniony tymczasowy zestaw dźwięków: szum budynku, sygnał błędu, muzyka w kulminacji i na końcu, tłumienie dźwięków za ścianą.
 - Czytelna scena autobusu na końcu, ochrona taśm przed przypadkowym podwójnym R, poprawki sobowtóra.
+- Ramy drzwi w lobby oraz zegar i napis EXIT, które zmieniają się w kulminacji.
 
 **Czego jeszcze nikt nie sprawdził:** gry człowieka, czasu przejścia, brzmienia dźwięków, 2–4 graczy, telefonu, fizycznego kontrolera, teleportu i zapisu. Do tego czasu slice nie jest uznany za działający. Wyniki testów są w [docs/05_STATUS.md](docs/05_STATUS.md).
 
