@@ -1,6 +1,6 @@
 # PROGRESS: HEADCOUNT
 
-Stan na 2026-11-07. Plik służy do wznowienia pracy w nowej sesji. Szczegółowe wyniki testów są w `docs/05_STATUS.md`, a lista assetów w `docs/06_ASSETS.md`.
+Stan na 2026-11-08. Plik służy do wznowienia pracy w nowej sesji. Szczegółowe wyniki testów są w `docs/05_STATUS.md`, a lista assetów w `docs/06_ASSETS.md`.
 
 ## Aktualny stan projektu
 
@@ -11,6 +11,12 @@ Kooperacyjny horror psychologiczny na Roblox w fazie Vertical Slice (Misja 001).
 - **Git:** gałąź `main`, zdalne repozytorium pokazuje `git remote -v`. `build/` i `Place1.rbxl` są poza repozytorium. Plan rozwoju jest w `docs/07_ROADMAP.md`.
 - **Publikacja na Roblox:** nic nie zostało opublikowane. `Config/Places` ma identyfikatory 0, więc teleport między miejscami nie może jeszcze działać. Publikacja wymaga wyraźnej zgody właściciela.
 - **Grywalność:** gry nie przeszedł jeszcze żaden człowiek.
+
+## Wykonane 2026-11-08
+
+- Powrót po rozłączeniu do już zamkniętej ekspedycji odsyła gracza do huba zamiast tworzyć pusty przebieg.
+- Okienko kasy w foyer nie jest już czarnym prostokątem, kotary przy ekranie są jaśniejsze.
+- Nic z tego nie było uruchomione w Studio. Szczegóły: `docs/05_STATUS.md`, dziesiąty przebieg.
 
 ## Wykonane dzisiaj (pakiet przed testem)
 

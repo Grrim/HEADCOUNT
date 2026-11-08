@@ -209,6 +209,7 @@ local EN: { [string]: string } = {
 	err_bad_target = "Not possible.",
 	err_mission_locked = "That file is sealed.",
 	err_teleport_failed = "Could not leave. Try again.",
+	notice_expedition_over = "This expedition has already ended. Returning you to the Archive.",
 	err_not_published = "Teleporting needs a published game with place ids. Open the mission place to test it here.",
 	-- intro
 	intro_hello = "Good evening. Please take a seat.",
@@ -411,6 +412,7 @@ local PL: { [string]: string } = {
 	err_bad_target = "Nie można.",
 	err_mission_locked = "Ta teczka jest zapieczętowana.",
 	err_teleport_failed = "Nie udało się wyruszyć. Spróbuj ponownie.",
+	notice_expedition_over = "Ta ekspedycja już się zakończyła. Wracasz do Archiwum.",
 	err_not_published = "Teleport wymaga opublikowanej gry z ID miejsc. Aby to przetestować tutaj, otwórz miejsce misji.",
 	intro_hello = "Dobry wieczór. Proszę usiąść.",
 	intro_folder = "Przeczytaj teczkę na biurku.",

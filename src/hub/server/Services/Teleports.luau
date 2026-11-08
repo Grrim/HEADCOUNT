@@ -122,6 +122,9 @@ function Teleports.rejoin(player: Player)
 	statusRemote:FireClient(player, "teleporting")
 	local options = Instance.new("TeleportOptions")
 	options.ReservedServerId = entry.serverId
+	-- Lets the mission tell a returning player from a fresh party. If the old server already shut
+	-- down, the same id opens an empty one, and the mission sends the player straight back.
+	options:SetTeleportData({ v = 1, rejoin = true })
 	local sent, err = pcall(function()
 		TeleportService:TeleportAsync(entry.placeId, { player }, options)
 	end)

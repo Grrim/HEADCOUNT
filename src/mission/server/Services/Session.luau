@@ -74,21 +74,65 @@ function Session.notifyOne(player: Player, key: string, ...: any)
 	notifyRemote:FireClient(player, key, ...)
 end
 
-local function readJoin(player: Player): (number?, number)
-	-- Teleport data is visible to the client, so only the seed is taken from it and only after a
-	-- type check. Nothing that grants a reward depends on it.
+local function readJoin(player: Player): (number?, number, boolean)
+	-- Teleport data is visible to the client, so only the seed and the rejoin flag are taken from
+	-- it and only after a type check. Nothing that grants a reward depends on either.
 	local ok, joinData = pcall(function()
 		return player:GetJoinData()
 	end)
 	if not ok or typeof(joinData) ~= "table" then
-		return nil, 1
+		return nil, 1, false
 	end
 	local data = joinData.TeleportData
 	local seed = if typeof(data) == "table" and typeof(data.seed) == "number"
 		then data.seed
 		else nil
+	local isRejoin = typeof(data) == "table" and data.rejoin == true
 	local members = joinData.Members
-	return seed, if typeof(members) == "table" then math.clamp(#members, 1, 4) else 1
+	return seed, if typeof(members) == "table" then math.clamp(#members, 1, 4) else 1, isRejoin
+end
+
+-- Players who arrived at an expedition that no longer exists. They are on their way back to the
+-- hub and never count towards the party or the run.
+local turnedAway: { [Player]: boolean } = {}
+
+local function livePlayers(): { Player }
+	local list = {}
+	for _, player in Players:GetPlayers() do
+		if not turnedAway[player] then
+			table.insert(list, player)
+		end
+	end
+	return list
+end
+
+local function forgetRejoin(players: { Player })
+	pcall(function()
+		local map = MemoryStoreService:GetHashMap("ActiveExpedition")
+		for _, player in players do
+			map:RemoveAsync(tostring(player.UserId))
+		end
+	end)
+end
+
+local function sendHome(players: { Player })
+	if #players == 0 then
+		return
+	end
+	if Places.HUB == 0 or RunService:IsStudio() then
+		print("[Session] teleport home skipped (no hub place id or Studio)")
+		return
+	end
+	for attempt = 1, Config.Party.TeleportRetries do
+		local ok, err = pcall(function()
+			TeleportService:TeleportAsync(Places.HUB, players)
+		end)
+		if ok then
+			return
+		end
+		warn(`[Session] teleport home failed ({attempt}): {err}`)
+		task.wait(3 ^ attempt)
+	end
 end
 
 -- The dispatcher's voice paces the mission, and slowly stops making sense.
@@ -139,7 +183,7 @@ local function begin()
 	end
 	begun = true
 	local completions = 0
-	for _, player in Players:GetPlayers() do
+	for _, player in livePlayers() do
 		local data = PlayerData.waitFor(player)
 		if data then
 			completions = math.max(completions, data.stats.completions)
@@ -150,7 +194,7 @@ local function begin()
 	if RunService:IsStudio() and typeof(devCompletions) == "number" then
 		completions = devCompletions
 	end
-	Session.playerCount = math.max(1, #Players:GetPlayers())
+	Session.playerCount = math.max(1, #livePlayers())
 	Session.take = Take.forCompletions(completions)
 	services.MissionWorld.applyTake(Session.take.reverseEveryNthRow)
 	Session.startedAt = os.clock()
@@ -290,27 +334,9 @@ function Session.finish(success: boolean)
 	task.spawn(function()
 		PlayerData.saveAll(10)
 		-- The expedition is over, so the hub must stop offering a way back to it.
-		pcall(function()
-			local map = MemoryStoreService:GetHashMap("ActiveExpedition")
-			for _, player in Players:GetPlayers() do
-				map:RemoveAsync(tostring(player.UserId))
-			end
-		end)
+		forgetRejoin(Players:GetPlayers())
 		task.wait(Config.Session.EndTapeSeconds)
-		if Places.HUB == 0 or RunService:IsStudio() then
-			print("[Session] mission over; teleport home skipped (no hub place id or Studio)")
-			return
-		end
-		for attempt = 1, Config.Party.TeleportRetries do
-			local ok, err = pcall(function()
-				TeleportService:TeleportAsync(Places.HUB, Players:GetPlayers())
-			end)
-			if ok then
-				return
-			end
-			warn(`[Session] teleport home failed ({attempt}): {err}`)
-			task.wait(3 ^ attempt)
-		end
+		sendHome(Players:GetPlayers())
 	end)
 end
 
@@ -324,7 +350,17 @@ end
 function Session.start()
 	local expected = 1
 	local function onJoin(player: Player)
-		local seed, members = readJoin(player)
+		local seed, members, isRejoin = readJoin(player)
+		-- A rejoin that finds no puzzle opened a fresh copy of a server that already shut down, and
+		-- anyone arriving after the ending would only watch the end tape. Both go back to the hub
+		-- instead of starting an empty run on their own.
+		if finishing or (isRejoin and not Session.puzzle) then
+			turnedAway[player] = true
+			Session.notifyOne(player, "notice_expedition_over")
+			forgetRejoin({ player })
+			task.delay(3, sendHome, { player })
+			return
+		end
 		if not Session.puzzle then
 			Session.seed = seed or Random.new():NextInteger(1, 2 ^ 30)
 			Session.puzzle = Puzzle.generate(Session.seed)
@@ -337,20 +373,21 @@ function Session.start()
 	for _, player in Players:GetPlayers() do
 		task.spawn(onJoin, player)
 	end
-	Players.PlayerRemoving:Connect(function()
+	Players.PlayerRemoving:Connect(function(player)
+		turnedAway[player] = nil
 		task.defer(function()
 			services.OffFrame.checkEveryoneCut()
 		end)
 	end)
 
-	while #Players:GetPlayers() == 0 do
+	while #livePlayers() == 0 do
 		task.wait(0.2)
 	end
 	-- A reserved server waits briefly for the whole party; anything else starts straight away.
 	local isReserved = game.PrivateServerId ~= "" and game.PrivateServerOwnerId == 0
 	if isReserved then
 		local deadline = os.clock() + Config.Session.WaitForPartySeconds
-		while #Players:GetPlayers() < expected and os.clock() < deadline do
+		while #livePlayers() < expected and os.clock() < deadline do
 			task.wait(0.25)
 		end
 	else

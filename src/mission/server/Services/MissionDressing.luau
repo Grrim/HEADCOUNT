@@ -13,6 +13,9 @@ local Surfaces = require(ReplicatedStorage.Shared.World.Surfaces)
 
 local MissionDressing = {}
 
+-- Stage velvet. The first shade (70, 28, 30) read as black under the hall lights in the playtest.
+local DRAPE = Color3.fromRGB(116, 38, 40)
+
 local function decor(
 	folder: Folder,
 	name: string,
@@ -157,7 +160,7 @@ local function hall(folder: Folder)
 				x + 0.25,
 				23,
 				-38.7 + (fold % 2) * 0.4,
-				Color3.fromRGB(70, 28, 30),
+				DRAPE,
 				Enum.Material.Fabric
 			)
 		end
@@ -172,7 +175,7 @@ local function hall(folder: Folder)
 		H.maxX - 0.5,
 		24,
 		-23.9,
-		Color3.fromRGB(70, 28, 30),
+		DRAPE,
 		Enum.Material.Fabric
 	)
 	sign(
@@ -267,10 +270,44 @@ local function foyer(folder: Folder)
 	-- Doormat and a worn runner leading to the hall, so the floor points the way.
 	decor(folder, "Runner", -3, 0, 46, 3, 0.1, 72, Color3.fromRGB(58, 34, 34), Enum.Material.Fabric).CastShadow =
 		false
-	-- Ticket window
+	-- Ticket window: a dim, warm-lit kiosk behind the glass instead of a black hole in the wall.
 	sign(folder, 19, 8, 45.2, 8, 1.6, Enum.NormalId.Back, "TICKETS", Palette.Paper, Palette.Ink)
-	decor(folder, "TicketGlass", 13, 3.4, 45.4, 25, 7, 45.7, Palette.Shadow, Enum.Material.Glass).Transparency =
-		0.5
+	local kiosk = decor(
+		folder,
+		"TicketKiosk",
+		13,
+		3.4,
+		45.2,
+		25,
+		7,
+		45.3,
+		Color3.fromRGB(92, 70, 48),
+		Enum.Material.Wood
+	)
+	kiosk.CastShadow = false
+	local kioskLight = Instance.new("SurfaceLight")
+	kioskLight.Face = Enum.NormalId.Back
+	kioskLight.Color = Palette.Bulb
+	kioskLight.Brightness = 0.6
+	kioskLight.Range = 6
+	kioskLight.Angle = 120
+	kioskLight.Parent = kiosk
+	decor(folder, "TicketLamp", 14, 6.5, 45.3, 24, 6.75, 45.38, Palette.Bulb, Enum.Material.Neon).CastShadow =
+		false
+	sign(folder, 19, 4.6, 45.35, 3.2, 0.9, Enum.NormalId.Back, "CLOSED", Palette.Paper, Palette.Rec)
+	decor(
+		folder,
+		"TicketGlass",
+		13,
+		3.4,
+		45.45,
+		25,
+		7,
+		45.7,
+		Color3.fromRGB(120, 140, 150),
+		Enum.Material.Glass
+	).Transparency =
+		0.7
 	-- Notice boards: readable set dressing that also tells the story.
 	decor(
 		folder,

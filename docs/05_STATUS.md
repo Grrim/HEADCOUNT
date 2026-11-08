@@ -57,7 +57,7 @@ Pomiar: ~1356 części z widownią, 60 FPS fizyki i 2,6 GB pamięci w Studio na 
 3. **Gracz może znaleźć Kadrowego zbyt szybko**: w jednym teście dotarł do sceny i wyciął gracza krótko po pierwszych błędnych próbach. Balans jest niesprawdzony.
 4. **Noclip** omija ukrytą ścianę (ruch jest po stronie klienta). Nagrody i tak wymagają pełnego przebiegu po stronie serwera.
 5. **Znajomi na innym serwerze huba** nie zobaczą drużyny. Globalna lista jest poza slice.
-6. **Powrót po rozłączeniu** do zakończonego serwera utworzy nowy, pusty przebieg. Trzeba to obsłużyć po pierwszych testach.
+6. ~~**Powrót po rozłączeniu** do zakończonego serwera utworzy nowy, pusty przebieg.~~ Obsłużone w dziesiątym przebiegu (odesłanie do huba), nieprzetestowane.
 7. **Dźwięki są tymczasowe i niespójne**, np. sygnał krótkofalówki zastępuje klik kamery. Brak: Hum, Projector, Wrong, Music, kroki na wykładzinie.
 8. **Tekst po stronie gracza nie przeszedł korekty.** EN i PL napisałem sam.
 9. **Sekwencje specjalne z GDD nie są zrobione**: dwa momenty „każdy widzi inny numer”, EQ dla dźwięków za ścianą, plakaty i dokument „Ławka”.
@@ -314,3 +314,15 @@ Stan na 2026-11-07, po uwadze właściciela, że całość wygląda nudno, lobby
 Wybór muzyki: z Creator Store, po wyszukaniu i zmierzeniu długości w Studio (`work/sfx`, poza repozytorium). Lobby: „Dark Ambient Piano”, misja: „Existential Dread (Deep Dark Ambient Drone)”. Zapasowa dla lobby w komentarzu w `Sounds.luau`.
 
 Niesprawdzone: brzmienie muzyki, wydajność `Future` na telefonie, prompty na dotyku i kontrolerze, NO EXIT przez prawdziwy odczyt rejestru, wygląd terminala w drużynie i na ekranie przygotowania. Okienko kasy w foyer to nadal czarny prostokąt. Dwie ostatnie drobne poprawki (obrys napisu radia gaśnie razem z tekstem, odstęp instrukcji w terminalu) są tylko w kodzie, bez zrzutu.
+
+## Dziesiąty przebieg: powrót do zakończonej ekspedycji, kasa, kotary
+
+Stan na 2026-11-08. Zmiany tylko w kodzie, **bez uruchomienia w Studio** (w tej sesji nie było dostępu do Studio). Bramki zielone: rojo (oba miejsca), lune (48 testów), selene, stylua. `scripts/check.py` wymaga Pythona, którego na tym komputerze nie ma w PATH, więc bramki uruchomiłem tymi samymi poleceniami ręcznie.
+
+| Zmiana | Pliki | Sprawdzone |
+|---|---|---|
+| Znany problem 6: hub dodaje do teleportu powrotu `rejoin = true`. Misja, która dostaje taki powrót bez wygenerowanej zagadki (stary serwer już się zamknął), albo gracza po zakończeniu misji, pokazuje „This expedition has already ended” i po 3 s odsyła go do huba. Taki gracz nie liczy się do drużyny ani do startu przebiegu | `Teleports.luau`, `Session.luau`, `Strings.luau` | Tylko budowa i lint. Wymaga opublikowanej gry |
+| Okienko kasy w foyer: ciepło oświetlone wnętrze, lampka, kartka CLOSED, jaśniejsza szyba zamiast czarnego prostokąta | `MissionDressing.luau` | Bez zrzutu |
+| Kotary przy ekranie i lambrekin jaśniejsze (116, 38, 40 zamiast 70, 28, 30) | `MissionDressing.luau` | Bez zrzutu |
+
+Do sprawdzenia w Studio: wygląd kasy i kotar oraz brak migotania (kartka CLOSED i lampka leżą przed tylną płytą, szyba przed nimi). Do sprawdzenia po publikacji: powrót do żywej ekspedycji nadal działa, a powrót do zamkniętej odsyła do huba.
