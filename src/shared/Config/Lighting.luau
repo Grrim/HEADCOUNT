@@ -47,4 +47,25 @@ return {
 		Brightness = -0.02,
 		TintColor = Color3.fromRGB(170, 200, 255),
 	},
+	-- The hub is home base, not a horror set. Warmer, brighter and clearer than the mission:
+	-- a staffed archive on a late shift, with the dread saved for the other place.
+	Hub = {
+		Base = {
+			Brightness = 1.7,
+			Ambient = Color3.fromRGB(62, 58, 50),
+			OutdoorAmbient = Color3.fromRGB(24, 22, 20),
+			ExposureCompensation = 0.4,
+		},
+		Atmosphere = {
+			Density = 0.18,
+			Haze = 0.9,
+			Color = Color3.fromRGB(74, 66, 52),
+			Decay = Color3.fromRGB(34, 28, 22),
+		},
+		World = {
+			Contrast = 0.1,
+			Saturation = 0.06,
+			TintColor = Color3.fromRGB(255, 246, 230),
+		},
+	},
 }

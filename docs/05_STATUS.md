@@ -326,3 +326,15 @@ Stan na 2026-11-08. Zmiany tylko w kodzie, **bez uruchomienia w Studio** (w tej 
 | Kotary przy ekranie i lambrekin jaśniejsze (116, 38, 40 zamiast 70, 28, 30) | `MissionDressing.luau` | Bez zrzutu |
 
 Do sprawdzenia w Studio: wygląd kasy i kotar oraz brak migotania (kartka CLOSED i lampka leżą przed tylną płytą, szyba przed nimi). Do sprawdzenia po publikacji: powrót do żywej ekspedycji nadal działa, a powrót do zamkniętej odsyła do huba.
+
+## Jedenasty przebieg: lobby przyjemne i orientacyjne
+
+Stan na 2026-11-08, po uwadze właściciela, że lobby nie jest przyjemne ani orientacyjne. Zmiany tylko w kodzie, **bez uruchomienia w Studio** (sesja bez dostępu do Studio). Bramki zielone: rojo (oba miejsca), lune (48 testów), selene, stylua.
+
+**Światło.** Lobby ma teraz własny preset `Hub` w `Config/Lighting.luau` (`LightingApply.apply("Hub")`): cieplejszy ambient, mniejsza mgła, lekka saturacja i cieplejszy tint. Misja dalej używa presetu bazowego, więc jej mrok się nie zmienia. W hali zamiast jednego rzędu paneli jest siatka 3×3 ciepłej bieli; alejki przy ścianach doświetlają kinkiety na boazerii (3 po zachodniej, 2 po wschodniej stronie), nad ladą recepcji wiszą dwie lampy, a pokój startowy i szatnia dostały cieplejsze panele.
+
+**Orientacja.** Przy wejściu do hali, na wprost drzwi z korytarza, wiszą trzy podświetlone tablice kierunkowe: „EXPEDITIONS ^", „TAPE ROOM > / PERSONNEL >", „< RECORDS" (z = 16, czyli w wolnym pasie między regałami, które kończą się na z = 14, a ścianą południową). Wzdłuż chodnika do terminala biegną niskie zielone światełka prowadzące co 8 jednostek. Nad drzwiami do korytarza, od strony hali, wisi zegar 18:04. Korytarz dostał boazerię, dwa kinkiety i tablicę „REGISTRY HALL AHEAD".
+
+**Przyjemność.** Kącik oczekiwania między regałem zachodnim a chodnikiem: dywan, dwa krzesła przed telewizorem, stolik z kubkiem i lampa podłogowa. Trzy rośliny doniczkowe: przy ekspresie, przy wejściu do hali i wyższa przy terminalu.
+
+Współrzędne nowych brył sprawdziłem ręcznie względem regałów (x ±18–22 i ±28–32, z 2..14), wózka, lady i ścian; tablice i kącik przesunąłem po pierwszej wersji, która nachodziła na regały. **Nikt tego nie widział na ekranie.** Do oceny w Studio: czy hala nie zrobiła się za jasna (strach ma zostać w misji), czytelność tablic z progu korytarza, brak migotania przy kinkietach i boazerii, czy rośliny nie wyglądają tandetnie.

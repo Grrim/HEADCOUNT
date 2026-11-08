@@ -14,6 +14,11 @@ local HubDressing = {}
 
 HubDressing.prompts = {} :: { [string]: ProximityPrompt }
 
+-- Matches the hall panels in HubWorld, so every lit surface agrees on what white is.
+local WARM = Color3.fromRGB(252, 234, 202)
+local PLANT_POT = Color3.fromRGB(88, 54, 40)
+local PLANT_LEAF = Color3.fromRGB(52, 88, 50)
+
 local function decor(
 	folder: Folder,
 	name: string,
@@ -67,7 +72,263 @@ local function lockerRoom(folder: Folder)
 		end
 	end
 	Build.box(folder, "LockerBench", 44, 0, 15, 54, 1.8, 17, Palette.Wood, Enum.Material.Wood)
-	Build.panel(folder, 49, 10.9, 16, 6, 2, 1.6, 22)
+	Build.panel(folder, 49, 10.9, 16, 6, 2, 1.6, 22, WARM)
+end
+
+-- A lit box sign hanging from the ceiling on two wires, readable from the south (the side every
+-- player approaches from, since the corridor enters the hall at its south wall).
+local function hangingSign(
+	folder: Folder,
+	name: string,
+	text: string,
+	ink: Color3,
+	cx: number,
+	bottomY: number,
+	cz: number,
+	width: number,
+	height: number
+)
+	local box = decor(
+		folder,
+		name,
+		cx - width / 2,
+		bottomY,
+		cz - 0.3,
+		cx + width / 2,
+		bottomY + height,
+		cz + 0.3,
+		Palette.Shadow
+	)
+	box.CastShadow = false
+	local label = Build.label(box, Enum.NormalId.Back, text, ink)
+	local gui = label.Parent :: SurfaceGui
+	gui.LightInfluence = 0
+	gui.Brightness = 1.4
+	for _, x in { cx - width / 2 + 0.5, cx + width / 2 - 0.5 } do
+		decor(
+			folder,
+			"SignWire",
+			x - 0.04,
+			bottomY + height,
+			cz - 0.04,
+			x + 0.04,
+			26,
+			cz + 0.04,
+			Palette.Metal
+		)
+	end
+end
+
+-- Everything that answers "where am I and where do I go": a hanging directory just inside the
+-- hall, arrows on it, guide lights along the runner, and a clock over the way back.
+local function wayfinding(folder: Folder)
+	-- At z = 16 the signs hang in the clear strip between the shelf rows (which end at z = 14)
+	-- and the south wall, right where the corridor door frames the view.
+	hangingSign(folder, "DirectorySign", "EXPEDITIONS  ^", Palette.Crt, 0, 11.4, 16, 11, 2.6)
+	hangingSign(folder, "DirectoryEast", "TAPE ROOM  >\nPERSONNEL  >", WARM, 12.5, 11.4, 16, 8, 2.6)
+	hangingSign(folder, "DirectoryWest", "<  RECORDS", WARM, -12.5, 11.4, 16, 8, 2.6)
+	-- Low green guide lights along both edges of the runner, airport-style: follow these and you
+	-- are at the terminal. They sit outside the runner so neither surface shares a plane.
+	for _, x in { -3.6, 3.2 } do
+		local z = 16
+		while z >= -28 do
+			local strip = decor(
+				folder,
+				"GuideLight",
+				x,
+				0,
+				z - 0.6,
+				x + 0.4,
+				0.12,
+				z + 0.6,
+				Palette.Crt,
+				Enum.Material.Neon
+			)
+			strip.CanQuery = false
+			z -= 8
+		end
+	end
+	-- A clock over the corridor door, hall side. 18:04 is the archive's hour: office hours on the
+	-- television end at 18:04, and the mission's foyer clock starts there too.
+	local clock = decor(folder, "HallClock", -2, 12, 19.35, 2, 13.8, 19.5, Palette.Shadow)
+	clock.CastShadow = false
+	local face = Build.label(clock, Enum.NormalId.Front, "18:04", Palette.Crt)
+	local clockGui = face.Parent :: SurfaceGui
+	clockGui.LightInfluence = 0
+	clockGui.Brightness = 1.2
+end
+
+-- A potted plant: the cheapest way a room says someone waters something here.
+local function plant(folder: Folder, x: number, z: number, tall: boolean?)
+	local pot = Build.box(folder, "PlantPot", x - 0.7, 0, z - 0.7, x + 0.7, 1.1, z + 0.7, PLANT_POT)
+	pot.Material = Enum.Material.SmoothPlastic
+	local height = if tall then 5.2 else 3.6
+	for index = 0, 2 do
+		local spread = 0.9 - index * 0.25
+		local leaf = Instance.new("Part")
+		leaf.Name = "PlantLeaf"
+		leaf.Shape = Enum.PartType.Ball
+		leaf.Anchored = true
+		leaf.CanCollide = false
+		leaf.CanQuery = false
+		leaf.CanTouch = false
+		leaf.Size = Vector3.new(2.4 * spread + 0.8, 1.8, 2.4 * spread + 0.8)
+		leaf.Position = Vector3.new(x, 1.1 + (height - 1.1) * (index + 1) / 3, z)
+		leaf.Color = PLANT_LEAF
+		leaf.Material = Enum.Material.Grass
+		leaf.Parent = folder
+	end
+end
+
+-- A warm pendant lamp: a cord from the ceiling, a shade, and a pool of light under it.
+local function pendant(folder: Folder, x: number, z: number, shadeY: number)
+	decor(
+		folder,
+		"PendantCord",
+		x - 0.05,
+		shadeY + 0.8,
+		z - 0.05,
+		x + 0.05,
+		26,
+		z + 0.05,
+		Palette.Metal
+	)
+	decor(
+		folder,
+		"PendantShade",
+		x - 0.8,
+		shadeY,
+		z - 0.8,
+		x + 0.8,
+		shadeY + 0.8,
+		z + 0.8,
+		Palette.Metal,
+		Enum.Material.Metal
+	)
+	local glow = decor(
+		folder,
+		"PendantGlow",
+		x - 0.5,
+		shadeY - 0.06,
+		z - 0.5,
+		x + 0.5,
+		shadeY,
+		z + 0.5,
+		Palette.Bulb,
+		Enum.Material.Neon
+	)
+	glow.CastShadow = false
+	local light = Instance.new("PointLight")
+	light.Color = Palette.Bulb
+	light.Brightness = 1.1
+	light.Range = 14
+	light.Parent = glow
+end
+
+-- A small wall lamp on the wainscot, so the long walls hold their own warmth.
+local function sconce(folder: Folder, x: number, z: number, facing: number)
+	local depth = 0.35 * facing
+	local body = decor(
+		folder,
+		"Sconce",
+		math.min(x, x + depth),
+		6.8,
+		z - 0.5,
+		math.max(x, x + depth),
+		7.8,
+		z + 0.5,
+		Palette.Bulb,
+		Enum.Material.Neon
+	)
+	body.CastShadow = false
+	local light = Instance.new("PointLight")
+	light.Color = Palette.Bulb
+	light.Brightness = 0.7
+	light.Range = 15
+	light.Parent = body
+end
+
+-- Somewhere to wait that looks like waiting was intended: a rug, two chairs at the television,
+-- a low table and a floor lamp. It sits between the west shelf row (which ends at x = -18) and
+-- the runner, so the way to the terminal stays open.
+local function waitingCorner(folder: Folder)
+	decor(
+		folder,
+		"WaitingRug",
+		-17,
+		0,
+		3.5,
+		-6,
+		0.1,
+		13,
+		Color3.fromRGB(96, 58, 42),
+		Enum.Material.Fabric
+	).CastShadow =
+		false
+	Build.chair(
+		folder,
+		"WaitChair1",
+		CFrame.lookAt(Vector3.new(-14.5, 0, 10.5), Vector3.new(-12.5, 0, 2.5))
+	)
+	Build.chair(
+		folder,
+		"WaitChair2",
+		CFrame.lookAt(Vector3.new(-8.5, 0, 10.5), Vector3.new(-11, 0, 2.5))
+	)
+	Build.box(
+		folder,
+		"WaitTable",
+		-12.3,
+		0,
+		9.6,
+		-10.7,
+		1.6,
+		11.2,
+		Palette.WoodDark,
+		Enum.Material.Wood
+	)
+	local mug = Instance.new("Part")
+	mug.Name = "WaitMug"
+	mug.Shape = Enum.PartType.Cylinder
+	mug.Anchored = true
+	mug.CanCollide = false
+	mug.CanQuery = false
+	mug.Size = Vector3.new(0.5, 0.4, 0.4)
+	mug.CFrame = CFrame.new(-11.4, 1.85, 10.4) * CFrame.Angles(0, 0, math.rad(90))
+	mug.Color = Palette.Paper
+	mug.Parent = folder
+	-- Floor lamp on the rug's corner
+	decor(folder, "LampPole", -16.3, 0, 4.4, -16.1, 6.4, 4.6, Palette.Metal, Enum.Material.Metal)
+	local shade = decor(
+		folder,
+		"LampShade",
+		-16.9,
+		6.4,
+		3.8,
+		-15.5,
+		7.6,
+		5.2,
+		Color3.fromRGB(214, 186, 140),
+		Enum.Material.Fabric
+	)
+	shade.CastShadow = false
+	local light = Instance.new("PointLight")
+	light.Color = Palette.Bulb
+	light.Brightness = 1.2
+	light.Range = 16
+	light.Parent = shade
+end
+
+-- The corridor between the workstation and the hall: wainscot, two sconces and a notice, so the
+-- first walk of the game is down a kept hallway rather than a grey chute.
+local function corridorDressing(folder: Folder)
+	decor(folder, "Wainscot", -3.5, 0, 21, -3.35, 4.5, 39, Palette.Wood, Enum.Material.Wood)
+	decor(folder, "Wainscot", 3.35, 0, 21, 3.5, 4.5, 39, Palette.Wood, Enum.Material.Wood)
+	sconce(folder, -3.35, 26, 1)
+	sconce(folder, 3.35, 34, -1)
+	local poster = decor(folder, "CorridorNotice", 3.45, 3.4, 28, 3.5, 7, 32, Palette.Paper)
+	poster.CastShadow = false
+	Build.label(poster, Enum.NormalId.Left, "ARCHIVE 03\nREGISTRY HALL\nAHEAD", Palette.Ink)
 end
 
 -- A lit box sign over the terminal, readable from the corridor door sixty studs away.
@@ -304,6 +565,23 @@ function HubDressing.start()
 	lockerRoom(folder)
 	hallDetails(folder)
 	archiveClutter(folder)
+	wayfinding(folder)
+	waitingCorner(folder)
+	corridorDressing(folder)
+	-- Hall sconces on the wainscot (west face points east, east face points west).
+	for _, z in { -30, -20, 8 } do
+		sconce(folder, -39.2, z, 1)
+	end
+	for _, z in { -34, -16 } do
+		sconce(folder, 39.2, z, -1)
+	end
+	-- Pendants over the reception counter.
+	pendant(folder, 8, -1, 8.5)
+	pendant(folder, 14, -1, 8.5)
+	-- Plants: by the coffee machine, at the hall entrance, and a tall one by the terminal.
+	plant(folder, 18.5, 3.5)
+	plant(folder, -6, 17.5)
+	plant(folder, 7, -35, true)
 	local map2 = map
 	local desk = map2:FindFirstChild("Desk") :: BasePart?
 	if desk then

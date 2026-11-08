@@ -1,6 +1,6 @@
 # PROGRESS: HEADCOUNT
 
-Stan na 2026-11-08. Plik służy do wznowienia pracy w nowej sesji. Szczegółowe wyniki testów są w `docs/05_STATUS.md`, a lista assetów w `docs/06_ASSETS.md`.
+Stan na 2026-11-08 wieczorem. Plik służy do wznowienia pracy w nowej sesji. Szczegółowe wyniki testów są w `docs/05_STATUS.md`, a lista assetów w `docs/06_ASSETS.md`.
 
 ## Aktualny stan projektu
 
@@ -13,6 +13,8 @@ Kooperacyjny horror psychologiczny na Roblox w fazie Vertical Slice (Misja 001).
 - **Grywalność:** gry nie przeszedł jeszcze żaden człowiek.
 
 ## Wykonane 2026-11-08
+
+- Lobby: własny, cieplejszy preset światła, siatka paneli w hali, kinkiety, lampy nad recepcją, podświetlone tablice kierunkowe przy wejściu, światełka prowadzące do terminala, zegar 18:04, boazeria i kinkiety w korytarzu, kącik z krzesłami przed TV, rośliny. Nic z tego nie było obejrzane w Studio (`docs/05_STATUS.md`, jedenasty przebieg).
 
 - Powrót po rozłączeniu do już zamkniętej ekspedycji odsyła gracza do huba zamiast tworzyć pusty przebieg.
 - Okienko kasy w foyer nie jest już czarnym prostokątem, kotary przy ekranie są jaśniejsze.

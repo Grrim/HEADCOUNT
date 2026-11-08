@@ -76,6 +76,9 @@ local function structure(map: Folder)
 	Build.wallX(map, "SecretSouth", 10, -60, -40, 0, 9, {})
 end
 
+-- The hall's house light: warm white, so the archive reads as staffed rather than abandoned.
+local WARM = Color3.fromRGB(252, 234, 202)
+
 local function lights(map: Folder)
 	local lamp =
 		Build.box(map, "DeskLamp", -0.4, 3.6, 44.2, 0.4, 4, 45, Palette.Bulb, Enum.Material.Neon)
@@ -87,11 +90,14 @@ local function lights(map: Folder)
 	glow.Range = 24
 	glow.Shadows = true
 	glow.Parent = lamp
-	Build.panel(map, 0, 9.9, 54, 3, 2, 0.9, 16)
-	Build.panel(map, 0, 8.9, 30, 3, 2, 1.8, 22)
-	-- The hall sits in half-light; the one warm pool is on the terminal, where every visit ends.
-	for _, z in { -28, -6, 12 } do
-		Build.panel(map, 0, 25.9, z, 16, 3, 1.6, 52)
+	Build.panel(map, 0, 9.9, 54, 3, 2, 1.4, 18, WARM)
+	Build.panel(map, 0, 8.9, 30, 3, 2, 1.8, 22, WARM)
+	-- A full grid over the hall. The aisles between the shelves get their own light, so no route
+	-- the player can take is a walk into the dark; the terminal spot still wins on warmth.
+	for _, x in { -26, 0, 26 } do
+		for _, z in { -28, -6, 12 } do
+			Build.panel(map, x, 25.9, z, 14, 3, 1.5, 48, WARM)
+		end
 	end
 	local beam = Instance.new("Part")
 	beam.Name = "TerminalSpot"
@@ -139,7 +145,7 @@ local function lights(map: Folder)
 	dust.LightEmission = 0.4
 	dust.RotSpeed = NumberRange.new(-20, 20)
 	dust.Parent = air
-	Build.panel(map, 50, 10.9, -6, 6, 3, 2.2, 26)
+	Build.panel(map, 50, 10.9, -6, 6, 3, 2.2, 26, WARM)
 	Build.panel(map, -50, 8.9, -2, 3, 2, 1.6, 20, Palette.Bulb, true)
 end
 
@@ -278,7 +284,7 @@ local function dressing(map: Folder)
 end
 
 function HubWorld.init()
-	LightingApply.apply()
+	LightingApply.apply("Hub")
 	local base = Workspace:FindFirstChild("Baseplate")
 	if base then
 		base:Destroy()
