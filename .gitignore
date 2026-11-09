@@ -4,3 +4,5 @@ build/
 *.rbxlx.lock
 sourcemap.json
 work/
+# Local tool wiring with machine-specific paths (Roblox Studio MCP)
+.mcp.json
