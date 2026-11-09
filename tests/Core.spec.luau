@@ -1,5 +1,6 @@
 --!strict
 local Achievements = require("../src/shared/Core/Achievements")
+local Conditions = require("../src/shared/Core/Conditions")
 local Flow = require("../src/shared/Core/Flow")
 local Framing = require("../src/shared/Core/Framing")
 local Graph = require("../src/shared/Core/Graph")
@@ -43,6 +44,27 @@ local function farPlayer(id: number): Registrar.PlayerInput
 end
 
 return {
+	["the first night is standard and later nights draw a repeatable condition"] = function()
+		for seed = 1, 50 do
+			assert(Conditions.forRun(seed, 0).id == "standard", "first visit must be standard")
+		end
+		local seen: { [string]: boolean } = {}
+		for seed = 1, 200 do
+			local a = Conditions.forRun(seed, 2)
+			assert(a.id == Conditions.forRun(seed, 2).id, "same seed, same night")
+			assert(a.id ~= "standard", "a later visit always changes something")
+			assert(Conditions.byId(a.id).id == a.id, "clients must resolve the id")
+			assert(a.tapeSeconds >= 6 and a.tapeSeconds <= 12, "tape length out of range")
+			assert(a.jumpScale > 0.5 and a.lightScale > 0.3 and a.watcherScale >= 1)
+			seen[a.id] = true
+		end
+		for _, condition in Conditions.all() do
+			assert(seen[condition.id], `{condition.id} is never drawn`)
+		end
+		assert(Conditions.byId("nonsense").id == "standard")
+		assert(Conditions.byId(nil).id == "standard")
+	end,
+
 	["guide walks a solo player through the hall in order"] = function()
 		local f: Guide.Facts = {
 			phase = "Protocol",

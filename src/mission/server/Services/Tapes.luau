@@ -117,7 +117,7 @@ local function onRecordStop(player: Player, rawTrack: unknown)
 		return
 	end
 	recordings[player] = nil
-	if os.clock() - recording.startedAt > CFG.MaxSeconds + 3 then
+	if os.clock() - recording.startedAt > services.Session.condition.tapeSeconds + 3 then
 		return
 	end
 	local start = recording.startPos

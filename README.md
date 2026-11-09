@@ -27,6 +27,7 @@ Ostatnio:
 - Więcej strachu: widownia w wizjerze obraca się w stronę kamery, bliskość Kadrowego słychać i widać, nowe anomalie, kinowe plansze rozdziałów.
 - Piwnica rozbudowana o ciemny magazyn z regałami. Bezpiecznik jest na końcu długiej alejki.
 - Anomalie można rejestrować, trzymając je w kadrze. Przy czacie głosowym głośna mowa w ciszy ściąga Kadrowego.
+- Od drugiej wizyty każda noc losuje warunek (krótka taśma, niespokojny Kadrowy, słabe żarówki, uważna sala), więc misja nie jest za każdym razem taka sama.
 - Cała misja i droga do terminala przeszły pieszo w Studio, bez teleportów.
 - Dokumenty w misji da się zamknąć, a wskazówka z magnetofonu nie nachodzi na napisy radia.
 - Usunięte migotanie grafiki przy drzwiach (nakładające się powierzchnie) w lobby i misji.

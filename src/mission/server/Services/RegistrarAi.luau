@@ -43,6 +43,7 @@ end
 local function currentScale(): number
 	local take = services.Session.take
 	return take.jumpScale
+		* services.Session.condition.jumpScale
 		* Take.partyScale(services.Session.playerCount)
 		* (if climax then CFG.ClimaxScale else 1)
 end

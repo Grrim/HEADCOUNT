@@ -409,3 +409,22 @@ Do sprawdzenia:
 - czat głosowy działa tylko w opublikowanej grze, przy włączonym głosie w ustawieniach doświadczenia i u graczy z weryfikacją wieku. Próg 0,12 RMS jest strzałem i trzeba go dostroić na prawdziwym mikrofonie,
 - czy czas 0,8 s i stożek 15° przy rejestrowaniu nie są za trudne dla postaci w korytarzu, która znika po ok. 1,1 s patrzenia,
 - kwestionariusz Maturity & Compliance: gra analizuje głośność mikrofonu (nie treść); warto to opisać w opisie gry.
+
+## Piętnasty przebieg: warunki nocy
+
+Stan na 2026-11-09. Zmiany tylko w kodzie, **bez uruchomienia w Studio**. Bramki zielone: rojo (oba miejsca), lune (52 testy), selene, stylua.
+
+Za przykładem proceduralnych horrorów (DOORS) każda wizyta od drugiej losuje jeden warunek nocy z ziarna ekspedycji (`Core/Conditions`, osobny strumień, więc zagadka się nie zmienia). Pierwsza wizyta jest zawsze standardowa, bo służy do nauki zasad.
+
+| Warunek | Działanie |
+|---|---|
+| Short tape | nagranie kończy się po 8 s zamiast 12 (klient zatrzymuje kamerę, serwer odrzuca dłuższe) |
+| Restless | Kadrowy czeka między skokami 0,82 raza krócej |
+| Weak bulbs | wszystkie światła poza lampami awaryjnymi świecą na 55% od początku, więc to ten poziom wraca po naprawie bezpiecznika |
+| Attentive hall | dwa razy więcej postaci obraca się do obiektywu |
+
+Warunek ogłasza radio ok. 17 s po starcie (po odprawie i sprawdzeniu sprzętu). Notatnik pokazuje „Tonight: …” z opisem, a raport końcowy podaje nazwę obok numeru dubla. W Studio warunek wymusza atrybut `DevCondition` na `Workspace` (np. `short_tape`), a `DevCompletions` ≥ 1 włącza losowanie.
+
+Pliki: `Core/Conditions.luau` (z testem), `Session.luau`, `RegistrarAi.luau`, `Tapes.luau`, `MissionWorld.dimLights`, `Viewfinder.luau`, `Audience.luau`, `Notebook.luau`, `EndTape.luau`, `Strings`.
+
+Do sprawdzenia: czy 8 s wystarcza na złapanie celu z jednego przejazdu, czy „Weak bulbs” nie robi sali nieczytelnej (jest jeszcze suwak jasności), czy radio o warunku nie nachodzi na pierwsze wskazówki.

@@ -135,6 +135,13 @@ end
 local function render(api: Journal.Api)
 	api.heading(Strings.get("hud_objective"))
 	api.line(if state then Strings.get(state.objective) else Strings.get("obj_waiting"))
+	if state and state.condition and state.condition ~= "standard" then
+		api.line(
+			Strings.get("notes_tonight", Strings.get(`condname_{state.condition}`)),
+			Palette.Rec
+		)
+		api.line(Strings.get(`conddesc_{state.condition}`), Palette.WallDark)
+	end
 	if currentText ~= "" then
 		api.heading(Strings.get("hud_next"))
 		api.line(currentText, Palette.Crt)

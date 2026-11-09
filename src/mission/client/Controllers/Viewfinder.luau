@@ -6,6 +6,7 @@ local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
 local AudioDirector = require(ReplicatedStorage.ClientCommon.AudioDirector)
+local Conditions = require(ReplicatedStorage.Shared.Core.Conditions)
 local Config = require(ReplicatedStorage.Shared.Config.Game)
 local Input = require(ReplicatedStorage.ClientCommon.Input)
 local LensView = require(ReplicatedStorage.ClientCommon.LensView)
@@ -23,6 +24,8 @@ local lastSample = 0
 local tapesLeft = CFG.PerPlayer
 local latestTapeId: number? = nil
 local stopRemote: RemoteEvent
+-- Tonight's length of one recording; a short-tape night cuts it down.
+local maxSeconds = CFG.MaxSeconds
 
 local function stopRecording()
 	if not recording then
@@ -120,6 +123,9 @@ function Viewfinder.start()
 		end
 	end)
 
+	Net.get("SessionState").OnClientEvent:Connect(function(state)
+		maxSeconds = Conditions.byId(state.condition).tapeSeconds
+	end)
 	Net.get("TapeList").OnClientEvent:Connect(function(list)
 		tapesLeft = list.left
 		latestTapeId = list.latestId
@@ -133,7 +139,7 @@ function Viewfinder.start()
 		end
 		local now = os.clock()
 		local elapsed = now - recordStart
-		if elapsed >= CFG.MaxSeconds then
+		if elapsed >= maxSeconds then
 			stopRecording()
 			return
 		end

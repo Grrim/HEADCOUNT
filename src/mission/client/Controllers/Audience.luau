@@ -6,6 +6,7 @@ local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
 local AudioDirector = require(ReplicatedStorage.ClientCommon.AudioDirector)
+local Conditions = require(ReplicatedStorage.Shared.Core.Conditions)
 local LensView = require(ReplicatedStorage.ClientCommon.LensView)
 local Layout = require(ReplicatedStorage.Shared.Core.Layout)
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -320,7 +321,8 @@ function Audience.init()
 		if state.doorSide then
 			buildHiddenDoor(state.doorSide)
 		end
-		watchLimit = WATCHERS_BY_PHASE[state.phase] or 0
+		local scale = Conditions.byId(state.condition).watcherScale
+		watchLimit = math.floor((WATCHERS_BY_PHASE[state.phase] or 0) * scale)
 		Audience.climax = state.phase == "Climax" or state.phase == "Done"
 		if state.phase == "Climax" then
 			startRising(function(row)

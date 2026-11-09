@@ -98,8 +98,12 @@ local function report(result: any)
 	for _, id in result.earned or {} do
 		table.insert(earnedNames, Strings.get(`ach_{id}`))
 	end
+	-- A changed night is named next to the take, so a blank line never opens the report.
+	local conditionNote = if result.condition and result.condition ~= "standard"
+		then "   " .. Strings.get("report_condition", Strings.get(`condname_{result.condition}`))
+		else ""
 	local lines = {
-		Strings.get("report_take", result.take),
+		Strings.get("report_take", result.take) .. conditionNote,
 		Strings.get("report_time", formatTime(result.duration)),
 		Strings.get("report_replays", result.replays),
 		Strings.get("report_cuts", result.cuts),

@@ -9,6 +9,7 @@ local TeleportService = game:GetService("TeleportService")
 local Workspace = game:GetService("Workspace")
 
 local Achievements = require(ReplicatedStorage.Shared.Core.Achievements)
+local Conditions = require(ReplicatedStorage.Shared.Core.Conditions)
 local Config = require(ReplicatedStorage.Shared.Config.Game)
 local Flow = require(ReplicatedStorage.Shared.Core.Flow)
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -24,6 +25,7 @@ Session.flow = Flow.new()
 Session.seed = 0
 Session.puzzle = nil :: Puzzle.Puzzle?
 Session.take = Take.forCompletions(0)
+Session.condition = Conditions.STANDARD
 Session.tags = {} :: { number }
 Session.startedAt = 0
 Session.totalReplays = 0
@@ -59,6 +61,7 @@ local function publicState(): { [string]: any }
 		liveLensHidesAudience = Session.take.liveLensHidesAudience,
 		omenSeed = Session.omenSeed,
 		doorSide = if doorRevealed and Session.puzzle then Session.puzzle.doorSide else nil,
+		condition = Session.condition.id,
 	}
 end
 
@@ -196,15 +199,30 @@ local function begin()
 	end
 	Session.playerCount = math.max(1, #livePlayers())
 	Session.take = Take.forCompletions(completions)
+	Session.condition = Conditions.forRun(Session.seed, completions)
+	-- Studio only: try a specific night without playing the mission several times.
+	local devCondition = Workspace:GetAttribute("DevCondition")
+	if RunService:IsStudio() and typeof(devCondition) == "string" then
+		Session.condition = Conditions.byId(devCondition)
+	end
+	if Session.condition.lightScale < 1 then
+		services.MissionWorld.dimLights(Session.condition.lightScale)
+	end
 	services.MissionWorld.applyTake(Session.take.reverseEveryNthRow)
 	Session.startedAt = os.clock()
 	Flow.begin(Session.flow)
 	Session.broadcast()
 	services.RegistrarAi.onSessionBegin()
 	Session.notify(Session.take.briefKey)
+	if Session.condition.id ~= "standard" then
+		-- After the brief and the equipment check, so it is not talked over.
+		task.delay(17, Session.notify, `cond_{Session.condition.id}`)
+	end
 	task.delay(10, Session.notify, "radio_check")
 	task.spawn(radioPacing)
-	print(`[Session] begin seed={Session.seed} take={Session.take.number}`)
+	print(
+		`[Session] begin seed={Session.seed} take={Session.take.number} condition={Session.condition.id}`
+	)
 	if RunService:IsStudio() and Session.puzzle then
 		-- Lets a developer verify the puzzle without watching tapes. Never runs in a live server.
 		for _, target in Session.puzzle.targets do
@@ -324,6 +342,7 @@ function Session.finish(success: boolean)
 			docs = docCount,
 			take = Session.take.number,
 			names = names,
+			condition = Session.condition.id,
 			earned = earned,
 			-- The tape is dated one week from now, which is the hook into the next mission.
 			futureDate = os.date("%d.%m.%Y", os.time() + 7 * 86400),

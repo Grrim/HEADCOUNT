@@ -588,6 +588,17 @@ function MissionWorld.showFilm(doorSide: number)
 	end
 end
 
+-- A night of weak bulbs: every light in the building, but not the emergency lamps, burns lower.
+-- Called once at the start, before the mains ever go, so the dimmed level is what they restore.
+function MissionWorld.dimLights(scale: number)
+	local map = MissionWorld.map :: Folder
+	for _, item in map:GetDescendants() do
+		if item:IsA("Light") and not table.find(emergencyLights, item) then
+			item.Brightness *= scale
+		end
+	end
+end
+
 -- When the mains go, everything on them goes, and only the red emergency lamps are left.
 function MissionWorld.setMains(on: boolean)
 	local map = MissionWorld.map :: Folder
