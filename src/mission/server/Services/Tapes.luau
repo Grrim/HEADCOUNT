@@ -4,10 +4,13 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local Workspace = game:GetService("Workspace")
 
+local Build = require(ReplicatedStorage.Shared.World.Build)
 local Config = require(ReplicatedStorage.Shared.Config.Game)
 local Layout = require(ReplicatedStorage.Shared.Core.Layout)
 local Net = require(ReplicatedStorage.Shared.Net)
+local Palette = require(ReplicatedStorage.Shared.Config.Palette)
 local PlayerData = require(ServerScriptService.Common.PlayerData)
 local RateLimit = require(ReplicatedStorage.Shared.Core.RateLimit)
 local Seats = require(ReplicatedStorage.Shared.Core.Seats)
@@ -42,6 +45,8 @@ local playing: { [Player]: number } = {} -- clock time the viewing ends at the l
 local archiveViewings = 0
 local recordLimit = RateLimit.new(Config.Rates.Record[1], Config.Rates.Record[2])
 local playLimit = RateLimit.new(Config.Rates.Play[1], Config.Rates.Play[2])
+local boxLimit = RateLimit.new(0.5, 2)
+local tapeBox: BasePart? = nil
 local listRemote: RemoteEvent
 local playRemote: RemoteEvent
 
@@ -150,6 +155,66 @@ local function onRecordStop(player: Player, rawTrack: unknown)
 	table.insert(list, clip)
 	services.Session.notifyOne(player, "tape_saved", clip.id)
 	Tapes.sendList(player)
+	-- The last tape is spent: say where more is before the player finds out the hard way.
+	if shot[player] >= CFG.PerPlayer and services.Session.flow.phase == "Protocol" then
+		task.delay(4, services.Session.notifyOne, player, "radio_tape_box")
+	end
+end
+
+-- Blank cassettes under the ticket window. A spent camera would otherwise end the attendance
+-- check for good; the walk back to the foyer is the price instead.
+local function onTapeBox(player: Player)
+	if not boxLimit:allow(player, os.clock()) or player:GetAttribute("OffFrame") == true then
+		return
+	end
+	local root = rootOf(player)
+	local box = tapeBox
+	if not root or not box or (root.Position - box.Position).Magnitude > 16 then
+		return
+	end
+	local session = services.Session
+	if session.flow.phase == "Waiting" or session.isClimaxOrLater() then
+		return
+	end
+	if (shot[player] or 0) < CFG.PerPlayer then
+		session.notifyOne(player, "tape_still_left")
+		return
+	end
+	shot[player] = CFG.PerPlayer - 1
+	session.notifyOne(player, "tape_refilled")
+	Tapes.sendList(player)
+end
+
+local function buildTapeBox()
+	local folder = Instance.new("Folder")
+	folder.Name = "TapeBox"
+	-- On the ticket counter, beside the attendance list and well clear of it.
+	local box =
+		Build.box(folder, "CassetteBox", 21, 3.4, 47.6, 23.8, 4.2, 48.6, Color3.fromRGB(52, 40, 30))
+	box.Material = Enum.Material.Cardboard
+	-- Cassette spines along the top: a row of small light slabs, so the box reads as tapes.
+	for index = 0, 4 do
+		local x = 21.35 + index * 0.5
+		Build.box(
+			folder,
+			"Cassette",
+			x,
+			4.2,
+			47.75,
+			x + 0.38,
+			4.55,
+			48.45,
+			Palette.Paper,
+			Enum.Material.SmoothPlastic
+		).CanCollide =
+			false
+	end
+	Build.label(box, Enum.NormalId.Back, "BLANK TAPES", Palette.Paper)
+	local prompt =
+		Build.prompt(box, "act_take_tape", "obj_tape_box", nil, Config.Puzzle.PromptDistance)
+	prompt.Triggered:Connect(onTapeBox)
+	folder.Parent = Workspace
+	tapeBox = box
 end
 
 local function onPlay(player: Player, tapeId: unknown)
@@ -248,10 +313,12 @@ function Tapes.init(all: { [string]: any })
 		playing[player] = nil
 		recordLimit:forget(player)
 		playLimit:forget(player)
+		boxLimit:forget(player)
 	end)
 end
 
 function Tapes.start()
+	buildTapeBox()
 	-- Teammates' positions while someone is shooting: they appear as ghosts on the tape.
 	local interval = 1 / CFG.GhostHz
 	while true do

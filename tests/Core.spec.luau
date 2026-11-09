@@ -3,6 +3,7 @@ local Achievements = require("../src/shared/Core/Achievements")
 local Flow = require("../src/shared/Core/Flow")
 local Framing = require("../src/shared/Core/Framing")
 local Graph = require("../src/shared/Core/Graph")
+local Guide = require("../src/shared/Core/Guide")
 local Layout = require("../src/shared/Core/Layout")
 local Omens = require("../src/shared/Core/Omens")
 local Party = require("../src/shared/Core/Party")
@@ -42,6 +43,91 @@ local function farPlayer(id: number): Registrar.PlayerInput
 end
 
 return {
+	["guide walks a solo player through the hall in order"] = function()
+		local f: Guide.Facts = {
+			phase = "Protocol",
+			pendingTags = {},
+			pendingRows = {},
+			reels = 0,
+			tapesSaved = 0,
+			latestWatched = false,
+			tapesLeft = 3,
+			code = {},
+			codeLength = 3,
+			dealt = 0,
+		}
+		local function key(): string
+			return (Guide.step(f) :: Guide.Step).key
+		end
+		assert(key() == "step_film", "no tape yet: film")
+		f.tapesSaved, f.tapesLeft = 1, 2
+		assert(key() == "step_play", "unwatched tape: play it")
+		f.latestWatched = true
+		assert(key() == "step_film_more", "watched, nobody turned: film more")
+		f.pendingRows = { "D" }
+		assert(key() == "step_seat", "someone turned: go to the row")
+		f.pendingRows, f.pendingTags = {}, { 17 }
+		local coat = Guide.step(f) :: Guide.Step
+		assert(coat.key == "step_coat" and coat.args[1] == "17", "a tag points at its coat")
+		f.pendingTags, f.reels = {}, 1
+		assert(key() == "step_more_reels", "one reel: keep filming")
+		f.tapesLeft = 0
+		assert(key() == "step_no_tape", "out of tape: fetch a cassette")
+		f.pendingRows = { "K" }
+		assert(key() == "step_seat", "a lead beats the empty camera")
+	end,
+
+	["guide reads the code as far as this player has seen it"] = function()
+		local f: Guide.Facts = {
+			phase = "Power",
+			pendingTags = {},
+			pendingRows = {},
+			reels = 3,
+			tapesSaved = 1,
+			latestWatched = true,
+			tapesLeft = 2,
+			code = {},
+			codeLength = 3,
+			dealt = 3,
+		}
+		assert((Guide.step(f) :: Guide.Step).key == "step_code_find")
+		f.code = { [1] = 4, [3] = 7 }
+		assert((Guide.step(f) :: Guide.Step).key == "step_code_find", "one card still unread")
+		f.code[2] = 0
+		local enter = Guide.step(f) :: Guide.Step
+		assert(enter.key == "step_code_enter" and enter.args[1] == "4 0 7", enter.args[1])
+		f.dealt, f.code = 1, { [2] = 5 }
+		local share = Guide.step(f) :: Guide.Step
+		assert(share.key == "step_code_share" and share.args[1] == "_ 5 _", share.args[1])
+	end,
+
+	["guide covers the late phases and names the door's side"] = function()
+		local f: Guide.Facts = {
+			phase = "Projector",
+			pendingTags = {},
+			pendingRows = {},
+			reels = 3,
+			tapesSaved = 1,
+			latestWatched = true,
+			tapesLeft = 2,
+			code = {},
+			codeLength = 3,
+			dealt = 3,
+		}
+		assert((Guide.step(f) :: Guide.Step).key == "step_order_find")
+		f.order = "C - A - B"
+		assert((Guide.step(f) :: Guide.Step).args[1] == "C - A - B")
+		f.phase, f.doorSide = "Door", 1
+		assert((Guide.step(f) :: Guide.Step).args[1] == "side_right")
+		f.doorSide = -1
+		assert((Guide.step(f) :: Guide.Step).args[1] == "side_left")
+		f.phase = "Climax"
+		local bell = Guide.step(f) :: Guide.Step
+		assert(bell.key == "step_bell" and bell.nudgeAfter < Guide.NUDGE_AFTER)
+		f.phase = "Done"
+		assert(Guide.step(f) == nil and Guide.id(nil) == "")
+	end,
+
 	["seed gives the same sequence, different seeds differ"] = function()
 		local a, b, c = Rng.new(7), Rng.new(7), Rng.new(8)
 		local first = a:next()

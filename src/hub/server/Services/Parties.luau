@@ -155,6 +155,31 @@ local ACTIONS: { [string]: (Player, any) -> () } = {
 		end
 		task.spawn(runCountdown, Party.of(registry, player.UserId) :: Party.Party)
 	end,
+	-- One press for a player on their own: a party of one, ready, and the countdown running.
+	solo = function(player, missionId)
+		if typeof(missionId) ~= "string" or Party.of(registry, player.UserId) then
+			fail(player, "already_in_party")
+			return
+		end
+		local mission = missionById(missionId)
+		local data = PlayerData.get(player)
+		if not mission or not mission.available or not (data and data.missions[missionId]) then
+			fail(player, "mission_locked")
+			return
+		end
+		local party, reason = Party.create(registry, player.UserId, missionId)
+		if not party then
+			fail(player, reason)
+			return
+		end
+		Party.setReady(registry, player.UserId, true)
+		local ok, startReason = Party.canStart(registry, player.UserId)
+		if not ok then
+			fail(player, startReason)
+			return
+		end
+		task.spawn(runCountdown, party)
+	end,
 	-- Coming back to an expedition still running after a disconnect.
 	rejoinYes = function(player)
 		services.Teleports.rejoin(player)

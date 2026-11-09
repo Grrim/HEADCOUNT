@@ -96,8 +96,13 @@ function Hints.start()
 			advance(3)
 		end
 	end)
-	Net.get("TapePlay").OnClientEvent:Connect(function()
-		advance(4)
+	Net.get("TapePlay").OnClientEvent:Connect(function(clip)
+		-- Only a tape that caught someone has a seat to send the player to. An empty one says so
+		-- when it ends (the notebook), and the hint line steps aside.
+		if step < 4 then
+			step = 4
+			show(if clip.id > 0 and #clip.seats > 0 then Strings.get("hint_seats") else "")
+		end
 	end)
 end
 

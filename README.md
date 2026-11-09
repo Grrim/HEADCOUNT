@@ -21,6 +21,9 @@ Stan na 2026-11-07. Faza Vertical Slice: jedna misja i lobby, z tymczasową graf
 
 Ostatnio:
 
+- Notatnik terenowy (J): zapisuje wskazówki, pozwala ponownie przeczytać dokumenty, pokazuje sterowanie i ma suwak jasności. Karta celu ma linię „NEXT” z konkretnym następnym krokiem, a radio podpowiada, gdy gracz długo stoi w miejscu.
+- Pudełko czystych kaset na ladzie kasy w foyer: gracz, któremu skończyła się taśma, nie utknie już na stałe.
+- Terminal ma przycisk PLAY SOLO, który startuje misję jednym kliknięciem.
 - Cała misja i droga do terminala przeszły pieszo w Studio, bez teleportów.
 - Dokumenty w misji da się zamknąć, a wskazówka z magnetofonu nie nachodzi na napisy radia.
 - Usunięte migotanie grafiki przy drzwiach (nakładające się powierzchnie) w lobby i misji.
@@ -74,8 +77,9 @@ Wynik trafia do `build/Hub.rbxl` i `build/Mission.rbxl`. Otwórz je w Studio i u
 | Latarka | F | D-pad góra |
 | Komunikaty radiowe | 1–4 | D-pad lewo/prawo/dół, B |
 | Pukanie (poza kadrem) | K | X |
+| Notatnik: wskazówki, dokumenty, sterowanie, jasność | J | L1 |
 
-Na urządzeniach dotykowych te same akcje są pod przyciskami ekranowymi.
+Na urządzeniach dotykowych te same akcje są pod przyciskami ekranowymi, a notatnik otwiera przycisk NOTES w prawym górnym rogu. W lobby J otwiera pomoc z opisem pomieszczeń.
 
 W Studio serwer misji wypisuje w Output rozwiązanie zagadki. Na żywym serwerze ten kod się nie wykonuje.
 

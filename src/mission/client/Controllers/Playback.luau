@@ -29,6 +29,8 @@ local grade: ColorCorrectionEffect
 local connection: RBXScriptConnection? = nil
 local ghostFolder: Folder? = nil
 local isActive = false
+local currentClip: any = nil
+local stopListeners: { (clip: any) -> () } = {}
 
 local function setControls(enabled: boolean)
 	local player = Players.LocalPlayer
@@ -142,6 +144,11 @@ function Playback.active(): boolean
 	return isActive
 end
 
+-- Called with the clip that just ended, whether it ran out or was stopped.
+function Playback.onStopped(listener: (clip: any) -> ())
+	table.insert(stopListeners, listener)
+end
+
 function Playback.stop()
 	if not isActive then
 		return
@@ -169,6 +176,11 @@ function Playback.stop()
 	LensView.setLocked(false)
 	setControls(true)
 	Net.get("PlayEnded"):FireServer()
+	local clip = currentClip
+	currentClip = nil
+	for _, listener in stopListeners do
+		task.spawn(listener, clip)
+	end
 end
 
 local function start(clip: any)
@@ -176,6 +188,7 @@ local function start(clip: any)
 		return
 	end
 	isActive = true
+	currentClip = clip
 	LensView.setLocked(true)
 	setControls(false)
 	local camera = Workspace.CurrentCamera

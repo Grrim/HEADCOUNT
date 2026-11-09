@@ -176,19 +176,33 @@ local function renderLobby()
 	for _, mission in Missions do
 		local line = row(y, 62)
 		Ui.text({
-			Size = UDim2.new(0.62, 0, 1, 0),
+			Size = UDim2.new(if mission.available then 0.46 else 1, 0, 1, 0),
 			Text = `{Strings.get(mission.titleKey)}\n{Strings.get(mission.summaryKey)}`,
 			TextSize = 15,
 			TextColor3 = if mission.available then Palette.Paper else Palette.WallDark,
 		}, line)
 		if mission.available then
+			-- Alone, one press is enough. With friends, an expedition they can join.
 			Ui.primary(
-				Strings.get("hub_create"),
+				Strings.get("hub_solo"),
 				{
 					AnchorPoint = Vector2.new(1, 0),
 					Position = UDim2.fromScale(1, 0),
-					Size = UDim2.new(0.36, 0, 0, 52),
+					Size = UDim2.new(0.26, 0, 0, 52),
 					TextSize = 14,
+				},
+				line,
+				function()
+					send("solo", mission.id)
+				end
+			)
+			Ui.button(
+				Strings.get("hub_create"),
+				{
+					AnchorPoint = Vector2.new(1, 0),
+					Position = UDim2.new(0.74, -6, 0, 0),
+					Size = UDim2.new(0.26, 0, 0, 52),
+					TextSize = 13,
 				},
 				line,
 				function()

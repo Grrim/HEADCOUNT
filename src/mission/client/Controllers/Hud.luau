@@ -23,6 +23,7 @@ local gui: ScreenGui
 local objectiveCard: Frame
 local objectiveLabel: TextLabel
 local detailLabel: TextLabel
+local stepLabel: TextLabel
 local subtitleLabel: TextLabel
 local docPanel: Frame
 local docTitle: TextLabel
@@ -170,6 +171,16 @@ local function buildGui()
 		TextColor3 = Palette.Crt,
 		Text = "",
 	}, body)
+	-- The concrete next move, worked out by the notebook from what this player knows.
+	stepLabel = Ui.text({
+		LayoutOrder = 4,
+		Size = UDim2.new(1, 0, 0, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
+		TextSize = 15,
+		TextColor3 = Palette.Crt,
+		Text = "",
+		Visible = false,
+	}, body)
 	subtitleLabel = Ui.caption({
 		AnchorPoint = Vector2.new(0.5, 1),
 		Position = UDim2.fromScale(0.5, 0.86),
@@ -241,6 +252,46 @@ local function buildGui()
 	end
 end
 
+local function flare()
+	objectiveCard.BackgroundTransparency = 0
+	TweenService:Create(
+		objectiveCard,
+		TweenInfo.new(1.2, Enum.EasingStyle.Quad),
+		{ BackgroundTransparency = 0.35 }
+	):Play()
+end
+
+function Hud.setStep(text: string)
+	if text == "" then
+		stepLabel.Text = ""
+		stepLabel.Visible = false
+		return
+	end
+	local line = `> {text}`
+	if line ~= stepLabel.Text then
+		stepLabel.Text = line
+		stepLabel.Visible = true
+		flare()
+	end
+end
+
+-- Reopened from the notebook: the same page the player first read.
+function Hud.showDoc(docId: string)
+	showPanel(Strings.get(`{docId}_title`), Strings.get(`{docId}_body`))
+end
+
+local function registerLines(names: { string }): string
+	local lines = { "...", "190. Kowal, J.", "191. Nowina, A.", "192. Sadek, R." }
+	for index, name in names do
+		table.insert(lines, `{192 + index}. {name}`)
+	end
+	return table.concat(lines, "\n")
+end
+
+function Hud.showRegister(names: { string })
+	showPanel(Strings.get("register_title"), registerLines(names))
+end
+
 -- Tapes and the ending own the whole picture.
 function Hud.setCinema(on: boolean)
 	cinema = on
@@ -265,12 +316,7 @@ function Hud.start()
 		if objective ~= objectiveLabel.Text then
 			objectiveLabel.Text = objective
 			-- A new order arrives with a brief flare of the card.
-			objectiveCard.BackgroundTransparency = 0
-			TweenService:Create(
-				objectiveCard,
-				TweenInfo.new(1.2, Enum.EasingStyle.Quad),
-				{ BackgroundTransparency = 0.35 }
-			):Play()
+			flare()
 		end
 		objectiveLabel.TextColor3 = if state.phase == "Climax" then Palette.Rec else Palette.Paper
 		local details = {}
@@ -298,11 +344,7 @@ function Hud.start()
 		showPanel(Strings.get(`{docId}_title`), Strings.get(`{docId}_body`))
 	end)
 	Net.get("RegisterShown").OnClientEvent:Connect(function(names: { string })
-		local lines = { "...", "190. Kowal, J.", "191. Nowina, A.", "192. Sadek, R." }
-		for index, name in names do
-			table.insert(lines, `{192 + index}. {name}`)
-		end
-		showPanel(Strings.get("register_title"), table.concat(lines, "\n"))
+		Hud.showRegister(names)
 		task.delay(6, Hud.subtitle, Strings.get("register_note"))
 	end)
 	Net.get("CommShown").OnClientEvent

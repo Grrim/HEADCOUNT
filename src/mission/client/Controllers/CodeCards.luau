@@ -17,6 +17,9 @@ local CARD_COLUMNS = { 13, 8, 3 }
 local cards: { { part: Part, digit: TextLabel, gui: SurfaceGui } } = {}
 local active = false
 local controllers: { [string]: any }
+local seenListeners: { (position: number, digit: number) -> () } = {}
+-- A card counts as read when it is on screen and near enough for its digit to be legible.
+local READ_DISTANCE = 50
 
 local function build()
 	local folder = Instance.new("Folder")
@@ -80,6 +83,31 @@ local function refresh()
 	end
 end
 
+-- Called with each digit this player has actually looked at, so the notebook can write it down.
+function CodeCards.onSeen(listener: (position: number, digit: number) -> ())
+	table.insert(seenListeners, listener)
+end
+
+local function readLoop()
+	while true do
+		task.wait(0.3)
+		local camera = Workspace.CurrentCamera
+		if camera and #seenListeners > 0 then
+			for position, card in cards do
+				local digit = tonumber(card.digit.Text)
+				if card.gui.Enabled and digit then
+					local point, onScreen = camera:WorldToViewportPoint(card.part.Position)
+					if onScreen and point.Z > 0 and point.Z < READ_DISTANCE then
+						for _, listener in seenListeners do
+							listener(position, digit)
+						end
+					end
+				end
+			end
+		end
+	end
+end
+
 function CodeCards.init(all: { [string]: any })
 	controllers = all
 	build()
@@ -97,6 +125,7 @@ function CodeCards.start()
 		active = state.phase == "Power"
 		refresh()
 	end)
+	task.spawn(readLoop)
 end
 
 return CodeCards

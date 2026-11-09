@@ -1,16 +1,24 @@
 # PROGRESS: HEADCOUNT
 
-Stan na 2026-11-08 wieczorem. Plik służy do wznowienia pracy w nowej sesji. Szczegółowe wyniki testów są w `docs/05_STATUS.md`, a lista assetów w `docs/06_ASSETS.md`.
+Stan na 2026-11-09. Plik służy do wznowienia pracy w nowej sesji. Szczegółowe wyniki testów są w `docs/05_STATUS.md`, a lista assetów w `docs/06_ASSETS.md`.
 
 ## Aktualny stan projektu
 
 Kooperacyjny horror psychologiczny na Roblox w fazie Vertical Slice (Misja 001). Lobby (Hub) i misja działają solo w Studio, z tymczasową oprawą z generatorów Roblox. Cała misja i droga przez lobby do terminala przeszły pieszo, bez teleportów (`docs/05_STATUS.md`, szósty przebieg).
 
-- **Budowanie i testy:** `python scripts/check.py [--fix]` uruchamia rojo, lune, selene i stylua oraz tworzy `build/Hub.rbxl` i `build/Mission.rbxl`. Ostatni wynik: wszystko zielone, 46 testów.
+- **Budowanie i testy:** `python scripts/check.py [--fix]` uruchamia rojo, lune, selene i stylua oraz tworzy `build/Hub.rbxl` i `build/Mission.rbxl`. Ostatni wynik: wszystko zielone, 51 testów.
 - **Nazwa:** HEADCOUNT. „Poza kadrem” zostaje nazwą stanu w grze i ukrytego zakończenia. Dostępności nazwy na Roblox nie sprawdzono.
 - **Git:** gałąź `main`, zdalne repozytorium pokazuje `git remote -v`. `build/` i `Place1.rbxl` są poza repozytorium. Plan rozwoju jest w `docs/07_ROADMAP.md`.
 - **Publikacja na Roblox:** nic nie zostało opublikowane. `Config/Places` ma identyfikatory 0, więc teleport między miejscami nie może jeszcze działać. Publikacja wymaga wyraźnej zgody właściciela.
 - **Grywalność:** gry nie przeszedł jeszcze żaden człowiek.
+
+## Wykonane 2026-11-09
+
+- Usunięta blokada misji: pudełko czystych kaset na ladzie kasy w foyer oddaje taśmę graczowi, który zużył wszystkie trzy.
+- Notatnik terenowy (J / L1 / NOTES) w misji i panel pomocy w lobby: wskazówki, dokumenty do ponownego czytania, sterowanie, jasność.
+- Karta celu pokazuje konkretny następny krok (`Core/Guide`, 3 nowe testy), a radio raz podpowiada, gdy gracz długo stoi w miejscu.
+- PLAY SOLO w terminalu. Po taśmie napis, w którym rzędzie ktoś się odwrócił.
+- Nic z tego nie było uruchomione w Studio. Szczegóły: `docs/05_STATUS.md`, dwunasty przebieg.
 
 ## Wykonane 2026-11-08
 

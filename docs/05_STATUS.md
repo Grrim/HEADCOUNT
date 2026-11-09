@@ -338,3 +338,27 @@ Stan na 2026-11-08, po uwadze właściciela, że lobby nie jest przyjemne ani or
 **Przyjemność.** Kącik oczekiwania między regałem zachodnim a chodnikiem: dywan, dwa krzesła przed telewizorem, stolik z kubkiem i lampa podłogowa. Trzy rośliny doniczkowe: przy ekspresie, przy wejściu do hali i wyższa przy terminalu.
 
 Współrzędne nowych brył sprawdziłem ręcznie względem regałów (x ±18–22 i ±28–32, z 2..14), wózka, lady i ścian; tablice i kącik przesunąłem po pierwszej wersji, która nachodziła na regały. **Nikt tego nie widział na ekranie.** Do oceny w Studio: czy hala nie zrobiła się za jasna (strach ma zostać w misji), czytelność tablic z progu korytarza, brak migotania przy kinkietach i boazerii, czy rośliny nie wyglądają tandetnie.
+
+## Dwunasty przebieg: zrozumiałość i brak blokad
+
+Stan na 2026-11-09, po prośbie właściciela, żeby gra była zrozumiała i intuicyjna. Zmiany tylko w kodzie, **bez uruchomienia w Studio** (sesja bez dostępu do Studio). Bramki zielone: rojo (oba miejsca), lune (51 testów), selene, stylua.
+
+| Zmiana | Pliki | Sprawdzone |
+|---|---|---|
+| **Blokada naprawiona:** gracz miał 3 taśmy na całą misję. Po ich zmarnowaniu nie dało się znaleźć brakujących szpul i misja stawała. Na ladzie kasy w foyer stoi teraz pudełko „BLANK TAPES”, które oddaje jedną taśmę graczowi z pustym licznikiem. Po ostatnim nagraniu radio mówi, gdzie jest pudełko, a komunikat „No tape left” też je wskazuje | `Tapes.luau`, `Strings` | Budowa i lint |
+| Linia „> …” na karcie celu: konkretny następny krok wyliczony z tego, co gracz wie (własne taśmy, odczytane cyfry, numerki zgłoszone przez drużynę). Logika w czystym module `Core/Guide` | `Core/Guide.luau`, `Notebook.luau`, `Hud.luau` | 3 nowe testy Lune |
+| Radio jednorazowo mówi wprost, co zrobić, gdy gracz stoi na jednym kroku dłużej niż jego limit (od 35 s przy dzwonku do 150 s) | `Core/Guide.luau`, `Notebook.luau` | Tylko testy logiki |
+| Po każdej taśmie napis: w którym rzędzie ktoś się odwrócił albo że nikt. Podpowiedź „Someone on the tape turned round” pojawia się tylko, gdy taśma kogoś złapała | `Notebook.luau`, `Hints.luau`, `Playback.onStopped` | Budowa |
+| Notatnik terenowy (J, L1, przycisk NOTES na dotyku): cel, następny krok, wskazówki (rzędy z taśm, miejsca i numerki, szpule, kod odczytany z kartek, kolejność szpul, strona drzwi), ponowne czytanie dokumentów i rejestru, sterowanie dla aktualnego urządzenia, jasność | `client_common/Journal.luau`, `Notebook.luau`, `CodeCards.onSeen` | Budowa |
+| Cyfra kodu trafia do notatnika dopiero, gdy kartka była na ekranie z odległości do 50 jednostek, więc notatnik nie zdradza kodu bez spojrzenia przez wizjer | `CodeCards.luau` | Budowa |
+| Jasność: 6 poziomów, przenoszona przez teleport (`TeleportService` teleport settings) | `client_common/Brightness.luau`, oba `Boot.client.luau` | Budowa |
+| Lobby: panel pomocy pod J z opisem pomieszczeń, sterowaniem i jasnością | `HelpPanel.luau` | Budowa |
+| Terminal: PLAY SOLO tworzy drużynę jednoosobową, ustawia gotowość i od razu odlicza. CREATE EXPEDITION zostaje dla gry ze znajomymi, tekst pomocy opisuje oba wejścia | `Parties.luau`, `Terminal.luau`, `Strings` | Budowa |
+
+Do sprawdzenia w Studio:
+- czy pudełko na ladzie (x 21–23,8, z 47,6–48,6, na blacie 3,4) nie nachodzi na nic i czy prompt nie zasłania promptu listy obecności (x 16–17,4),
+- czy tag „[J] NOTES” w prawym górnym rogu nie koliduje z przyciskami Roblox i z HUD-em wizjera (chowa się przy podniesionej kamerze),
+- czy notatnik zwalnia kursor (przycisk CLOSE ma `Modal`) i czy B zamyka go na kontrolerze,
+- czy linia „NEXT” nie robi z karty celu zbyt długiego bloku na telefonie,
+- czy podpowiedzi radia nie przychodzą za wcześnie dla człowieka (limity w `Core/Guide.luau`),
+- PLAY SOLO w Studio kończy się komunikatem o braku publikacji, tak jak BEGIN; pełny przebieg wymaga opublikowanej gry.
