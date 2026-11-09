@@ -328,7 +328,8 @@ local function emergency(map: Folder): { Light }
 		{ 37, 16, 8 },
 		{ -20, 20, -24.5 },
 		{ 20, 20, -24.5 },
-		{ -30, 12, 60 },
+		-- Off the foyer's west wall face (x -29.5), not sunk into it.
+		{ -28.85, 12, 60 },
 		{ 40, 12, 72 },
 		{ -44, 11, -20 },
 		{ -63, 9, -13 },
@@ -361,10 +362,34 @@ local function emergency(map: Folder): { Light }
 	return lights
 end
 
+-- Three more papers that tell what happened on 12.11.1987, each where it belongs: the usher's
+-- roster in the storage he still walks, the agenda by the projector, a wife's letter on the
+-- director's desk.
+local function stories(map: Folder, prompts: { [string]: ProximityPrompt })
+	local C = Layout.CELLAR
+	local function paper(name: string, a: Vector3, b: Vector3): BasePart
+		local sheet = Build.box(map, name, a.X, a.Y, a.Z, b.X, b.Y, b.Z, Palette.Paper)
+		sheet.CanCollide = false
+		prompts[name] = Build.prompt(sheet, "act_read", "obj_document", nil, PD)
+		return sheet
+	end
+	-- On the crate in the second aisle (x -85..-83, z 52.1..54.1, 2 high).
+	paper(
+		"DocUsher",
+		Vector3.new(-84.6, C.floorY + 2, 52.6),
+		Vector3.new(-83.4, C.floorY + 2.08, 53.6)
+	)
+	-- On the booth table, beside H. Wrona's note (x 6..7.4).
+	paper("DocAgenda", Vector3.new(8.2, 17.2, 47), Vector3.new(9.6, 17.28, 48.2))
+	-- On the director's desk, beside his memo (x 50.8..52.4, z 25..27).
+	paper("DocLetter", Vector3.new(52.7, 3.2, 25.3), Vector3.new(53.8, 3.27, 26.8))
+end
+
 function MissionAnnex.build(map: Folder, prompts: { [string]: ProximityPrompt }): { Light }
 	office(map, prompts)
 	basement(map, prompts)
 	reels(map, prompts)
+	stories(map, prompts)
 	return emergency(map)
 end
 

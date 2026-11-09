@@ -19,6 +19,9 @@ local ALL_DOCS = {
 	"doc_wrona",
 	"doc_office",
 	"doc_basement",
+	"doc_usher",
+	"doc_agenda",
+	"doc_letter",
 	"doc_register",
 	"doc_secret",
 }

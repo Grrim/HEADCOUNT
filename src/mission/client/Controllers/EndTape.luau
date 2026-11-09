@@ -114,6 +114,8 @@ local function report(result: any)
 			then Strings.get("report_earned", table.concat(earnedNames, ", "))
 			else "",
 		"",
+		-- After a closed meeting, the hook into the next one: the bus from the end of the tape.
+		if result.success then Strings.get("report_teaser", result.futureDate) else "",
 		Strings.get(if result.canTeleport then "report_return" else "report_return_studio"),
 	}
 	Ui.text({

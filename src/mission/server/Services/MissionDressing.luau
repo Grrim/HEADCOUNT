@@ -85,8 +85,9 @@ local function hall(folder: Folder)
 		Palette.Paper,
 		Palette.Ink
 	)
-	decor(folder, "WainscotRear", H.minX + 0.5, 0, H.maxZ - 0.8, -5, 4.5, H.maxZ - 0.5, wood, mat)
-	decor(folder, "WainscotRear", 5, 0, H.maxZ - 0.8, H.maxX - 0.5, 4.5, H.maxZ - 0.5, wood, mat)
+	-- The rear runs start where the side runs end, so no two tops share a corner (that flickered).
+	decor(folder, "WainscotRear", H.minX + 0.8, 0, H.maxZ - 0.8, -5, 4.5, H.maxZ - 0.5, wood, mat)
+	decor(folder, "WainscotRear", 5, 0, H.maxZ - 0.8, H.maxX - 0.8, 4.5, H.maxZ - 0.5, wood, mat)
 	-- Pillars break up the side walls and give the eye something to count.
 	-- Spaced to stay clear of the corridor door in the west wall.
 	local z = 0
@@ -287,7 +288,7 @@ local function foyer(folder: Folder)
 		-5,
 		0,
 		F.maxZ - 0.8,
-		F.maxX - 0.5,
+		F.maxX - 0.8,
 		4,
 		F.maxZ - 0.5,
 		wood,

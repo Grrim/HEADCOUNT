@@ -27,6 +27,7 @@ local NAMES = {
 	"RegisterShown",
 	"EndMission",
 	"CodeDigits",
+	"UsherEvent",
 	-- hub
 	"PartyAction",
 	"PartyState",

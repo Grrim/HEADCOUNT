@@ -500,7 +500,7 @@ local function archiveClutter(folder: Folder)
 		decor(
 			folder,
 			"DoorFrame",
-			-half - 0.5,
+			-half - 0.55,
 			0,
 			z - 0.7,
 			-half + 0.15,
@@ -515,7 +515,7 @@ local function archiveClutter(folder: Folder)
 			half - 0.15,
 			0,
 			z - 0.7,
-			half + 0.5,
+			half + 0.55,
 			top + 0.5,
 			z + 0.7,
 			wood,
@@ -596,7 +596,8 @@ function HubDressing.start()
 	pendant(folder, 8, -1, 8.5)
 	pendant(folder, 14, -1, 8.5)
 	-- Plants: by the coffee machine, at the hall entrance, and a tall one by the terminal.
-	plant(folder, 18.5, 3.5)
+	-- South of the east shelving (which ends at z 14), not inside it.
+	plant(folder, 18.5, 15.5)
 	plant(folder, -6, 17.5)
 	plant(folder, 7, -35, true)
 	local map2 = map

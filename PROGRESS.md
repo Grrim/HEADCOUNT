@@ -14,6 +14,7 @@ Kooperacyjny horror psychologiczny na Roblox w fazie Vertical Slice (Misja 001).
 
 ## Wykonane 2026-11-09
 
+- Przeciwnicy i fabuła: Kadrowy porusza się poklatkowo, pochyla i sięga długą ręką; nowy przeciwnik Bileter w ciemności widzi tylko światło latarki; trzy nowe dokumenty i zapowiedź następnej taśmy. Audyt geometrii `lune run audit_map` znalazł i pomógł naprawić lampę w ścianie, donicę w regale i migającą boazerię. Szczegóły: `docs/05_STATUS.md`, siedemnasty przebieg.
 - Wygląd: plakaty z lat 80. w sali, foyer i lobby (bez obrazków, z kształtów i czcionek), wygląd VHS w wizjerze i na taśmach, głębia ostrości, kurz w sali i w świetle projektora. Podgląd plakatów: `lune run poster_preview`. Szczegóły: `docs/05_STATUS.md`, szesnasty przebieg.
 - Warunki nocy od drugiej wizyty: krótka taśma, niespokojny Kadrowy, słabe żarówki albo uważna sala (`Core/Conditions`). Szczegóły: `docs/05_STATUS.md`, piętnasty przebieg.
 - Trendy 2026: rejestrowanie anomalii kamerą (styl Exit 8) i Kadrowy, który w ciszy słyszy głos z czatu głosowego. Szczegóły i źródła: `docs/05_STATUS.md`, czternasty przebieg.

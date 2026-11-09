@@ -112,6 +112,8 @@ local function onHook(player: Player, hook: number, prompt: ProximityPrompt)
 		dealDigits()
 		task.delay(2.5, session.notify, "radio_power")
 		task.delay(9, session.notify, "radio_power_cards")
+		-- And then the reason to keep the torch off.
+		task.delay(24, session.notify, "radio_usher")
 	end
 end
 
@@ -318,6 +320,9 @@ function Puzzles.start()
 			DocWrona = "doc_wrona",
 			DocOffice = "doc_office",
 			DocBasement = "doc_basement",
+			DocUsher = "doc_usher",
+			DocAgenda = "doc_agenda",
+			DocLetter = "doc_letter",
 		}
 	do
 		local prompt = world.prompts[promptName]

@@ -25,7 +25,7 @@ Achievements.ALL = {
 	"quick_meeting",
 }
 
-Achievements.TOTAL_DOCS_IN_MISSION = 6
+Achievements.TOTAL_DOCS_IN_MISSION = 9
 Achievements.QUICK_SECONDS = 720
 
 function Achievements.earned(result: Result): { string }

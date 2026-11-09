@@ -24,6 +24,32 @@ Layout.REGISTER = { x = 0, y = 3, z = -62 }
 Layout.BENCH = { x = -18, y = 0, z = 60 }
 Layout.SPLICE_MARK = { x = 16, y = 0, z = 66 }
 
+-- The Usher's round during the power cut: down the west side aisle, through the curtain
+-- corridor and the landing, down the stairs, across the boiler room and along every aisle of the
+-- storage cellar to the breaker, then back the same way. Every leg runs through open floor or a
+-- doorway, so he never walks through a wall. y is the floor under his feet.
+Layout.USHER_ROUTE = {
+	{ x = -35, y = 0, z = 34 },
+	{ x = -35, y = 0, z = -9 },
+	{ x = -43, y = 0, z = -9 },
+	{ x = -43, y = 0, z = -11 },
+	{ x = -63, y = 0, z = -11 },
+	{ x = -63, y = 0, z = -8 },
+	{ x = -63, y = -12, z = 14 },
+	{ x = -63, y = -12, z = 20 },
+	{ x = -70, y = -12, z = 38 },
+	{ x = -70, y = -12, z = 47 },
+	{ x = -55, y = -12, z = 47 },
+	{ x = -55, y = -12, z = 55.5 },
+	{ x = -85, y = -12, z = 55.5 },
+	{ x = -85, y = -12, z = 63.5 },
+	{ x = -55, y = -12, z = 63.5 },
+	{ x = -55, y = -12, z = 71.5 },
+	{ x = -85, y = -12, z = 71.5 },
+	{ x = -85, y = -12, z = 79.5 },
+	{ x = -62, y = -12, z = 79.5 },
+}
+
 -- x of the hidden door in the stage's back wall, by puzzle.doorSide.
 Layout.DOOR_OFFSET_X = 20
 Layout.DOOR_Z = -40

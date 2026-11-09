@@ -443,3 +443,29 @@ Stan na 2026-11-09. Zmiany w kodzie, **bez uruchomienia w Studio**. Bramki zielo
 Podgląd plakatów: `lune run poster_preview` zapisuje `work/posters_preview.html`. Czcionki w przeglądarce tylko przypominają Oswald i SpecialElite z Roblox.
 
 Do sprawdzenia w Studio: czytelność plakatów z kilku kroków (`MaxDistance` 90), czy linie skanowania nie są za ciemne na telefonie, koszt głębi ostrości na słabym sprzęcie, czy kurz nie wygląda jak śnieg.
+
+## Siedemnasty przebieg: przeciwnicy, fabuła, audyt geometrii
+
+Stan na 2026-11-09. Zmiany w kodzie, **bez uruchomienia w Studio**. Bramki zielone: rojo (oba miejsca), lune (53 testy), selene, stylua. Nowy audyt map przechodzi.
+
+**Audyt geometrii bez Studio.** `lune run audit_map [mission|hub]` buduje mapę prawdziwymi serwisami (`MissionWorld`/`HubWorld` + dressing) z `build/*.rbxl` w Lune i zgłasza: powierzchnie we wspólnej płaszczyźnie (migotanie), części i modele 3D zatopione w ścianach lub podłogach oraz odcinki trasy Biletera, które przechodzą przez coś stałego. Pomija powierzchnie, których gracz nie zobaczy (spody na podłogach, szczyty ścian nad sufitami, płaszczyzny schowane w ścianach). Przed uruchomieniem trzeba zbudować miejsca (`rojo build`).
+
+Naprawione dzięki audytowi:
+- czerwona lampa awaryjna w foyer siedziała w 83% w ścianie zachodniej (teraz na jej licu),
+- donica w lobby stała w regale wschodnim (przeniesiona za koniec regału),
+- narożniki boazerii w sali i foyer nachodziły na siebie i migały (biegi tylne zaczynają się tam, gdzie kończą boczne),
+- ramy drzwi korytarza w lobby wystają minimalnie poza lico ściany.
+
+Zostały trzy zgłoszenia w miejscach niewidocznych z wnętrza (koniec podwyższenia korytarza za ścianą sali, styk podestu ze ścianą schodów, rama drzwi od strony pustki za podestem).
+
+| Zmiana | Pliki |
+|---|---|
+| **Kadrowy straszniejszy:** z bliska porusza się jak poklatkowa animacja z wypadającymi klatkami (do 8 klatek/s), szarpie się co 0,5–2 s, pochyla nad graczem (do 14°). Szyja dalej rysuje się płynnie od pochylonych barków, więc głowa nie pojawia się między klatkami. Gdy sięga po gracza, z prawego barku wysuwa się długa ręka z czterema palcami, które zaciskają się w trakcie | `RegistrarView.luau` |
+| **Nowy przeciwnik, Bileter:** w czasie zaniku prądu (od 30 s po nim) chodzi stałą trasą: boczna nawa sali, korytarz z kotarami, podest, schody, kotłownia i cały magazyn do bezpiecznika i z powrotem. Nie widzi ludzi, tylko światło: zapalona latarka w zasięgu 16 jednostek i w linii wzroku go przyciąga, a z odległości 2,2 jednostki znajduje każdego. Goni z prędkością 11,5 (gracz 13), tylko gdy widzi cel; regał, ściana, rząd krzeseł czy skrzynia go zatrzymują (sprawdza kulą na wysokości kolan), a po 2,5 s bez światła wraca po własnych śladach. Reaguje tylko na swoim piętrze i łapie tylko kogoś, kogo widzi, więc nie przez ścianę. Złapany gracz jest wycinany z kadru. Słychać go po krokach i podwójnym kliknięciu kasownika co 4–7,5 s. Bez prądu widać go tylko w świetle latarki lub lamp awaryjnych; przez kamerę ma zawsze obrys (czerwony, gdy goni), a spod czarnej opaski świecą mu oczy, kiedy kogoś zobaczy | `UsherAi.luau`, `UsherView.luau`, `Core/Layout.USHER_ROUTE`, `Net.UsherEvent` |
+| Radio przedstawia Biletera 24 s po zaniku prądu. W notatniku pojawia się zasada „In the dark, the usher finds you by your torch” | `Puzzles.luau`, `Notebook.luau`, `Strings` |
+| **Fabuła:** trzy nowe dokumenty. Grafik dyżurów biletera T. Malca na skrzyni w magazynie („zawsze ktoś jest bez biletu”), porządek zebrania przy projektorze (punkt 4: rejestracja obecnych przez Kadrowego, nikt nie wychodzi przed jego końcem), list żony do Zarządu na biurku dyrektora (mąż od zebrania siedzi w fotelu i na swoje imię odpowiada „obecny”). Wszystkie trafiają do archiwum w lobby; osiągnięcie „cała dokumentacja” wymaga teraz 9 dokumentów | `MissionAnnex.stories`, `Puzzles.luau`, `ArchiveUi.luau`, `Core/Achievements.luau` |
+| Po udanej misji raport kończy się zapowiedzią: „NEXT TAPE: ROUTE 17. RECORDED …”, czyli autobus z finałowej taśmy i data za tydzień | `EndTape.luau` |
+
+Do sprawdzenia w Studio: czy Bileter nie jest za trudny w magazynie (latarka jest tam potrzebna), czy jego postać z siatki Kadrowego z głową z części nie wygląda śmiesznie, jak wygląda ręka Kadrowego, czy poklatkowy ruch nie wygląda jak lag sieci.
+
+Poprawki po niezależnym przeglądzie kodu przeciwników: Bileter nie przechodzi przez niskie przeszkody w pościgu, nie łapie przez ścianę i nie zastyga, widząc światło piętro wyżej. Kroki i chód Biletera grają w pełnym tempie, choć kotwica rusza się tylko 10 razy na sekundę. Szyja Kadrowego liczy wysokość od rysowanej pozycji barków, więc wierzch szyi nie mignie przy skoku. Ręka Kadrowego chowa się na taśmie, przy celu dalej niż 20 jednostek i sama po czasie sięgania, gdyby misja skończyła się w jego trakcie. Radio o Bileterze (24 s) wyprzedza teraz jego start (30 s).
