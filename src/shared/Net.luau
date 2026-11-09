@@ -14,6 +14,7 @@ local NAMES = {
 	"Knock",
 	"FlashlightToggle",
 	"CodeEntry",
+	"VoiceNoise",
 	-- mission, server to client
 	"SessionState",
 	"Notify",

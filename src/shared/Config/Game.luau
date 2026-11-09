@@ -41,6 +41,8 @@ return {
 		WakeAfterReplays = 2,
 		FalseSilenceChance = 0.12,
 		FalseSilenceCheckEvery = 30,
+		-- Seconds between two pulls by the same player's voice.
+		VoiceCooldown = 8,
 	},
 	OffFrame = {
 		RescueSeconds = 3,

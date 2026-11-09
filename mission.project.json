@@ -40,6 +40,12 @@
         "Technology": "Future"
       }
     },
+    "VoiceChatService": {
+      "$properties": {
+        "UseAudioApi": "Enabled",
+        "EnableDefaultVoice": true
+      }
+    },
     "MaterialService": {
       "$path": "src/materials"
     }

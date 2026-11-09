@@ -104,6 +104,7 @@ local function report(result: any)
 		Strings.get("report_replays", result.replays),
 		Strings.get("report_cuts", result.cuts),
 		Strings.get("report_docs", result.docs),
+		Strings.get("report_anomalies", controllers.OmenDirector.loggedCount()),
 		if #earnedNames > 0
 			then Strings.get("report_earned", table.concat(earnedNames, ", "))
 			else "",

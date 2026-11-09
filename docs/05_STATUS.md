@@ -385,3 +385,27 @@ Do sprawdzenia w Studio:
 - czy twarz przed obiektywem wypada na wysokości oczu (zakładam głowę ok. 4,4 nad podłogą postaci),
 - czy plansze rozdziałów nie nakładają się na odprawę radia na starcie,
 - czas misji po wydłużeniu drogi do bezpiecznika.
+
+## Czternasty przebieg: trendy 2026
+
+Stan na 2026-11-09. Zmiany tylko w kodzie, **bez uruchomienia w Studio**. Bramki zielone: rojo (oba miejsca), lune (51 testów), selene, stylua.
+
+**Co pokazało krótkie badanie trendów** (głównie rankingi i poradniki, więc to sygnały, nie twarde dane):
+- najwięcej graczy mają co-op survival (99 Nights in the Forest) i proceduralne roguelite (DOORS), wysoko są też The Mimic, Pressure i Forsaken,
+- powtarzają się: eksploracja przestrzeni liminalnych, horror oparty na folklorze, tryby zabójca kontra ocalali, kooperacja z czatem głosowym,
+- w grach z czatem głosowym potwór coraz częściej „słyszy” graczy (PANICORE, R.E.P.O., Lethal Company), a sam głos jest częścią mechaniki,
+- w indie wracają found footage, analog horror i estetyka VHS, czyli to, na czym HEADCOUNT już stoi,
+- popularne jest też szukanie anomalii, w stylu Exit 8 czy Observation Duty.
+
+Źródła: [everythingedinburgh.com](https://everythingedinburgh.com/games/gaming/best-roblox-horror-games/), [endsights.com](https://endsights.com/best-horror-roblox-games), [rolearn.dev, studium przypadku](https://rolearn.dev/case-studies/horror-multiplayer-viral-loop), [gaming.net](https://www.gaming.net/best-co-op-horror-games-proximity-voice-chat/), [pcgamer.com](https://pcgamer.com/retro-horror-games-are-preparing-to-go-beyond-the-ps1), [wnhub.io](https://wnhub.io/news/indie/item-52426).
+
+| Zmiana | Pliki |
+|---|---|
+| **Rejestrowanie anomalii:** krzesło w przejściu, postać w korytarzu, sobowtór, odwrócone krzesło i odwrócony rząd można zarejestrować, trzymając je 0,8 s na środku podniesionej kamery (stożek ok. 15°, do 55 jednostek). Przy pierwszej anomalii radio mówi, że się to robi. Licznik trafia do notatnika, raportu końcowego i do zasad w „WHAT WE KNOW”. Zostaje po stronie klienta, bez nagród, więc nie trzeba go chronić przed oszustwem | `OmenDirector.luau`, `Notebook.luau`, `EndTape.luau`, `Strings` |
+| **Kadrowy słyszy głos:** przy włączonym czacie głosowym klient mierzy tylko poziom RMS własnego mikrofonu (`AudioAnalyzer` na `AudioDeviceInput`) i tylko w czasie ciszy przed skokiem. Głośna mowa przez 0,35 s wysyła `VoiceNoise`. Serwer przyjmuje to tylko w oknie ciszy, którą sam ogłosił, nie częściej niż raz na 8 s na gracza, i może wtedy zrobić to samo co seans: przyciągnąć Kadrowego o jeden węzeł. Gracz widzi „Something heard you”, a w notatniku pojawia się zasada „keep quiet”. Bez czatu głosowego nic się nie dzieje | `VoiceListener.luau`, `RegistrarAi.luau`, `Net`, `Config/Game.VoiceCooldown` |
+| `VoiceChatService`: `UseAudioApi = Enabled`, `EnableDefaultVoice = true` w `mission.project.json`. Sprawdzone przez wczytanie `build/Mission.rbxl` w Lune | `mission.project.json` |
+
+Do sprawdzenia:
+- czat głosowy działa tylko w opublikowanej grze, przy włączonym głosie w ustawieniach doświadczenia i u graczy z weryfikacją wieku. Próg 0,12 RMS jest strzałem i trzeba go dostroić na prawdziwym mikrofonie,
+- czy czas 0,8 s i stożek 15° przy rejestrowaniu nie są za trudne dla postaci w korytarzu, która znika po ok. 1,1 s patrzenia,
+- kwestionariusz Maturity & Compliance: gra analizuje głośność mikrofonu (nie treść); warto to opisać w opisie gry.

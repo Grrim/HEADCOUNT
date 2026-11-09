@@ -26,6 +26,7 @@ Ostatnio:
 - Terminal ma przycisk PLAY SOLO, który startuje misję jednym kliknięciem.
 - Więcej strachu: widownia w wizjerze obraca się w stronę kamery, bliskość Kadrowego słychać i widać, nowe anomalie, kinowe plansze rozdziałów.
 - Piwnica rozbudowana o ciemny magazyn z regałami. Bezpiecznik jest na końcu długiej alejki.
+- Anomalie można rejestrować, trzymając je w kadrze. Przy czacie głosowym głośna mowa w ciszy ściąga Kadrowego.
 - Cała misja i droga do terminala przeszły pieszo w Studio, bez teleportów.
 - Dokumenty w misji da się zamknąć, a wskazówka z magnetofonu nie nachodzi na napisy radia.
 - Usunięte migotanie grafiki przy drzwiach (nakładające się powierzchnie) w lobby i misji.
@@ -93,3 +94,4 @@ W Studio serwer misji wypisuje w Output rozwiązanie zagadki. Na żywym serwerze
 4. W Creator Hub ustaw dla misji Access Control na **Secure within universe only**.
 5. W Game Settings włącz dostęp do API (Enable Studio Access to API Services) do testów DataStore.
 6. Wypełnij kwestionariusz Maturity & Compliance. Cel to Mild.
+7. Włącz czat głosowy w Game Settings > Communication. Bez niego gra działa, ale Kadrowy nie słyszy graczy.

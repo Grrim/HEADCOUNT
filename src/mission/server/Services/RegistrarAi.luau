@@ -47,7 +47,14 @@ local function currentScale(): number
 		* (if climax then CFG.ClimaxScale else 1)
 end
 
+-- Until when the building is holding its breath. A voice heard in that window draws him.
+local quietUntil = 0
+local heardAt: { [Player]: number } = {}
+
 local function send(kind: string, id: number?)
+	if kind == "preJump" then
+		quietUntil = os.clock() + RULES.silenceLead + 1.5
+	end
 	eventRemote:FireAllClients(kind, id)
 end
 
@@ -109,6 +116,35 @@ function RegistrarAi.proceduralError(player: Player)
 	if event and event.node then
 		placeAnchor(event.node)
 		send("jump")
+	end
+end
+
+-- A client heard its own player speak loudly during the silence. The claim is only trusted
+-- inside a real silence the server announced, at most once every few seconds per player, and it
+-- can only do what a replay does: pull him one node closer to that player.
+local function onVoice(player: Player)
+	local now = os.clock()
+	if not running or not state or state.dormant or now > quietUntil then
+		return
+	end
+	if now - (heardAt[player] or -math.huge) < CFG.VoiceCooldown then
+		return
+	end
+	if player:GetAttribute("OffFrame") == true then
+		return
+	end
+	heardAt[player] = now
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if not root then
+		return
+	end
+	local p = root.Position
+	local event = Registrar.onReplay(state :: Registrar.State, Layout.NODES, p.X, p.Y, p.Z)
+	if event and event.node then
+		placeAnchor(event.node)
+		send("jump")
+		services.Session.notifyOne(player, "heard_you")
 	end
 end
 
@@ -183,6 +219,10 @@ end
 function RegistrarAi.init(all: { [string]: any })
 	services = all
 	eventRemote = Net.get("RegistrarEvent")
+	Net.get("VoiceNoise").OnServerEvent:Connect(onVoice)
+	Players.PlayerRemoving:Connect(function(player)
+		heardAt[player] = nil
+	end)
 	anchor = Instance.new("Part")
 	anchor.Name = "RegistrarAnchor"
 	anchor.Anchored = true

@@ -142,6 +142,10 @@ local function render(api: Journal.Api)
 
 	api.heading(Strings.get("notes_clues"))
 	api.line(Strings.get("notes_tapes", tapesLeft))
+	local logged = controllers.OmenDirector.loggedCount()
+	if logged > 0 then
+		api.line(Strings.get("notes_anomalies", logged), Palette.Crt)
+	end
 	local any = false
 	for id = 1, tapesSaved do
 		local rows = tapeRows[id]
@@ -364,12 +368,26 @@ function Notebook.start()
 	Net.get("RegistrarEvent").OnClientEvent:Connect(function(kind: string)
 		if kind == "preJump" or kind == "jump" then
 			learn("rule_silence")
+			if controllers.VoiceListener.available() then
+				learn("rule_voice")
+			end
 		elseif kind == "exposure" then
 			learn("rule_exposure")
 		elseif kind == "reach" then
 			learn("rule_reach")
 		elseif kind == "cut" then
 			learn("rule_cut")
+		end
+	end)
+	controllers.OmenDirector.onLogged(function()
+		learn("rule_anomaly")
+		Journal.ping()
+		Journal.refresh()
+	end)
+	controllers.VoiceListener.onAvailable(function()
+		-- Only worth knowing for someone the building can hear.
+		if ruleSet.rule_silence then
+			learn("rule_voice")
 		end
 	end)
 	LensView.onChanged(syncTag)

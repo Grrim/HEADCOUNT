@@ -14,6 +14,7 @@ Kooperacyjny horror psychologiczny na Roblox w fazie Vertical Slice (Misja 001).
 
 ## Wykonane 2026-11-09
 
+- Trendy 2026: rejestrowanie anomalii kamerą (styl Exit 8) i Kadrowy, który w ciszy słyszy głos z czatu głosowego. Szczegóły i źródła: `docs/05_STATUS.md`, czternasty przebieg.
 - Więcej strachu: widownia obraca się do kamery od zaniku prądu, bicie serca i czerwona poświata przy Kadrowym, migające światła przy jego skokach, trzy nowe anomalie (szept imienia, twarz przed obiektywem, zaciemnienie).
 - Większa piwnica: magazyn z regałami w kształcie węża, bezpiecznik na końcu pod czerwoną lampą.
 - Kinowe plansze rozdziałów, znacznik RADIO w napisach, zasady w notatniku, obsługa kontrolera w panelach.

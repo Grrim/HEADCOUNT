@@ -29,6 +29,44 @@ local running = false
 local phase = "Waiting"
 local pathMemory: { CFrame } = {}
 
+-- Anything wrong that can be pointed at. Holding one in the middle of the lens for a moment logs
+-- it: the hall rewards those who look closely, the way the anomaly-hunting games do.
+type Anomaly = { check: (origin: Vector3, look: Vector3) -> boolean, hold: number, logged: boolean }
+local LOG_HOLD = 0.8
+local LOG_RANGE = 55
+local LOG_COS = 0.965
+local anomalies: { Anomaly } = {}
+local loggedCount = 0
+local loggedListeners: { (count: number) -> () } = {}
+
+local function framedPoint(origin: Vector3, look: Vector3, point: Vector3): boolean
+	local offset = point - origin
+	local distance = offset.Magnitude
+	return distance > 1 and distance < LOG_RANGE and look:Dot(offset.Unit) > LOG_COS
+end
+
+local function register(check: (origin: Vector3, look: Vector3) -> boolean)
+	table.insert(anomalies, { check = check, hold = 0, logged = false })
+	-- The first one comes with instructions, once the radio is free to give them.
+	if #anomalies == 1 then
+		task.spawn(function()
+			task.wait(4)
+			while controllers.Hud.isSpeaking() or controllers.Playback.active() do
+				task.wait(1)
+			end
+			AudioDirector.play("Radio", 0.35)
+			controllers.Hud.subtitle(Strings.get("radio_anomaly"), 6)
+		end)
+	end
+end
+
+-- One that exists only while its instance does.
+local function registerAt(instance: Instance, at: () -> Vector3)
+	register(function(origin, look)
+		return instance.Parent ~= nil and framedPoint(origin, look, at())
+	end)
+end
+
 local function cameraPosition(): Vector3
 	return (Workspace.CurrentCamera :: Camera).CFrame.Position
 end
@@ -139,6 +177,9 @@ local function aisleChair(): boolean
 		Build.chair(folder, "Chair", CFrame.lookAt(spot, Vector3.new(position.X, 0, position.Z)))
 	chair.CanCollide = false
 	folder.Parent = Workspace
+	registerAt(folder, function()
+		return spot + Vector3.new(0, 3, 0)
+	end)
 	task.delay(70, function()
 		if isOutOfView(spot + Vector3.new(0, 3, 0)) then
 			folder:Destroy()
@@ -188,6 +229,9 @@ local function corridorFigure(): boolean
 	figure.Position = spot + Vector3.new(0, 5.5, 0)
 	figure.Color = Palette.Ink
 	figure.Parent = Workspace
+	registerAt(figure, function()
+		return figure.Position
+	end)
 	task.spawn(function()
 		local deadline = os.clock() + 40
 		local seenFor = 0
@@ -223,6 +267,15 @@ local function rowTurned(firstSeat: number): boolean
 	for col = 1, Seats.COLS do
 		turnSeat(Seats.id(row, col))
 	end
+	register(function(origin, look)
+		for col = 1, Seats.COLS do
+			local x, seatZ = Seats.position(Seats.id(row, col))
+			if framedPoint(origin, look, Vector3.new(x, 3, seatZ)) then
+				return true
+			end
+		end
+		return false
+	end)
 	return true
 end
 
@@ -280,6 +333,9 @@ local function theDouble(): boolean
 	clone.Name = "Double"
 	clone:PivotTo(first)
 	clone.Parent = Workspace
+	registerAt(clone, function()
+		return clone:GetPivot().Position + Vector3.new(0, 1, 0)
+	end)
 	-- A copy, because the memory keeps shifting while the double walks and would rush it along.
 	local route = table.clone(pathMemory)
 	task.spawn(function()
@@ -404,6 +460,9 @@ local function stage(omen: Omens.Omen): boolean
 			return false
 		end
 		turnSeat(id)
+		register(function(origin, look)
+			return framedPoint(origin, look, Vector3.new(x, 3, z))
+		end)
 		return true
 	elseif kind == "row_turned" then
 		return rowTurned(omen.seatId :: number)
@@ -419,6 +478,44 @@ end
 
 function OmenDirector.init(all: { [string]: any })
 	controllers = all
+end
+
+function OmenDirector.loggedCount(): number
+	return loggedCount
+end
+
+function OmenDirector.onLogged(listener: (count: number) -> ())
+	table.insert(loggedListeners, listener)
+end
+
+local function logLoop()
+	local step = 0.2
+	while true do
+		task.wait(step)
+		local camera = Workspace.CurrentCamera
+		if camera and LensView.raised and not controllers.Playback.active() then
+			local origin = camera.CFrame.Position
+			local look = camera.CFrame.LookVector
+			for _, anomaly in anomalies do
+				if not anomaly.logged then
+					if anomaly.check(origin, look) then
+						anomaly.hold += step
+					else
+						anomaly.hold = math.max(0, anomaly.hold - step / 2)
+					end
+					if anomaly.hold >= LOG_HOLD then
+						anomaly.logged = true
+						loggedCount += 1
+						AudioDirector.play("RecStart", 0.5, 0.8)
+						controllers.Hud.subtitle(Strings.get("anomaly_logged", loggedCount), 2.5)
+						for _, listener in loggedListeners do
+							task.spawn(listener, loggedCount)
+						end
+					end
+				end
+			end
+		end
+	end
 end
 
 -- The projected film never holds steady.
@@ -441,6 +538,7 @@ end
 function OmenDirector.start()
 	map = Workspace:WaitForChild("Map")
 	task.spawn(flickerFilm)
+	task.spawn(logLoop)
 	task.spawn(rememberPath)
 	Net.get("SessionState").OnClientEvent:Connect(function(state)
 		if state.omenSeed and not schedule then
