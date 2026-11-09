@@ -16,6 +16,7 @@ local Grades = require(ReplicatedStorage.Shared.Config.Lighting)
 local Palette = require(ReplicatedStorage.Shared.Config.Palette)
 local Strings = require(ReplicatedStorage.Shared.Strings)
 local Ui = require(script.Parent.Ui)
+local Vhs = require(script.Parent.Vhs)
 
 local LensView = {}
 
@@ -240,6 +241,8 @@ function LensView.init(reportsToServer: RemoteEvent?)
 	grade.Parent = Lighting
 	buildGui()
 	buildWarnings()
+	-- A camcorder picture, not a clean one: light scanlines and a lens that softens the distance.
+	Vhs.apply(gui, { strength = 0.55, focusBlur = 0.12 })
 	applyFrameColor()
 	Players.LocalPlayer:GetAttributeChangedSignal("FrameId"):Connect(applyFrameColor)
 

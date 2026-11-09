@@ -28,6 +28,7 @@ Ostatnio:
 - Piwnica rozbudowana o ciemny magazyn z regałami. Bezpiecznik jest na końcu długiej alejki.
 - Anomalie można rejestrować, trzymając je w kadrze. Przy czacie głosowym głośna mowa w ciszy ściąga Kadrowego.
 - Od drugiej wizyty każda noc losuje warunek (krótka taśma, niespokojny Kadrowy, słabe żarówki, uważna sala), więc misja nie jest za każdym razem taka sama.
+- Nowy wygląd: plakaty w stylu domu kultury z lat 80., obraz jak z kasety VHS w kamerze i na taśmach, kurz w świetle projektora.
 - Cała misja i droga do terminala przeszły pieszo w Studio, bez teleportów.
 - Dokumenty w misji da się zamknąć, a wskazówka z magnetofonu nie nachodzi na napisy radia.
 - Usunięte migotanie grafiki przy drzwiach (nakładające się powierzchnie) w lobby i misji.
@@ -68,7 +69,7 @@ Bramki jakości (budowa obu miejsc, testy logiki, lint, formatowanie):
 python scripts/check.py
 ```
 
-Wynik trafia do `build/Hub.rbxl` i `build/Mission.rbxl`. Otwórz je w Studio i uruchom Play. Źródłem prawdy jest dysk, więc **nie edytuj skryptów w Studio**.
+Wynik trafia do `build/Hub.rbxl` i `build/Mission.rbxl`. Otwórz je w Studio i uruchom Play. Źródłem prawdy jest dysk, więc **nie edytuj skryptów w Studio**. Podgląd plakatów bez Studio: `lune run poster_preview` (zapisuje `work/posters_preview.html`).
 
 ## Sterowanie
 

@@ -15,6 +15,7 @@ local Net = require(ReplicatedStorage.Shared.Net)
 local Palette = require(ReplicatedStorage.Shared.Config.Palette)
 local Strings = require(ReplicatedStorage.Shared.Strings)
 local Ui = require(ReplicatedStorage.ClientCommon.Ui)
+local Vhs = require(ReplicatedStorage.ClientCommon.Vhs)
 
 local EndTape = {}
 
@@ -155,6 +156,8 @@ local function play(result: any)
 	camera.CameraType = Enum.CameraType.Scriptable
 	camera.FieldOfView = 50
 	local gui = Ui.screen("FinalTape", 15)
+	-- The last tape is the most worn of all.
+	Vhs.apply(gui, { strength = 1, zIndex = 50 })
 	local cover = Ui.frame(
 		{ Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(0, 0, 0), ZIndex = 5 },
 		gui

@@ -7,6 +7,7 @@ local Workspace = game:GetService("Workspace")
 local Build = require(ReplicatedStorage.Shared.World.Build)
 local Config = require(ReplicatedStorage.Shared.Config.Game)
 local Palette = require(ReplicatedStorage.Shared.Config.Palette)
+local Posters = require(ReplicatedStorage.Shared.World.Posters)
 local Props = require(ReplicatedStorage.Shared.World.Props)
 local Surfaces = require(ReplicatedStorage.Shared.World.Surfaces)
 
@@ -558,6 +559,21 @@ local function archiveClutter(folder: Folder)
 	decor(folder, "Wainscot", 39.2, 0, -39.5, 39.5, 4.5, -11, Palette.Wood, Enum.Material.Wood)
 end
 
+-- Bills from the places the expeditions go, pinned up in the hall. The spots avoid the sconces
+-- (west z -30, -20, 8; east z -34, -16 at y 6.8-7.8), the doors (west z -6..2, east -10..-2 and
+-- 10..18) and the signs over them.
+local function hallPosters(folder: Folder)
+	local spots = {
+		{ "headcount", Vector3.new(-39.5, 6.9, -25), Vector3.xAxis, -1 },
+		{ "missing", Vector3.new(-39.5, 6.9, 13.5), Vector3.xAxis, 2 },
+		{ "cinema", Vector3.new(39.5, 6.9, -25), -Vector3.xAxis, 1 },
+		{ "choir", Vector3.new(39.5, 6.9, 4), -Vector3.xAxis, -1.5 },
+	}
+	for _, spot in spots do
+		Posters.hang(folder, spot[1], spot[2], spot[3], 3, spot[4])
+	end
+end
+
 function HubDressing.start()
 	local map = Workspace:WaitForChild("Map")
 	local folder = Instance.new("Folder")
@@ -567,6 +583,7 @@ function HubDressing.start()
 	archiveClutter(folder)
 	wayfinding(folder)
 	waitingCorner(folder)
+	hallPosters(folder)
 	corridorDressing(folder)
 	-- Hall sconces on the wainscot (west face points east, east face points west).
 	for _, z in { -30, -20, 8 } do

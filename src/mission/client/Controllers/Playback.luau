@@ -17,6 +17,7 @@ local Palette = require(ReplicatedStorage.Shared.Config.Palette)
 local Strings = require(ReplicatedStorage.Shared.Strings)
 local Tape = require(ReplicatedStorage.Shared.Core.Tape)
 local Ui = require(ReplicatedStorage.ClientCommon.Ui)
+local Vhs = require(ReplicatedStorage.ClientCommon.Vhs)
 
 local Playback = {}
 
@@ -115,6 +116,8 @@ local function buildGui()
 		(grade :: any)[key] = value
 	end
 	grade.Parent = Lighting
+	-- A worn tape: heavier lines, the torn band at the bottom, the background out of focus.
+	Vhs.apply(gui, { strength = 1, focusBlur = 0.3 })
 end
 
 local function buildGhosts(ghosts: { any }): { { model: Part, track: { { number } } } }

@@ -428,3 +428,18 @@ Warunek ogłasza radio ok. 17 s po starcie (po odprawie i sprawdzeniu sprzętu).
 Pliki: `Core/Conditions.luau` (z testem), `Session.luau`, `RegistrarAi.luau`, `Tapes.luau`, `MissionWorld.dimLights`, `Viewfinder.luau`, `Audience.luau`, `Notebook.luau`, `EndTape.luau`, `Strings`.
 
 Do sprawdzenia: czy 8 s wystarcza na złapanie celu z jednego przejazdu, czy „Weak bulbs” nie robi sali nieczytelnej (jest jeszcze suwak jasności), czy radio o warunku nie nachodzi na pierwsze wskazówki.
+
+## Szesnasty przebieg: wygląd
+
+Stan na 2026-11-09. Zmiany w kodzie, **bez uruchomienia w Studio**. Bramki zielone: rojo (oba miejsca), lune (53 testy), selene, stylua.
+
+| Zmiana | Pliki | Sprawdzone |
+|---|---|---|
+| **Plakaty** bez wgrywanych obrazków, złożone z kształtów i typografii w stylu domu kultury z lat 80.: zebranie, kino z ocenzurowaną widownią, ostrzeżenie „Do not look behind you”, chór „192 voices”, „Have you seen this man?” z sylwetką o zbyt długiej szyi, „We count on you” z siatką 192 kratek. Papier pożółkły na brzegach, taśma w rogach, lekko krzywo powieszone, oświetlone jak pokój (w ciemności są ciemne) | `World/Posters.luau` | Test `tests/Posters.spec.luau` buduje każdy plakat z prawdziwych instancji Roblox w Lune (nazwy klas, właściwości, enumów) i sprawdza, że przód patrzy w salę. Podgląd HTML obejrzany na zrzucie |
+| Rozmieszczenie: 6 w sali misji między filarami i pod kinkietami, 1 w foyer przy ławce, 4 w hali lobby z dala od kinkietów i drzwi | `MissionDressing.posters`, `HubDressing.hallPosters` | Współrzędne sprawdzone ręcznie względem filarów, kinkietów, boazerii i drzwi; w grze nieobejrzane |
+| **Wygląd VHS:** 120 linii skanowania, lekkie migotanie jasności i poszarpany pasek zakłóceń przy dolnej krawędzi. Słabszy w wizjerze, mocny na odtwarzanej taśmie i finałowej kasecie. Do tego głębia ostrości (rozmyte tło), gdy obraz jest „z kamery” | `client_common/Vhs.luau`, `LensView`, `Playback`, `EndTape` | Budowa |
+| **Kurz:** drobinki stale wiszą nad siedzeniami (oświetlone jak sala) i wirują w świetle projektora, gdy leci film | `MissionDressing.hall`, `MissionWorld` (`BeamDust`) | Budowa |
+
+Podgląd plakatów: `lune run poster_preview` zapisuje `work/posters_preview.html`. Czcionki w przeglądarce tylko przypominają Oswald i SpecialElite z Roblox.
+
+Do sprawdzenia w Studio: czytelność plakatów z kilku kroków (`MaxDistance` 90), czy linie skanowania nie są za ciemne na telefonie, koszt głębi ostrości na słabym sprzęcie, czy kurz nie wygląda jak śnieg.

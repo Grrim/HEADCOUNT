@@ -8,6 +8,7 @@ local Workspace = game:GetService("Workspace")
 local Build = require(ReplicatedStorage.Shared.World.Build)
 local Layout = require(ReplicatedStorage.Shared.Core.Layout)
 local Palette = require(ReplicatedStorage.Shared.Config.Palette)
+local Posters = require(ReplicatedStorage.Shared.World.Posters)
 local Props = require(ReplicatedStorage.Shared.World.Props)
 local Surfaces = require(ReplicatedStorage.Shared.World.Surfaces)
 
@@ -114,6 +115,31 @@ local function hall(folder: Folder)
 		)
 		z += 15
 	end
+	-- A few motes always hanging in the air over the seats. Lit by the room, so they vanish in the dark.
+	local air = decor(folder, "HallAir", -32, 4, -20, 32, 16, 40, Palette.Ceiling)
+	air.Transparency = 1
+	air.CanCollide = false
+	air.CanQuery = false
+	air.CastShadow = false
+	local motes = Instance.new("ParticleEmitter")
+	motes.Shape = Enum.ParticleEmitterShape.Box
+	motes.ShapeStyle = Enum.ParticleEmitterShapeStyle.Volume
+	motes.Rate = 14
+	motes.Lifetime = NumberRange.new(9, 14)
+	motes.Speed = NumberRange.new(0.03, 0.15)
+	motes.SpreadAngle = Vector2.new(180, 180)
+	motes.Size = NumberSequence.new(0.07)
+	motes.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 1),
+		NumberSequenceKeypoint.new(0.3, 0.55),
+		NumberSequenceKeypoint.new(0.7, 0.55),
+		NumberSequenceKeypoint.new(1, 1),
+	})
+	motes.Color = ColorSequence.new(Palette.Paper)
+	motes.LightEmission = 0.15
+	motes.RotSpeed = NumberRange.new(-20, 20)
+	motes.Parent = air
+
 	-- Ceiling grid
 	local gridZ = H.minZ + 6
 	while gridZ < H.maxZ do
@@ -755,6 +781,26 @@ local function heroProps(folder: Folder, map: Instance)
 	end
 end
 
+-- Bills on the walls between the pillars and below the sconces, and one by the foyer bench.
+-- Each spot was checked against the pillars (z 0, 15, 30), the sconces (z 8, 17.5 and 22, 36 at
+-- y 9 and up), the wainscot (up to y 4.5) and the doors (west z -13..-5, east z 20..28).
+local function posters(folder: Folder)
+	local H = Layout.HALL
+	local west, east = H.minX + 0.5, H.maxX - 0.5
+	local spots = {
+		{ "safety", Vector3.new(west, 7, 4), Vector3.xAxis, 0 },
+		{ "missing", Vector3.new(west, 7, 19), Vector3.xAxis, -2 },
+		{ "choir", Vector3.new(west, 7, 40), Vector3.xAxis, 1 },
+		{ "cinema", Vector3.new(east, 7, 4), -Vector3.xAxis, 0 },
+		{ "headcount", Vector3.new(east, 7, 11.5), -Vector3.xAxis, 1.5 },
+		{ "missing", Vector3.new(east, 7, 39), -Vector3.xAxis, 3 },
+		{ "meeting", Vector3.new(-23.5, 7.2, 61), Vector3.xAxis, -1 },
+	}
+	for _, spot in spots do
+		Posters.hang(folder, spot[1], spot[2], spot[3], 3, spot[4])
+	end
+end
+
 function MissionDressing.start()
 	local map = Workspace:WaitForChild("Map")
 	local folder = Instance.new("Folder")
@@ -767,6 +813,7 @@ function MissionDressing.start()
 	openings(folder)
 	windows(folder)
 	sconces(folder)
+	posters(folder)
 	coatRail(folder)
 	heroProps(folder, map)
 	folder.Parent = map

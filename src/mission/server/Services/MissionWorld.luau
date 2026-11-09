@@ -24,6 +24,7 @@ MissionWorld.prompts = {} :: { [string]: ProximityPrompt }
 MissionWorld.film = nil :: Frame?
 MissionWorld.filmDoors = {} :: { [number]: Frame }
 MissionWorld.beam = nil :: Beam?
+MissionWorld.beamDust = nil :: ParticleEmitter?
 MissionWorld.hallLights = {} :: { Light }
 
 local PD = Config.Puzzle.PromptDistance
@@ -457,6 +458,40 @@ local function setPieces(map: Folder)
 	beam.Enabled = false
 	beam.Parent = projector
 	MissionWorld.beam = beam
+	-- Dust turning in the projector light, along the wide end of the beam. Off until the film runs.
+	local air = Instance.new("Part")
+	air.Name = "BeamDust"
+	air.Anchored = true
+	air.CanCollide = false
+	air.CanQuery = false
+	air.CanTouch = false
+	air.CastShadow = false
+	air.Transparency = 1
+	air.Size = Vector3.new(14, 9, 60)
+	air.Position = Vector3.new(0, 15.5, -8)
+	air.Parent = map
+	local motes = Instance.new("ParticleEmitter")
+	motes.Name = "Motes"
+	motes.Enabled = false
+	motes.Shape = Enum.ParticleEmitterShape.Box
+	motes.ShapeStyle = Enum.ParticleEmitterShapeStyle.Volume
+	motes.Rate = 40
+	motes.Lifetime = NumberRange.new(5, 9)
+	motes.Speed = NumberRange.new(0.05, 0.3)
+	motes.SpreadAngle = Vector2.new(180, 180)
+	motes.Size = NumberSequence.new(0.09)
+	motes.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 1),
+		NumberSequenceKeypoint.new(0.3, 0.35),
+		NumberSequenceKeypoint.new(0.7, 0.35),
+		NumberSequenceKeypoint.new(1, 1),
+	})
+	motes.Color = ColorSequence.new(Palette.Bulb)
+	motes.LightEmission = 0.7
+	motes.LightInfluence = 0
+	motes.RotSpeed = NumberRange.new(-30, 30)
+	motes.Parent = air
+	MissionWorld.beamDust = motes
 
 	-- Foyer dressing and documents
 	Build.box(
@@ -572,6 +607,9 @@ function MissionWorld.showFilm(doorSide: number)
 	MissionWorld.filmDoors[doorSide].Visible = true
 	if MissionWorld.beam then
 		MissionWorld.beam.Enabled = true
+		if MissionWorld.beamDust then
+			MissionWorld.beamDust.Enabled = true
+		end
 		local id = Sounds.Projector
 		if id ~= 0 then
 			local sound = Instance.new("Sound")

@@ -6,7 +6,7 @@ Stan na 2026-11-09. Plik służy do wznowienia pracy w nowej sesji. Szczegółow
 
 Kooperacyjny horror psychologiczny na Roblox w fazie Vertical Slice (Misja 001). Lobby (Hub) i misja działają solo w Studio, z tymczasową oprawą z generatorów Roblox. Cała misja i droga przez lobby do terminala przeszły pieszo, bez teleportów (`docs/05_STATUS.md`, szósty przebieg).
 
-- **Budowanie i testy:** `python scripts/check.py [--fix]` uruchamia rojo, lune, selene i stylua oraz tworzy `build/Hub.rbxl` i `build/Mission.rbxl`. Ostatni wynik: wszystko zielone, 52 testy.
+- **Budowanie i testy:** `python scripts/check.py [--fix]` uruchamia rojo, lune, selene i stylua oraz tworzy `build/Hub.rbxl` i `build/Mission.rbxl`. Ostatni wynik: wszystko zielone, 53 testy.
 - **Nazwa:** HEADCOUNT. „Poza kadrem” zostaje nazwą stanu w grze i ukrytego zakończenia. Dostępności nazwy na Roblox nie sprawdzono.
 - **Git:** gałąź `main`, zdalne repozytorium pokazuje `git remote -v`. `build/` i `Place1.rbxl` są poza repozytorium. Plan rozwoju jest w `docs/07_ROADMAP.md`.
 - **Publikacja na Roblox:** nic nie zostało opublikowane. `Config/Places` ma identyfikatory 0, więc teleport między miejscami nie może jeszcze działać. Publikacja wymaga wyraźnej zgody właściciela.
@@ -14,6 +14,7 @@ Kooperacyjny horror psychologiczny na Roblox w fazie Vertical Slice (Misja 001).
 
 ## Wykonane 2026-11-09
 
+- Wygląd: plakaty z lat 80. w sali, foyer i lobby (bez obrazków, z kształtów i czcionek), wygląd VHS w wizjerze i na taśmach, głębia ostrości, kurz w sali i w świetle projektora. Podgląd plakatów: `lune run poster_preview`. Szczegóły: `docs/05_STATUS.md`, szesnasty przebieg.
 - Warunki nocy od drugiej wizyty: krótka taśma, niespokojny Kadrowy, słabe żarówki albo uważna sala (`Core/Conditions`). Szczegóły: `docs/05_STATUS.md`, piętnasty przebieg.
 - Trendy 2026: rejestrowanie anomalii kamerą (styl Exit 8) i Kadrowy, który w ciszy słyszy głos z czatu głosowego. Szczegóły i źródła: `docs/05_STATUS.md`, czternasty przebieg.
 - Więcej strachu: widownia obraca się do kamery od zaniku prądu, bicie serca i czerwona poświata przy Kadrowym, migające światła przy jego skokach, trzy nowe anomalie (szept imienia, twarz przed obiektywem, zaciemnienie).
