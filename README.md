@@ -6,6 +6,7 @@ Kooperacyjny horror na Roblox (1–4 graczy). Kamera pokazuje to, czego nie widz
 - Architektura: [docs/03_TDD.md](docs/03_TDD.md)
 - Aktualny stan, testy i znane problemy: [docs/05_STATUS.md](docs/05_STATUS.md)
 - Plan rozwoju: [docs/07_ROADMAP.md](docs/07_ROADMAP.md)
+- Szkic Misji 002 „Kurs 17”: [docs/08_MISJA_002.md](docs/08_MISJA_002.md)
 - Punkt wznowienia pracy: [PROGRESS.md](PROGRESS.md)
 
 Język gry to angielski, także na szyldach w świecie. Polskie tłumaczenie czeka w `src/shared/Strings.luau`, wyłączone flagą `POLISH_TRANSLATION`.
