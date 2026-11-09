@@ -95,6 +95,19 @@ return {
 		assert(Route17.clock(24 * 60 + 5) == "00:05", "past midnight wraps")
 	end,
 
+	["the team gets off only at the middle stops, and the piece is always at one"] = function()
+		assert(not Route17.canExit("depot") and not Route17.canExit("west_estate"))
+		for _, stop in Route17.EXIT_STOPS do
+			assert(Route17.canExit(stop))
+		end
+		for seed = 1, 100 do
+			assert(
+				Route17.canExit(Route17.generate(seed).itemStop),
+				"the piece waits where nobody can get off"
+			)
+		end
+	end,
+
 	["stop and validator only count when pressed together"] = function()
 		assert(Route17.inSync(10, 11.2))
 		assert(not Route17.inSync(10, 12))

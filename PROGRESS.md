@@ -6,7 +6,7 @@ Stan na 2026-11-09. Plik służy do wznowienia pracy w nowej sesji. Szczegółow
 
 Kooperacyjny horror psychologiczny na Roblox w fazie Vertical Slice (Misja 001). Lobby (Hub) i misja działają solo w Studio, z tymczasową oprawą z generatorów Roblox. Cała misja i droga przez lobby do terminala przeszły pieszo, bez teleportów (`docs/05_STATUS.md`, szósty przebieg).
 
-- **Budowanie i testy:** `python scripts/check.py [--fix]` uruchamia rojo, lune, selene i stylua oraz tworzy `build/Hub.rbxl` i `build/Mission.rbxl`. Ostatni wynik: wszystko zielone, 60 testów.
+- **Budowanie i testy:** `python scripts/check.py [--fix]` uruchamia rojo, lune, selene i stylua oraz tworzy `build/Hub.rbxl` i `build/Mission.rbxl`. Ostatni wynik: wszystko zielone, 61 testów.
 - **Nazwa:** HEADCOUNT. „Poza kadrem” zostaje nazwą stanu w grze i ukrytego zakończenia. Dostępności nazwy na Roblox nie sprawdzono.
 - **Git:** gałąź `main`, zdalne repozytorium pokazuje `git remote -v`. `build/` i `Place1.rbxl` są poza repozytorium. Plan rozwoju jest w `docs/07_ROADMAP.md`.
 - **Publikacja na Roblox:** nic nie zostało opublikowane. `Config/Places` ma identyfikatory 0, więc teleport między miejscami nie może jeszcze działać. Publikacja wymaga wyraźnej zgody właściciela.
@@ -14,7 +14,7 @@ Kooperacyjny horror psychologiczny na Roblox w fazie Vertical Slice (Misja 001).
 
 ## Wykonane 2026-11-09
 
-- Szkic Misji 002 „Kurs 17” w `docs/08_MISJA_002.md`: nocny autobus, Dubler powtarzający ruchy gracza sprzed 30 s, Kanar (bileter T. Malec), przystanki jako większe przestrzenie. Logika z testami: `Core/StandIn` i `Core/Route17` (7 testów, razem 60). Miejsca w Roblox jeszcze nie ma.
+- Szkic Misji 002 „Kurs 17” w `docs/08_MISJA_002.md`: nocny autobus, Dubler powtarzający ruchy gracza sprzed 30 s, Kanar (bileter T. Malec), przystanki jako większe przestrzenie. Logika z testami: `Core/StandIn` i `Core/Route17` (8 testów, razem 61; decyzje projektowe na końcu dokumentu). Miejsca w Roblox jeszcze nie ma.
 - Przeciwnicy i fabuła: Kadrowy porusza się poklatkowo, pochyla i sięga długą ręką; nowy przeciwnik Bileter w ciemności widzi tylko światło latarki; trzy nowe dokumenty i zapowiedź następnej taśmy. Audyt geometrii `lune run audit_map` znalazł i pomógł naprawić lampę w ścianie, donicę w regale i migającą boazerię. Szczegóły: `docs/05_STATUS.md`, siedemnasty przebieg.
 - Wygląd: plakaty z lat 80. w sali, foyer i lobby (bez obrazków, z kształtów i czcionek), wygląd VHS w wizjerze i na taśmach, głębia ostrości, kurz w sali i w świetle projektora. Podgląd plakatów: `lune run poster_preview`. Szczegóły: `docs/05_STATUS.md`, szesnasty przebieg.
 - Warunki nocy od drugiej wizyty: krótka taśma, niespokojny Kadrowy, słabe żarówki albo uważna sala (`Core/Conditions`). Szczegóły: `docs/05_STATUS.md`, piętnasty przebieg.

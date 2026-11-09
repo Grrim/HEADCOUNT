@@ -10,6 +10,10 @@ local Route17 = {}
 Route17.STOPS = { "depot", "jutrzenka", "hospital", "loop", "west_estate" }
 -- The ones the bus can be asked to stop at for a piece; the first and last are fixed.
 local MIDDLE = { "jutrzenka", "hospital", "loop" }
+-- The team gets off only at the middle stops, for this long: the depot is the start and the
+-- estate is the way out in the climax (docs/08_MISJA_002.md, decisions).
+Route17.EXIT_STOPS = table.clone(MIDDLE)
+Route17.EXIT_SECONDS = 90
 -- Two coaches, nine rows each: eighteen seats, and the ones beside the three doors.
 Route17.SEATS = 18
 Route17.DOOR_SEATS = { 1, 2, 9, 10, 17, 18 }
@@ -86,6 +90,10 @@ function Route17.stopForTicket(run: Run, minutes: number): string?
 		end
 	end
 	return nil
+end
+
+function Route17.canExit(stop: string): boolean
+	return table.find(Route17.EXIT_STOPS, stop) ~= nil
 end
 
 -- STOP and the validator, pressed by two people (or a person and their stand-in) together.
