@@ -10,6 +10,7 @@ local Cosmetics = require(ReplicatedStorage.Shared.Config.Cosmetics)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Palette = require(ReplicatedStorage.Shared.Config.Palette)
 local Strings = require(ReplicatedStorage.Shared.Strings)
+local Panels = require(ReplicatedStorage.ClientCommon.Panels)
 local Ui = require(ReplicatedStorage.ClientCommon.Ui)
 
 local LockerUi = {}
@@ -122,6 +123,7 @@ function LockerUi.init()
 		TextSize = 15,
 		Text = "",
 	}, panel)
+	Panels.watch(panel)
 end
 
 function LockerUi.start()

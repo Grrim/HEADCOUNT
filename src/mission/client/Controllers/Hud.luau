@@ -33,10 +33,25 @@ local subtitleToken = 0
 local lastPhase = ""
 local cinema = false
 
+-- Player names and story text go into rich text, so anything that looks like a tag is escaped.
+local function escape(text: string): string
+	return (text:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;"))
+end
+
+-- The dispatcher speaks with a green RADIO mark in front, so a voice on the radio never reads
+-- like the player's own thought.
+local function styled(text: string): string
+	local rest = text:match("^RADIO: (.*)$")
+	if rest then
+		return `<font color="#B6D696"><b>RADIO</b></font>   {escape(rest)}`
+	end
+	return escape(text)
+end
+
 function Hud.subtitle(text: string, seconds: number?)
 	subtitleToken += 1
 	local token = subtitleToken
-	subtitleLabel.Text = text
+	subtitleLabel.Text = styled(text)
 	subtitleLabel.TextTransparency = 0
 	subtitleLabel.Visible = true
 	task.delay(seconds or math.max(4, #text / 14), function()
@@ -44,6 +59,13 @@ function Hud.subtitle(text: string, seconds: number?)
 			TweenService:Create(subtitleLabel, TweenInfo.new(0.6), { TextTransparency = 1 }):Play()
 		end
 	end)
+end
+
+-- True while a line is on screen and not yet fading out.
+function Hud.isSpeaking(): boolean
+	return subtitleLabel.Visible
+		and subtitleLabel.Text ~= ""
+		and subtitleLabel.TextTransparency < 0.5
 end
 
 local function applyVisibility()
@@ -185,6 +207,7 @@ local function buildGui()
 		AnchorPoint = Vector2.new(0.5, 1),
 		Position = UDim2.fromScale(0.5, 0.86),
 		TextSize = 19,
+		RichText = true,
 		Text = "",
 		ZIndex = 5,
 	}, gui, 820)

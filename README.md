@@ -24,6 +24,8 @@ Ostatnio:
 - Notatnik terenowy (J): zapisuje wskazówki, pozwala ponownie przeczytać dokumenty, pokazuje sterowanie i ma suwak jasności. Karta celu ma linię „NEXT” z konkretnym następnym krokiem, a radio podpowiada, gdy gracz długo stoi w miejscu.
 - Pudełko czystych kaset na ladzie kasy w foyer: gracz, któremu skończyła się taśma, nie utknie już na stałe.
 - Terminal ma przycisk PLAY SOLO, który startuje misję jednym kliknięciem.
+- Więcej strachu: widownia w wizjerze obraca się w stronę kamery, bliskość Kadrowego słychać i widać, nowe anomalie, kinowe plansze rozdziałów.
+- Piwnica rozbudowana o ciemny magazyn z regałami. Bezpiecznik jest na końcu długiej alejki.
 - Cała misja i droga do terminala przeszły pieszo w Studio, bez teleportów.
 - Dokumenty w misji da się zamknąć, a wskazówka z magnetofonu nie nachodzi na napisy radia.
 - Usunięte migotanie grafiki przy drzwiach (nakładające się powierzchnie) w lobby i misji.

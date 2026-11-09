@@ -2,6 +2,7 @@
 -- The 192 who never left. They exist only on this client and only behind the lens: the empty hall
 -- to the eye, the full hall through the viewfinder. Also owns the other things only a lens shows.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
 local AudioDirector = require(ReplicatedStorage.ClientCommon.AudioDirector)
@@ -29,6 +30,17 @@ local liveLensHides = false
 local shown = true
 local risen: { [number]: boolean } = {}
 local rising = false
+
+-- After the lights go out the hall starts to watch back: through the lens, a few of them turn in
+-- their chairs to face the camera and keep facing it. More of them each phase.
+local WATCH_RANGE = 28
+local WATCH_EVERY = 2.2
+local WATCHERS_BY_PHASE: { [string]: number } =
+	{ Power = 3, Projector = 5, Door = 7, Register = 9, Climax = 14 }
+local watchYaw: { [number]: number } = {}
+local watchCount = 0
+local watchLimit = 0
+local sinceWatch = 0
 
 -- In the climax they stand, row by row, starting from the back.
 local function startRising(placeRow: (number) -> ())
@@ -95,6 +107,10 @@ local function placeFigure(id: number)
 	local reversed = reversedRows ~= nil and row % (reversedRows :: number) == 0
 	local flip = reversed ~= (turned[id] == true)
 	local rotation = if flip then figure.pivot * CFrame.Angles(0, math.pi, 0) else figure.pivot
+	local yaw = watchYaw[id]
+	if yaw then
+		rotation = figure.pivot * CFrame.Angles(0, yaw, 0)
+	end
 	local lift = if risen[row] then CFrame.new(0, 2.3, 0) else CFrame.new()
 	for index, item in figure.parts do
 		item.CFrame = lift * rotation * figure.pivot:ToObjectSpace(figure.base[index])
@@ -198,6 +214,80 @@ function Audience.setPlayback(on: boolean, seats: { number }?)
 	Audience.refresh()
 end
 
+-- The yaw that turns a seated figure to look at a point: 0 faces the stage (-Z).
+local function yawTowards(id: number, target: Vector3): number
+	local x, z = Seats.position(id)
+	return math.atan2(-(target.X - x), -(target.Z - z))
+end
+
+local function clearWatchers()
+	if watchCount == 0 then
+		return
+	end
+	local ids = {}
+	for id in watchYaw do
+		table.insert(ids, id)
+	end
+	watchYaw = {}
+	watchCount = 0
+	for _, id in ids do
+		placeFigure(id)
+	end
+end
+
+-- Someone near the middle of the picture, close enough to be seen turning, not yet watching.
+-- Row A is left alone: in the dark it holds up the code.
+local function pickWatcher(camera: Camera): number?
+	local origin = camera.CFrame.Position
+	local look = camera.CFrame.LookVector
+	local candidates = {}
+	for id in figures do
+		local row = Seats.fromId(id)
+		if row > 1 and not watchYaw[id] and not turned[id] then
+			local x, z = Seats.position(id)
+			local offset = Vector3.new(x, 4, z) - origin
+			local distance = offset.Magnitude
+			if distance > 4 and distance < WATCH_RANGE and look:Dot(offset.Unit) > 0.55 then
+				table.insert(candidates, id)
+			end
+		end
+	end
+	if #candidates == 0 then
+		return nil
+	end
+	return candidates[math.random(1, #candidates)]
+end
+
+local function watchStep(dt: number)
+	local camera = Workspace.CurrentCamera
+	local looking = LensView.raised and not Audience.playback and not Audience.ended
+	if not camera or watchLimit == 0 or not looking then
+		clearWatchers()
+		sinceWatch = 0
+		return
+	end
+	sinceWatch += dt
+	if sinceWatch >= WATCH_EVERY and watchCount < watchLimit then
+		sinceWatch = 0
+		local id = pickWatcher(camera)
+		if id then
+			-- Starts from where they already face, so the turn is seen, not a snap.
+			local row = Seats.fromId(id)
+			local reversed = reversedRows ~= nil and row % (reversedRows :: number) == 0
+			watchYaw[id] = if reversed then math.pi else 0
+			watchCount += 1
+		end
+	end
+	local target = camera.CFrame.Position
+	for id, yaw in watchYaw do
+		local wanted = yawTowards(id, target)
+		local delta = (wanted - yaw + math.pi) % (2 * math.pi) - math.pi
+		-- Slow, and slower still the nearer they are to facing you.
+		watchYaw[id] = yaw + delta * math.min(1, dt * 0.9)
+		placeFigure(id)
+	end
+end
+
 function Audience.init()
 	layer = Instance.new("Folder")
 	layer.Name = "LensLayer"
@@ -205,6 +295,7 @@ function Audience.init()
 	buildBench()
 	layer.Parent = Workspace
 	Audience.refresh()
+	RunService.Heartbeat:Connect(watchStep)
 	LensView.onChanged(function(raised)
 		Audience.refresh()
 		-- The first look shows someone on the bench. The next look, they have moved closer.
@@ -229,6 +320,7 @@ function Audience.init()
 		if state.doorSide then
 			buildHiddenDoor(state.doorSide)
 		end
+		watchLimit = WATCHERS_BY_PHASE[state.phase] or 0
 		Audience.climax = state.phase == "Climax" or state.phase == "Done"
 		if state.phase == "Climax" then
 			startRising(function(row)

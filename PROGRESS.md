@@ -14,6 +14,10 @@ Kooperacyjny horror psychologiczny na Roblox w fazie Vertical Slice (Misja 001).
 
 ## Wykonane 2026-11-09
 
+- Więcej strachu: widownia obraca się do kamery od zaniku prądu, bicie serca i czerwona poświata przy Kadrowym, migające światła przy jego skokach, trzy nowe anomalie (szept imienia, twarz przed obiektywem, zaciemnienie).
+- Większa piwnica: magazyn z regałami w kształcie węża, bezpiecznik na końcu pod czerwoną lampą.
+- Kinowe plansze rozdziałów, znacznik RADIO w napisach, zasady w notatniku, obsługa kontrolera w panelach.
+- Szczegóły: `docs/05_STATUS.md`, trzynasty przebieg. Nic z tego nie było uruchomione w Studio.
 - Usunięta blokada misji: pudełko czystych kaset na ladzie kasy w foyer oddaje taśmę graczowi, który zużył wszystkie trzy.
 - Notatnik terenowy (J / L1 / NOTES) w misji i panel pomocy w lobby: wskazówki, dokumenty do ponownego czytania, sterowanie, jasność.
 - Karta celu pokazuje konkretny następny krok (`Core/Guide`, 3 nowe testy), a radio raz podpowiada, gdy gracz długo stoi w miejscu.

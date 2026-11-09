@@ -55,6 +55,9 @@ local currentText = ""
 local stepId = ""
 local stepSince = 0
 local nudged: { [string]: boolean } = {}
+-- Rules of the place, in the order the player ran into them. The first is known from the start.
+local rules: { string } = { "rule_tape" }
+local ruleSet: { [string]: boolean } = { rule_tape = true }
 
 local function rowsOf(seatIds: { number }): { string }
 	local set: { [string]: boolean } = {}
@@ -175,6 +178,11 @@ local function render(api: Journal.Api)
 		api.line(Strings.get("notes_none"), Palette.WallDark)
 	end
 
+	api.heading(Strings.get("notes_rules"))
+	for _, rule in rules do
+		api.line(`- {Strings.get(rule)}`)
+	end
+
 	if #docs > 0 or registerNames then
 		api.heading(Strings.get("notes_docs"))
 		for _, docId in docs do
@@ -196,6 +204,16 @@ local function render(api: Journal.Api)
 	api.controls(CONTROLS)
 	api.heading(Strings.get("notes_settings"))
 	api.brightness()
+end
+
+local function learn(rule: string)
+	if ruleSet[rule] then
+		return
+	end
+	ruleSet[rule] = true
+	table.insert(rules, rule)
+	Journal.ping()
+	Journal.refresh()
 end
 
 local function isCut(): boolean
@@ -272,6 +290,10 @@ function Notebook.start()
 	controllers.Playback.onStopped(function(clip)
 		syncTag()
 		-- Say what the tape showed while it is still fresh, so nobody has to rewatch it.
+		if clip then
+			Journal.ping()
+			learn("rule_replay")
+		end
 		if clip and clip.id > 0 and state and state.phase == "Protocol" then
 			local rows = rowsOf(clip.seats)
 			if #rows > 0 then
@@ -295,6 +317,7 @@ function Notebook.start()
 		else
 			return
 		end
+		Journal.ping()
 		update()
 	end)
 	Net.get("CodeDigits").OnClientEvent:Connect(function(hand: { [string]: number })
@@ -313,6 +336,7 @@ function Notebook.start()
 	controllers.CodeCards.onSeen(function(position: number, digit: number)
 		if seenCode[position] ~= digit then
 			seenCode[position] = digit
+			Journal.ping()
 			update()
 		end
 	end)
@@ -321,11 +345,13 @@ function Notebook.start()
 		if not docSet[docId] and docId ~= "doc_register" then
 			docSet[docId] = true
 			table.insert(docs, docId)
+			Journal.ping()
 			Journal.refresh()
 		end
 	end)
 	Net.get("RegisterShown").OnClientEvent:Connect(function(names: { string })
 		registerNames = names
+		Journal.ping()
 		Journal.refresh()
 	end)
 	Net.get("EndMission").OnClientEvent:Connect(function()
@@ -333,6 +359,18 @@ function Notebook.start()
 		Journal.close()
 		syncTag()
 		update()
+	end)
+	-- What the Registrar does is learned by meeting it, and written down the first time.
+	Net.get("RegistrarEvent").OnClientEvent:Connect(function(kind: string)
+		if kind == "preJump" or kind == "jump" then
+			learn("rule_silence")
+		elseif kind == "exposure" then
+			learn("rule_exposure")
+		elseif kind == "reach" then
+			learn("rule_reach")
+		elseif kind == "cut" then
+			learn("rule_cut")
+		end
 	end)
 	LensView.onChanged(syncTag)
 	syncTag()

@@ -42,6 +42,8 @@ local tag: TextButton
 local options: Options? = nil
 local isOpen = false
 local tagWanted = true
+local tagText = ""
+local pingToken = 0
 
 local function usingGamepad(): boolean
 	return UserInputService.GamepadEnabled and not UserInputService.KeyboardEnabled
@@ -171,6 +173,11 @@ function Journal.open()
 	end
 	isOpen = true
 	render()
+	-- Reading the notebook clears the mark.
+	pingToken += 1
+	tag.Text = tagText
+	tag.TextColor3 = Palette.Paper
+	tag.BorderColor3 = Palette.Paper
 	panel.Visible = true
 	tag.Visible = false
 	AudioDirector.play("Paper", 0.4)
@@ -210,6 +217,25 @@ function Journal.setTagVisible(visible: boolean)
 	if tag then
 		tag.Visible = visible and not isOpen
 	end
+end
+
+-- Something new was written down: the corner tag turns red and gains a mark for a few seconds.
+function Journal.ping()
+	if not tag or isOpen then
+		return
+	end
+	pingToken += 1
+	local token = pingToken
+	tag.Text = `{tagText} +`
+	tag.TextColor3 = Palette.Rec
+	tag.BorderColor3 = Palette.Rec
+	task.delay(6, function()
+		if token == pingToken then
+			tag.Text = tagText
+			tag.TextColor3 = Palette.Paper
+			tag.BorderColor3 = Palette.Paper
+		end
+	end)
 end
 
 function Journal.setup(opts: Options)
@@ -268,21 +294,17 @@ function Journal.setup(opts: Options)
 	Ui.make("UIPadding", { PaddingRight = UDim.new(0, 12), PaddingBottom = UDim.new(0, 10) }, list)
 
 	local keyName = if Input.isTouch then nil else Journal.keyName("J", "L1")
-	tag = Ui.button(
-		if keyName then Strings.get(opts.tagKey, keyName) else Strings.get(opts.touchKey),
-		{
-			AnchorPoint = Vector2.new(1, 0),
-			Position = UDim2.new(1, -14, 0, 52),
-			Size = UDim2.fromOffset(if keyName then 128 else 104, 30),
-			TextSize = 14,
-			BackgroundTransparency = 0.35,
-			BackgroundColor3 = Color3.fromRGB(8, 10, 12),
-			BorderColor3 = Palette.Paper,
-			TextColor3 = Palette.Paper,
-		},
-		gui,
-		Journal.toggle
-	)
+	tagText = if keyName then Strings.get(opts.tagKey, keyName) else Strings.get(opts.touchKey)
+	tag = Ui.button(tagText, {
+		AnchorPoint = Vector2.new(1, 0),
+		Position = UDim2.new(1, -14, 0, 52),
+		Size = UDim2.fromOffset(if keyName then 128 else 104, 30),
+		TextSize = 14,
+		BackgroundTransparency = 0.35,
+		BackgroundColor3 = Color3.fromRGB(8, 10, 12),
+		BorderColor3 = Palette.Paper,
+		TextColor3 = Palette.Paper,
+	}, gui, Journal.toggle)
 	Input.bind("Journal", Journal.toggle, { Enum.KeyCode.J, Enum.KeyCode.ButtonL1 })
 	titleLabel.Text = Strings.get(opts.titleKey)
 end

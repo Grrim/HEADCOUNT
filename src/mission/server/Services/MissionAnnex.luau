@@ -78,6 +78,8 @@ local function office(map: Folder, prompts: { [string]: ProximityPrompt })
 	glow.Parent = lamp
 end
 
+local cellar: (map: Folder, prompts: { [string]: ProximityPrompt }) -> ()
+
 local function basement(map: Folder, prompts: { [string]: ProximityPrompt })
 	local B = Layout.BASEMENT
 	local concrete = Enum.Material.Concrete
@@ -117,6 +119,7 @@ local function basement(map: Folder, prompts: { [string]: ProximityPrompt })
 	Build.wallX(map, "BasementNorth", B.minZ, B.minX, B.maxX, B.floorY, B.floorY + B.height, {
 		{ -66, -60, B.floorY, B.floorY + B.height },
 	}, grey, concrete)
+	-- A doorway through to the storage cellar behind the boiler room.
 	Build.wallX(
 		map,
 		"BasementSouth",
@@ -125,7 +128,7 @@ local function basement(map: Folder, prompts: { [string]: ProximityPrompt })
 		B.maxX,
 		B.floorY,
 		B.floorY + B.height,
-		{},
+		{ { -74, -66, B.floorY, B.floorY + 8 } },
 		grey,
 		concrete
 	)
@@ -185,8 +188,9 @@ local function basement(map: Folder, prompts: { [string]: ProximityPrompt })
 		pipe.CanCollide = false
 	end
 	for index = 0, 5 do
-		local x = -58 + index * 0.4
-		local z = 36 + (index % 3) * 2.8
+		-- Against the east wall, clear of the way from the stairs to the storage doorway.
+		local x = -52 + index * 0.4
+		local z = 30 + (index % 3) * 2.8
 		Build.chair(
 			map,
 			"SpareChair",
@@ -194,16 +198,77 @@ local function basement(map: Folder, prompts: { [string]: ProximityPrompt })
 		)
 	end
 
-	-- The breaker, in the far corner. Its prompt opens a keypad on the client.
+	Build.panel(map, -71, B.floorY + B.height - 0.1, B.maxZ - 6, 3, 1.5, 2, 26, nil, true)
+	Build.panel(map, -63, 9.9, -13, 3, 1.5, 1.4, 20)
+	cellar(map, prompts)
+end
+
+-- Storage behind the boiler room. Four rows of shelving, each open at alternate ends, turn the
+-- room into one switchback aisle about a hundred and forty studs long. With the mains out, the
+-- only light is the red lamp over the breaker at the very end.
+function cellar(map: Folder, prompts: { [string]: ProximityPrompt })
+	local C = Layout.CELLAR
+	local concrete = Enum.Material.Concrete
+	local grey = Palette.WallDark
+	local top = C.floorY + C.height
+	Build.box(
+		map,
+		"CellarFloor",
+		C.minX,
+		C.floorY - 1,
+		C.minZ,
+		C.maxX,
+		C.floorY,
+		C.maxZ,
+		grey,
+		concrete
+	)
+	Build.box(map, "CellarCeiling", C.minX, top, C.minZ, C.maxX, top + 1, C.maxZ, Palette.Ceiling)
+	-- The north side is the boiler room's south wall; these start where it ends.
+	Build.wallZ(map, "CellarWest", C.minX, C.minZ + 0.5, C.maxZ, C.floorY, top, {}, grey, concrete)
+	Build.wallZ(map, "CellarEast", C.maxX, C.minZ + 0.5, C.maxZ, C.floorY, top, {}, grey, concrete)
+	Build.wallX(map, "CellarSouth", C.maxZ, C.minX, C.maxX, C.floorY, top, {}, grey, concrete)
+
+	-- { z of the row, open at the east end }. The gaps are 9.5 wide, the aisles 6.
+	local rows = { { 50, true }, { 58, false }, { 66, true }, { 74, false } }
+	for _, row in rows do
+		local z = row[1] :: number
+		local openEast = row[2] :: boolean
+		local fromX = if openEast then C.minX + 0.5 else -80
+		local toX = if openEast then -60 else C.maxX - 0.5
+		Build.shelf(map, fromX, z, toX, z + 2, C.floorY, 8.5)
+	end
+	-- A few boxes left in the aisles, so the way is never a straight run in the torchlight.
+	-- Each is pushed against a shelf, leaving at least 3.4 studs of aisle beside it.
+	-- { centre x, near edge z }.
+	for _, spot in { { -84, 52.1 }, { -57, 60.1 }, { -86, 68.1 }, { -66, 76.1 } } do
+		local crate = Build.box(
+			map,
+			"CellarCrate",
+			spot[1] - 1,
+			C.floorY,
+			spot[2],
+			spot[1] + 1,
+			C.floorY + 2,
+			spot[2] + 2,
+			Palette.WoodDark,
+			Enum.Material.Wood
+		)
+		crate.CastShadow = true
+	end
+	Build.panel(map, -70, top - 0.1, 55, 3, 1.5, 1.1, 22)
+	Build.panel(map, -70, top - 0.1, 71, 3, 1.5, 1.1, 22)
+
+	-- The breaker, at the end of the last aisle. Its prompt opens a keypad on the client.
 	local panel = Build.box(
 		map,
 		"BreakerPanel",
-		-74,
-		B.floorY + 2.5,
-		B.maxZ - 1.2,
-		-68,
-		B.floorY + 7.5,
-		B.maxZ - 0.5,
+		-60,
+		C.floorY + 2.5,
+		C.maxZ - 1.2,
+		-54,
+		C.floorY + 7.5,
+		C.maxZ - 0.5,
 		Palette.Metal,
 		Enum.Material.Metal
 	)
@@ -215,20 +280,17 @@ local function basement(map: Folder, prompts: { [string]: ProximityPrompt })
 	local doc = Build.box(
 		map,
 		"DocBasement",
-		-66,
-		B.floorY + 4,
-		B.maxZ - 0.6,
-		-63.5,
-		B.floorY + 7,
-		B.maxZ - 0.5,
+		-53.5,
+		C.floorY + 4,
+		C.maxZ - 0.6,
+		-51,
+		C.floorY + 7,
+		C.maxZ - 0.5,
 		Palette.Paper
 	)
 	doc.CanCollide = false
 	Build.label(doc, Enum.NormalId.Front, "!", Palette.Rec)
 	prompts.DocBasement = Build.prompt(doc, "act_read", "obj_document", nil, PD)
-
-	Build.panel(map, -71, B.floorY + B.height - 0.1, B.maxZ - 6, 3, 1.5, 2, 26, nil, true)
-	Build.panel(map, -63, 9.9, -13, 3, 1.5, 1.4, 20)
 end
 
 local function reels(map: Folder, prompts: { [string]: ProximityPrompt })
@@ -271,6 +333,8 @@ local function emergency(map: Folder): { Light }
 		{ -44, 11, -20 },
 		{ -63, 9, -13 },
 		{ -75, -4, 28 },
+		-- Over the breaker, at the end of the storage aisle: the one thing to walk towards.
+		{ -57, -3.5, 80.3 },
 	}
 	for _, spot in spots do
 		local lamp = Build.box(

@@ -13,6 +13,8 @@ return {
 	Crowd = 9112844097, -- quiet crowd room tone
 	RegistrarJump = 9125484526, -- deep hit, reverberant
 	Reach = 79337190843902, -- horror drum hit
+	-- Stand-in: the drum hit pitched down and played twice reads as a heartbeat. Replace with a real one.
+	Heartbeat = 79337190843902,
 	Cut = 9125484526,
 	Knock = 9120918417, -- knock on a wooden door
 	Radio = 9118026602, -- "Radio Static 1", 2.7 s

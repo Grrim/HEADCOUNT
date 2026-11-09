@@ -11,6 +11,9 @@ Layout.BOOTH = { minX = -30, maxX = 20, minZ = 44, maxZ = 56, floorY = 14, heigh
 Layout.CORRIDOR = { minX = -48, maxX = -39, minZ = -44, maxZ = -4, height = 13 }
 Layout.OFFICE = { minX = 39, maxX = 60, minZ = 12, maxZ = 34, height = 12 }
 Layout.BASEMENT = { minX = -90, maxX = -50, minZ = 14, maxZ = 44, floorY = -12, height = 10 }
+-- Storage behind the boiler room: rows of shelving laid out as one long switchback aisle, with
+-- the breaker at the very end of it.
+Layout.CELLAR = { minX = -90, maxX = -50, minZ = 44, maxZ = 82, floorY = -12, height = 10 }
 Layout.ARCHIVE = { minX = -30, maxX = 30, minZ = -68, maxZ = -40, floorY = 3, height = 12 }
 
 Layout.SPAWN = { x = 0, y = 3, z = 68 }
@@ -49,7 +52,8 @@ Layout.NODES = {
 	corridorSouth = { x = -43, y = 0, z = -9, edges = { "frontWest", "corridorNorth", "landing" } },
 	landing = { x = -55, y = 0, z = -13, edges = { "corridorSouth", "stairs" } },
 	stairs = { x = -63, y = -6, z = 3, edges = { "landing", "basement" } },
-	basement = { x = -68, y = -12, z = 30, edges = { "stairs" } },
+	basement = { x = -68, y = -12, z = 30, edges = { "stairs", "cellar" } },
+	cellar = { x = -70, y = -12, z = 63, edges = { "basement" } },
 	corridorNorth = { x = -43, y = 3, z = -38, edges = { "corridorSouth", "wing" } },
 	wing = { x = -33, y = 3, z = -32, edges = { "corridorNorth", "stage" } },
 	stage = { x = 12, y = 3, z = -30, edges = { "aisleFront", "wing", "archive" } },

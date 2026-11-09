@@ -362,3 +362,26 @@ Do sprawdzenia w Studio:
 - czy linia „NEXT” nie robi z karty celu zbyt długiego bloku na telefonie,
 - czy podpowiedzi radia nie przychodzą za wcześnie dla człowieka (limity w `Core/Guide.luau`),
 - PLAY SOLO w Studio kończy się komunikatem o braku publikacji, tak jak BEGIN; pełny przebieg wymaga opublikowanej gry.
+
+## Trzynasty przebieg: strach, postacie, większa piwnica, UI
+
+Stan na 2026-11-09, po prośbie właściciela o lepsze UI i postacie, większe pomieszczenia, ciekawszą misję i więcej strachu. Zmiany tylko w kodzie, **bez uruchomienia w Studio**. Bramki zielone: rojo (oba miejsca), lune (51 testów), selene, stylua. Nowych modeli 3D nie było jak zrobić bez Studio, więc postacie „ożywają” przez zachowanie, nie przez nowe siatki.
+
+| Zmiana | Pliki |
+|---|---|
+| **Widownia patrzy:** od zaniku prądu, przez wizjer, kilka postaci w zasięgu 28 jednostek powoli obraca się na krzesłach w stronę kamery i ją śledzi. Ich liczba rośnie z fazą (3 → 14 w kulminacji), a po opuszczeniu kamery wracają na miejsce. Rząd A (kod) i fazy z zagadką taśm są wyłączone, żeby nie mylić z „odwróconą osobą” | `Audience.luau` |
+| **Bliskość Kadrowego:** gdy jest obudzony, bicie serca przyspiesza z odległością (62 → 12 jednostek), a brzegi obrazu pulsują na czerwono. Przy każdym jego skoku światła w promieniu 48 jednostek migają. Bicie serca to tymczasowo przyciszony, obniżony `Reach` (`Sounds.Heartbeat`) | `Dread.luau`, `Sounds.luau` |
+| **Nowe anomalie:** szept imienia gracza zza pleców (od ok. 230 s), twarz z widowni tuż przed obiektywem na 0,4 s przy podniesionej kamerze (raz, od ok. 340 s), dwusekundowe zaciemnienie całego budynku dla jednego gracza (od ok. 430 s, nie w fazie Power) | `Core/Omens.luau`, `OmenDirector.luau` |
+| **Większa piwnica:** za kotłownią, przez drzwi w jej południowej ścianie (x −74…−66), jest magazyn 40 × 38 z czterema rzędami regałów otwartych na zmianę z dwóch stron, czyli jedna długa alejka w kształcie węża (ok. 140 jednostek). Bezpiecznik i kartka stoją na końcu, pod czerwoną lampą awaryjną, która po zaniku prądu jest jedynym światłem. Kadrowy ma tam nowy węzeł `cellar`. Zapasowe krzesła w kotłowni przesunięte pod wschodnią ścianę | `MissionAnnex.luau`, `Core/Layout.luau`, `Strings` |
+| **Plansze rozdziałów:** każda faza zaczyna się kinową planszą „PART I–V” z nazwą wpisywaną znak po znaku (pierwsza z miejscem i datą). Czeka, aż skończy się taśma | `Titles.luau`, `Strings` |
+| **Notatnik:** sekcja „WHAT WE KNOW” z zasadami odkrywanymi w grze (taśma, seanse, cisza, patrzenie za długo, sięganie, wycięcie z kadru). Tag w rogu robi się czerwony z „+” przy nowym wpisie | `Notebook.luau`, `Journal.luau` |
+| **Kontroler:** terminal, archiwum, szafka, klawiatura kodu i okno powrotu zaznaczają pierwszy przycisk dla D-pada, a B je zamyka | `client_common/Panels.luau` i kontrolery paneli |
+| **UI:** komunikaty radia mają zielony znacznik RADIO (rich text, nazwy graczy są escapowane). Terminal pokazuje „1-4 players, about 20 min, headphones recommended” | `Hud.luau`, `Terminal.luau`, `Config/Missions` |
+
+Do sprawdzenia w Studio:
+- przejście pieszo kotłownia → drzwi → cała alejka magazynu → bezpiecznik, także z latarką po zaniku prądu (alejki 6, przejścia 9,5, przy skrzyniach min. 3,4 jednostki),
+- czy obracające się postacie nie wchodzą zbyt mocno w oparcia krzeseł i czy wyglądają strasznie, a nie śmiesznie,
+- brzmienie „bicia serca” z bębna i siła czerwonej poświaty (nie może przeszkadzać w czytaniu),
+- czy twarz przed obiektywem wypada na wysokości oczu (zakładam głowę ok. 4,4 nad podłogą postaci),
+- czy plansze rozdziałów nie nakładają się na odprawę radia na starcie,
+- czas misji po wydłużeniu drogi do bezpiecznika.

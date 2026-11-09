@@ -7,6 +7,7 @@ local AudioDirector = require(ReplicatedStorage.ClientCommon.AudioDirector)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Palette = require(ReplicatedStorage.Shared.Config.Palette)
 local Strings = require(ReplicatedStorage.Shared.Strings)
+local Panels = require(ReplicatedStorage.ClientCommon.Panels)
 local Ui = require(ReplicatedStorage.ClientCommon.Ui)
 
 local ArchiveUi = {}
@@ -117,6 +118,7 @@ function ArchiveUi.init()
 		TextSize = 16,
 		Text = "",
 	}, panel)
+	Panels.watch(panel)
 end
 
 function ArchiveUi.start()

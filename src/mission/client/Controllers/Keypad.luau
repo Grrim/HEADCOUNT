@@ -8,6 +8,7 @@ local AudioDirector = require(ReplicatedStorage.ClientCommon.AudioDirector)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Palette = require(ReplicatedStorage.Shared.Config.Palette)
 local Strings = require(ReplicatedStorage.Shared.Strings)
+local Panels = require(ReplicatedStorage.ClientCommon.Panels)
 local Ui = require(ReplicatedStorage.ClientCommon.Ui)
 
 local Keypad = {}
@@ -102,6 +103,11 @@ function Keypad.init()
 			panel.Visible = false
 		end
 	)
+	Panels.watch(panel, function()
+		entry = {}
+		render()
+		panel.Visible = false
+	end)
 end
 
 function Keypad.start()

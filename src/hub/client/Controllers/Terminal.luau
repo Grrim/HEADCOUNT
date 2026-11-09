@@ -12,6 +12,7 @@ local Missions = require(ReplicatedStorage.Shared.Config.Missions)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Palette = require(ReplicatedStorage.Shared.Config.Palette)
 local Strings = require(ReplicatedStorage.Shared.Strings)
+local Panels = require(ReplicatedStorage.ClientCommon.Panels)
 local Ui = require(ReplicatedStorage.ClientCommon.Ui)
 
 local Terminal = {}
@@ -28,6 +29,8 @@ local prepCount: TextLabel
 local prepAbort: TextButton
 local rejoinPanel: Frame
 local parties: { any } = {}
+-- The action a gamepad should land on after each redraw: SOLO, READY or BEGIN.
+local mainButton: TextButton? = nil
 
 local function myParty(): any
 	for _, party in parties do
@@ -147,14 +150,17 @@ local function renderMyParty(party: any)
 	for index, entry in entries do
 		-- Ready is what everyone in a party has to press; the other two are secondary.
 		local make = if index == 1 and not amReady then Ui.primary else Ui.button
-		make(entry[1], {
+		local button = make(entry[1], {
 			Position = UDim2.new((index - 1) / 3, 2, 0, 0),
 			Size = UDim2.new(1 / 3, -4, 1, 0),
 			TextSize = 15,
 		}, actions, entry[2])
+		if index == 1 then
+			mainButton = button
+		end
 	end
 	if amLeader then
-		Ui.primary(
+		local begin = Ui.primary(
 			Strings.get("hub_start"),
 			{
 				Position = UDim2.new(0, 2, 0, y + 52),
@@ -168,22 +174,28 @@ local function renderMyParty(party: any)
 			end,
 			Palette.Rec
 		)
+		-- Once everyone is ready, the lead's next press is BEGIN.
+		if amReady then
+			mainButton = begin
+		end
 	end
 end
 
 local function renderLobby()
 	local y = 0
 	for _, mission in Missions do
-		local line = row(y, 62)
+		-- Who it is for and how long it takes, before anyone commits to it.
+		local meta = if mission.metaKey then "\n" .. Strings.get(mission.metaKey) else ""
+		local line = row(y, if mission.metaKey then 84 else 62)
 		Ui.text({
 			Size = UDim2.new(if mission.available then 0.46 else 1, 0, 1, 0),
-			Text = `{Strings.get(mission.titleKey)}\n{Strings.get(mission.summaryKey)}`,
-			TextSize = 15,
+			Text = `{Strings.get(mission.titleKey)}\n{Strings.get(mission.summaryKey)}{meta}`,
+			TextSize = 14,
 			TextColor3 = if mission.available then Palette.Paper else Palette.WallDark,
 		}, line)
 		if mission.available then
 			-- Alone, one press is enough. With friends, an expedition they can join.
-			Ui.primary(
+			local solo = Ui.primary(
 				Strings.get("hub_solo"),
 				{
 					AnchorPoint = Vector2.new(1, 0),
@@ -196,6 +208,7 @@ local function renderLobby()
 					send("solo", mission.id)
 				end
 			)
+			mainButton = mainButton or solo
 			Ui.button(
 				Strings.get("hub_create"),
 				{
@@ -210,7 +223,7 @@ local function renderLobby()
 				end
 			)
 		end
-		y += 68
+		y += if mission.metaKey then 90 else 68
 	end
 	y += 4
 	heading(y, Strings.get("hub_open_list"))
@@ -260,6 +273,7 @@ end
 
 local function render()
 	content:ClearAllChildren()
+	mainButton = nil
 	local party = myParty()
 	if party then
 		renderMyParty(party)
@@ -272,6 +286,7 @@ local function render()
 		renderLobby()
 		prep.Visible = false
 	end
+	Panels.reselect(panel)
 end
 
 local function buildGui()
@@ -461,6 +476,12 @@ end
 function Terminal.init()
 	action = Net.get("PartyAction")
 	buildGui()
+	Panels.watch(panel, nil, function()
+		return mainButton
+	end)
+	Panels.watch(rejoinPanel, function()
+		rejoinPanel.Visible = false
+	end)
 	setLoadingGui()
 end
 

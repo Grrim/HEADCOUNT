@@ -10,10 +10,13 @@ local Workspace = game:GetService("Workspace")
 local AudioDirector = require(ReplicatedStorage.ClientCommon.AudioDirector)
 local Build = require(ReplicatedStorage.Shared.World.Build)
 local Layout = require(ReplicatedStorage.Shared.Core.Layout)
+local LensView = require(ReplicatedStorage.ClientCommon.LensView)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Omens = require(ReplicatedStorage.Shared.Core.Omens)
 local Palette = require(ReplicatedStorage.Shared.Config.Palette)
+local Props = require(ReplicatedStorage.Shared.World.Props)
 local Seats = require(ReplicatedStorage.Shared.Core.Seats)
+local Strings = require(ReplicatedStorage.Shared.Strings)
 
 local OmenDirector = {}
 
@@ -23,6 +26,7 @@ local controllers: { [string]: any }
 local schedule: { Omens.Omen }? = nil
 local elapsed = 0
 local running = false
+local phase = "Waiting"
 local pathMemory: { CFrame } = {}
 
 local function cameraPosition(): Vector3
@@ -304,6 +308,79 @@ local function theDouble(): boolean
 	return true
 end
 
+-- The player's own name, very quietly, from just behind them. Only when nobody else is talking.
+local function whisperName(): boolean
+	-- Never over the radio: a line on screen may be the one hint a stuck player gets.
+	if controllers.Hud.isSpeaking() then
+		return false
+	end
+	local camera = Workspace.CurrentCamera :: Camera
+	local look = camera.CFrame.LookVector
+	local behind = camera.CFrame.Position - Vector3.new(look.X, 0, look.Z).Unit * 3
+	AudioDirector.playAt("Radio", behind, 0.22, 20)
+	controllers.Hud.subtitle(Strings.get("omen_whisper", localPlayer.DisplayName), 3)
+	return true
+end
+
+-- Once a run: the lens comes up and someone from the hall is already standing right in front of
+-- it, face to face, for less than half a second.
+local function lensFace(): boolean
+	if not LensView.raised or controllers.Playback.active() then
+		return false
+	end
+	local camera = Workspace.CurrentCamera :: Camera
+	local origin = camera.CFrame.Position
+	local look = Vector3.new(camera.CFrame.LookVector.X, 0, camera.CFrame.LookVector.Z)
+	if look.Magnitude < 0.2 then
+		return false
+	end
+	local spot = origin + look.Unit * 3.4
+	-- Their eyes level with the lens: the sitter's head is about 4.4 above its floor.
+	local floor = CFrame.lookAt(
+		Vector3.new(spot.X, origin.Y - 4.4, spot.Z),
+		Vector3.new(origin.X, origin.Y - 4.4, origin.Z)
+	)
+	local folder = Instance.new("Folder")
+	folder.Name = "LensFace"
+	Props.sitter(folder, floor, 4)
+	folder.Parent = Workspace
+	AudioDirector.play("Reach", 0.9, 0.85)
+	task.delay(0.38, function()
+		folder:Destroy()
+	end)
+	return true
+end
+
+-- Every light in the building goes out for two seconds, for this player only.
+local function blackout(): boolean
+	if not inHall() or phase == "Power" then
+		return false
+	end
+	local lights: { { light: Light, brightness: number } } = {}
+	for _, item in map:GetDescendants() do
+		-- Disabled lights (the red emergency lamps) are left alone: the server switches those with
+		-- Enabled, and a zeroed one would stay dark through the whole power cut.
+		if item:IsA("Light") and item.Enabled and item.Brightness > 0 then
+			-- A light mid-flicker (Dread) reports its true level here, not the dimmed one.
+			local base = item:GetAttribute("FlickerBase")
+			local brightness = if typeof(base) == "number" then base else item.Brightness
+			table.insert(lights, { light = item, brightness = brightness })
+			item.Brightness = 0
+		end
+	end
+	-- No drop in the hum: silence is the warning that he moves, and this is not that.
+	task.delay(2.2, function()
+		for _, entry in lights do
+			-- A light the server changed meanwhile keeps the server's value.
+			if entry.light.Brightness == 0 and phase ~= "Power" then
+				entry.light.Brightness = entry.brightness
+			end
+		end
+		AudioDirector.play("Creak", 0.6)
+	end)
+	return true
+end
+
 local function stage(omen: Omens.Omen): boolean
 	local kind = omen.kind
 	if kind == "steps_behind" then
@@ -330,6 +407,12 @@ local function stage(omen: Omens.Omen): boolean
 		return true
 	elseif kind == "row_turned" then
 		return rowTurned(omen.seatId :: number)
+	elseif kind == "whisper_name" then
+		return whisperName()
+	elseif kind == "lens_face" then
+		return lensFace()
+	elseif kind == "blackout" then
+		return blackout()
 	end
 	return true
 end
@@ -363,6 +446,7 @@ function OmenDirector.start()
 		if state.omenSeed and not schedule then
 			schedule = Omens.schedule(state.omenSeed, localPlayer.UserId)
 		end
+		phase = state.phase
 		running = state.phase ~= "Waiting" and state.phase ~= "Done" and state.phase ~= "Failed"
 	end)
 	local step = 0.5
