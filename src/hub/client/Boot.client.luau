@@ -28,5 +28,6 @@ PromptUi.start()
 Affordance.start()
 Vignette.start()
 LensView.init(nil) -- the hub's lens is purely local: nothing here is decided by it
+LensView.setTapeCounterVisible(false)
 Loader.run(script.Parent.Controllers)
 RoomTone.start({ "Creak", "Drip" })

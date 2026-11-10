@@ -31,15 +31,29 @@ local screenLabel: TextLabel? = nil
 local introComplete = false
 local terminalVisited = false
 
+local controllers: { [string]: any }
+
+-- One line of atmosphere from the room itself ("The door is open."). What to do is the guide's.
 local function hint(text: string)
 	hintLabel.Text = text
+	if text ~= "" then
+		task.delay(4, function()
+			if hintLabel.Text == text then
+				hintLabel.Text = ""
+			end
+		end)
+	end
 end
 
--- Until the player has opened the terminal once, the hall tells them where it is.
-local function pointToTerminal()
-	if not terminalVisited then
-		hint(Strings.get("intro_terminal"))
+local function guide(step: string)
+	if controllers and controllers.Guide then
+		controllers.Guide.set(step)
 	end
+end
+
+-- Until the player has opened the terminal once, the guide points at it.
+local function pointToTerminal()
+	guide(if terminalVisited then "chosen" else "go")
 end
 
 -- The camcorder is a holder box with its visible parts inside; taking it hides them all.
@@ -133,13 +147,13 @@ local function onLens(raised: boolean)
 	layer.Parent = if raised then Workspace else nil
 	if not raised then
 		if raises == 1 and not introComplete then
-			hint(Strings.get("intro_again"))
+			guide("again")
 		end
 		return
 	end
 	raises += 1
 	if raises == 1 and not introComplete then
-		hint("")
+		guide("look")
 	elseif raises == 2 and not introComplete then
 		-- The chair is empty now. The figure is behind where the player is standing.
 		sitter:PivotTo(CFrame.new(6, 0, 56) * CFrame.Angles(0, math.rad(200), 0))
@@ -160,7 +174,7 @@ local function setupCamera()
 			hideCamera(part)
 			prompt.Enabled = false
 			enableLens()
-			hint(Strings.get("intro_raise"))
+			guide("raise")
 			AudioDirector.play("LensUp", 0.5)
 		end)
 	end
@@ -208,7 +222,8 @@ local function applyMemory(flags: { [string]: boolean })
 	end
 end
 
-function Intro.init()
+function Intro.init(all: { [string]: any })
+	controllers = all
 	layer = Instance.new("Folder")
 	layer.Name = "LensLayer"
 	sitter = buildSitter(layer, CFrame.new(-7, 0, 52) * CFrame.Angles(0, math.rad(40), 0))
@@ -234,17 +249,14 @@ function Intro.start()
 			prompt.Triggered:Connect(function()
 				if not terminalVisited then
 					terminalVisited = true
-					hint("")
+					guide("chosen")
 				end
 			end)
 		end
 	end
-	hint(Strings.get("intro_folder"))
-	task.delay(6, function()
-		if not hasCamera then
-			hint(Strings.get("intro_camera"))
-		end
-	end)
+	if not introComplete then
+		guide("take")
+	end
 	Net.get("DocsState").OnClientEvent:Connect(function(state)
 		applyMemory(state.flags)
 	end)

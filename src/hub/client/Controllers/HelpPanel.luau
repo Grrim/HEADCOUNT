@@ -4,6 +4,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Journal = require(ReplicatedStorage.ClientCommon.Journal)
+local LensView = require(ReplicatedStorage.ClientCommon.LensView)
 local Palette = require(ReplicatedStorage.Shared.Config.Palette)
 local Strings = require(ReplicatedStorage.Shared.Strings)
 
@@ -20,6 +21,7 @@ local function render(api: Journal.Api)
 	api.line(Strings.get("notes_hub_terminal"), Palette.Crt)
 	api.line(Strings.get("notes_hub_tapes"))
 	api.line(Strings.get("notes_hub_personnel"))
+	api.line(Strings.get("notes_hub_lens"))
 	api.line(Strings.get("notes_hub_tip"), Palette.WallDark)
 	api.heading(Strings.get("notes_controls"))
 	api.controls(CONTROLS)
@@ -34,6 +36,10 @@ function HelpPanel.init()
 		touchKey = "btn_help",
 		render = render,
 	})
+	-- The viewfinder owns the corners while the camera is up.
+	LensView.onChanged(function(raised)
+		Journal.setTagVisible(not raised)
+	end)
 end
 
 return HelpPanel

@@ -583,3 +583,24 @@ Bez nowych plików z modelem i bez wgrywania. Szyja, klatkowanie, pochylanie si�
 Sprawdzone w Studio (solo, kotwica Kadrowego przestawiona ręcznie, kamera podniesiona): z odległości ok. 26 i 20 studów czyta się jako postać za wysoka na salę, stojąca w przejściu między widownią, z kołnierzem wysoko i dłońmi na wysokości oparć. Z bliska (13 studów) to głównie ciemna sylwetka z bladymi dłońmi. **Zrzuty powstały przy obniżonej jakości grafiki** (pięć okien Studio naraz), więc działania światła przy piersi nie dało się ocenić. Niesprawdzone: sięganie długą ręką z nowym ramieniem, wygląd na taśmie i na finałowej taśmie, koszt 30 części przesuwanych co klatkę na telefonie.
 
 Stara siatka `Registrar.rbxmx` zostaje w projekcie; nadal używa jej Bileter (`UsherView`).
+
+## Dwudziesty przebieg: lobby czytelne i żywe
+
+Stan na 2026-11-10, po uwadze właściciela, że lobby jest nudne i nieintuicyjne. Lobby przeszedłem w Studio jak nowy gracz (klawisze Q i E, chód `MoveTo`, kierunek kamery ustawiany skryptem). Diagnoza:
+
+- start to pudełko z biurkiem; ekran mówił „Please take a seat”, choć zadaniem było wziąć kamerę, a kroki intro były gołymi podpisami bez klawisza,
+- „Lower it. Raise it again” nie było niczym umotywowane,
+- hala jest statyczna: nie ma co robić poza dojściem do terminala, a kamera (sedno gry) nie ma tu żadnego zastosowania,
+- z daleka nie widać, kto jest w lobby ani jakie ekspedycje się tworzą.
+
+| Zmiana | Pliki |
+|---|---|
+| **Przewodnik lobby:** ta sama karta celu, chip z klawiszem i znacznik odległości co w misji. Kroki: weź kamerę (znacznik na kamerze), podnieś [Q], „ktoś siedzi na krześle, opuść kamerę”, podnieś ją jeszcze raz, „zapisz się na ekspedycję” (znacznik na terminalu), a po otwarciu terminala: PLAY SOLO albo czekanie z kamerą w ręku. Przy podniesionej kamerze karta znika, a polecenie przechodzi na chip na dole | `hub/client/Controllers/Guide.luau`, `Intro.luau`, `Strings` |
+| Ekran na biurku mówi „Good evening. Take the camera.” | `Strings.intro_hello` |
+| **Tablica odjazdów** na północnej ścianie, na lewo od terminala: dzisiejsze misje (OPEN / SEALED), tworzące się ekspedycje z liczbą osób i „BOARDING” w odliczaniu, „On shift:” z graczami w lobby. Wiersz przy zmianie przewija litery jak tablica klapkowa, z cichym klikiem. Tylko po stronie klienta, czyta ten sam stan drużyn co terminal | `hub/client/Controllers/Board.luau` |
+| **Archiwiści:** przez obiektyw hala ma obsadę. Czterech urzędników bez głowy chodzi alejkami i przystaje twarzą do regałów, piąty stoi za ladą recepcji i zawsze obraca się w stronę kamery. Gołym okiem hala jest pusta. Uczy pierwszej zasady gry bez słów i daje kamerze zajęcie w lobby. Pozycje liczone z zegara, rysowane tylko przy podniesionej kamerze | `hub/client/Controllers/Archivists.luau` |
+| Wizjer w lobby nie pokazuje pustego licznika taśm; notatka i tag pomocy chowają się przy podniesionej kamerze; w pomocy nowa linia o kamerze w hali | `LensView.setTapeCounterVisible`, `Boot.client.luau`, `HelpPanel.luau` |
+
+Sprawdzone w Studio (solo, PC): karta i znacznik na kamerze na starcie, chip „Raise the camera”, postać na krześle przez obiektyw z chipem „Lower the camera” i czystymi narożnikami wizjera, po intrze znacznik „Expeditions” przez drzwi, tablica czytelna z odległości kilkunastu studów, wiersz drużyny po utworzeniu ekspedycji (zdarzenie `PartyAction` wysłane skryptem), archiwiści przez obiektyw (recepcjonista zwrócony do kamery, dwóch w ruchu), brak błędów skryptów w kliencie.
+
+Niesprawdzone: tablica przy 2–4 graczach i w odliczaniu (BOARDING), czy archiwiści nie wchodzą w rekwizyty na całej trasie, telefon, czy tablicę da się przeczytać z wejścia do hali na małym ekranie. Audyt geometrii lobby nie obejmuje tablicy ani archiwistów (budowane po stronie klienta); położenie tablicy względem ściany (lico na z = −39,5) sprawdzone ręcznie.

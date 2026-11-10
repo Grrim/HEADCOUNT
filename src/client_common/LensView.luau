@@ -425,6 +425,11 @@ local function drawTapes()
 	tapeLabel.TextColor3 = if tapesLeft == 0 then Ui.C.Danger else Ui.C.Text
 end
 
+-- The lobby has no tapes to count; it hides the cassette row instead of showing an empty one.
+function LensView.setTapeCounterVisible(visible: boolean)
+	tapeRow.Visible = visible
+end
+
 function LensView.setTapes(left: number, total: number?)
 	tapesLeft = left
 	if total then

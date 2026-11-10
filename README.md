@@ -28,6 +28,8 @@ Ostatnio (2026-11-10, przegląd doświadczenia gracza; szczegóły w `docs/05_ST
 - **Kamera:** przesłona przy podnoszeniu, lekki ruch w ręku, pasek długości nagrania, znak zapisu taśmy, oś czasu przy odtwarzaniu.
 - **Prowadzenie:** znacznik celu z odległością (na chwilę po zmianie kroku i przy utknięciu) i romb nad każdym obiektem do użycia.
 - **Telefon:** własne przyciski dotykowe (CAM pod kciukiem, REC z kropką, stany), bezpieczne marginesy ekranu.
+- **Lobby:** przewodnik krok po kroku (karta celu, klawisz, znacznik do kamery i terminala), tablica odjazdów z dzisiejszymi misjami, tworzącymi się ekspedycjami i graczami na zmianie, a przez kamerę w hali chodzą archiwiści, których gołym okiem nie ma.
+- Nowy Kadrowy: za wysoki, z rękami do kolan i kolanami zgiętymi w złą stronę, zbudowany z części.
 - Jaśniejsze tło światła w misji (czytelność przy niższej jakości grafiki) i bordowy chodnik w foyer.
 
 Wcześniej:
