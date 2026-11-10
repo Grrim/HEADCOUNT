@@ -2,6 +2,7 @@
 -- Being cut out instead of dying: only a lens can see you, a teammate can film you back, and you
 -- can always walk back to the leader mark. If everyone is out, the tape ends.
 local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 
@@ -31,6 +32,9 @@ end
 function OffFrame.checkEveryoneCut()
 	local session = services.Session
 	if Flow.isOver(session.flow) or session.flow.phase == "Waiting" then
+		if allCutSince then
+			Workspace:SetAttribute("TapeEndsAt", nil)
+		end
 		allCutSince = nil
 		return
 	end
@@ -38,6 +42,9 @@ function OffFrame.checkEveryoneCut()
 	for _, player in Players:GetPlayers() do
 		anyone = true
 		if player:GetAttribute("OffFrame") ~= true then
+			if allCutSince then
+				Workspace:SetAttribute("TapeEndsAt", nil)
+			end
 			allCutSince = nil
 			return
 		end
@@ -48,6 +55,8 @@ function OffFrame.checkEveryoneCut()
 	local now = os.clock()
 	if not allCutSince then
 		allCutSince = now
+		-- Clients count down to the server's clock, so every screen shows the same seconds.
+		Workspace:SetAttribute("TapeEndsAt", Workspace:GetServerTimeNow() + CFG.AllCutGrace)
 		session.notify("tape_running_out")
 	elseif now - allCutSince >= CFG.AllCutGrace and Flow.everyoneCut(session.flow) then
 		session.finish(false)
@@ -60,6 +69,7 @@ function OffFrame.cut(player: Player)
 	end
 	setFlag(player, true)
 	cutAt[player] = os.clock()
+	player:SetAttribute("SelfReturnAt", Workspace:GetServerTimeNow() + CFG.SelfReturnAfter)
 	rescue[player] = 0
 	services.Lens.clear(player)
 	services.Session.totalCuts += 1

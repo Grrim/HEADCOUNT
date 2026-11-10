@@ -4,6 +4,11 @@
 --   * unframed: a timer runs; silence warns before he cuts one node closer
 --   * a player inside his radius gets a short window to frame him or be cut out
 --   * each tape replay pulls him one node toward the viewer
+-- Fairness rules, so a cut is always something the player could have stopped:
+--   * he only reaches for someone who can see where he stands (line of sight to his anchor)
+--   * after arriving anywhere he waits a moment before reaching, even after an unsignalled pull
+--   * watching him costs exposure, but it drains away again while nobody watches
+--   * a player stuck in a tape gets extra time to look up and frame him
 local Graph = require("./Graph")
 
 local Registrar = {}
@@ -15,9 +20,23 @@ export type Config = {
 	contactRadius: number,
 	reachTime: number,
 	graceAfterCut: number,
+	-- Seconds after any arrival before he may reach. Optional, 0 when absent.
+	arrivalGrace: number?,
+	-- Exposure lost per second while nobody frames him. Optional, 0 when absent.
+	exposureDecay: number?,
 }
 
-export type PlayerInput = { id: number, x: number, y: number, z: number, cut: boolean }
+-- sees: false when a wall stands between the player and him (nil counts as seeing).
+-- reachBonus: extra seconds of warning for this player, such as one watching a tape.
+export type PlayerInput = {
+	id: number,
+	x: number,
+	y: number,
+	z: number,
+	cut: boolean,
+	sees: boolean?,
+	reachBonus: number?,
+}
 
 export type Event = { kind: string, id: number?, node: string? }
 
@@ -30,6 +49,8 @@ export type State = {
 	reachId: number?,
 	reachLeft: number,
 	dormant: boolean,
+	-- Seconds left before he may reach after arriving at his node.
+	settle: number,
 }
 
 function Registrar.new(startNode: string, config: Config): State
@@ -42,7 +63,13 @@ function Registrar.new(startNode: string, config: Config): State
 		reachId = nil,
 		reachLeft = 0,
 		dormant = false,
+		settle = 0,
 	}
+end
+
+-- Any move, signalled or not, starts the settle time.
+function Registrar.arrived(state: State, config: Config)
+	state.settle = config.arrivalGrace or 0
 end
 
 local function targetsFor(
@@ -97,6 +124,20 @@ function Registrar.step(
 		return events
 	end
 
+	state.settle = math.max(0, state.settle - dt)
+	local decay = config.exposureDecay or 0
+	if decay > 0 then
+		local watching = {}
+		for _, id in framedBy do
+			watching[id] = true
+		end
+		for id, exposure in state.exposure do
+			if not watching[id] and not state.registered[id] then
+				state.exposure[id] = math.max(0, exposure - decay * dt)
+			end
+		end
+	end
+
 	if #framedBy > 0 then
 		-- Watching holds him still, but it costs the watcher. Shared watching splits nothing:
 		-- each watcher accumulates separately, which is why teams should take turns.
@@ -141,12 +182,18 @@ function Registrar.step(
 		return events
 	end
 
-	for _, player in players do
-		if not player.cut and distanceTo(graph, state.node, player) <= config.contactRadius then
-			state.reachId = player.id
-			state.reachLeft = config.reachTime
-			table.insert(events, { kind = "reach", id = player.id })
-			return events
+	if state.settle <= 0 then
+		for _, player in players do
+			if
+				not player.cut
+				and player.sees ~= false
+				and distanceTo(graph, state.node, player) <= config.contactRadius
+			then
+				state.reachId = player.id
+				state.reachLeft = config.reachTime + (player.reachBonus or 0)
+				table.insert(events, { kind = "reach", id = player.id })
+				return events
+			end
 		end
 	end
 
@@ -161,6 +208,7 @@ function Registrar.step(
 		-- With nobody left to hunt he simply stays put, and stays silent about it.
 		if nextNode ~= state.node then
 			state.node = nextNode
+			Registrar.arrived(state, config)
 			table.insert(events, { kind = "jump", node = nextNode })
 		end
 	end
@@ -173,7 +221,8 @@ function Registrar.onReplay(
 	graph: Graph.Graph,
 	viewerX: number,
 	viewerY: number,
-	viewerZ: number
+	viewerZ: number,
+	config: Config?
 ): Event?
 	if state.dormant then
 		return nil
@@ -184,6 +233,9 @@ function Registrar.onReplay(
 		return nil
 	end
 	state.node = nextNode
+	if config then
+		Registrar.arrived(state, config)
+	end
 	return { kind = "jump", node = nextNode }
 end
 

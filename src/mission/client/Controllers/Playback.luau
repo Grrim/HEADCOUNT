@@ -26,6 +26,8 @@ local gui: ScreenGui
 local infoLabel: TextLabel
 local captionLabel: TextLabel
 local band: Frame
+local progressFill: Frame
+local stopHint: TextLabel
 local grade: ColorCorrectionEffect
 local connection: RBXScriptConnection? = nil
 local ghostFolder: Folder? = nil
@@ -52,7 +54,7 @@ local function setControls(enabled: boolean)
 end
 
 local function buildGui()
-	gui = Ui.screen("Playback", 4)
+	gui = Ui.screen("Playback", 4, true)
 	gui.Enabled = false
 	-- Bars that crop the picture to 4:3, whatever the shape of the device.
 	Ui.frame({
@@ -65,28 +67,49 @@ local function buildGui()
 		Size = UDim2.new(0.125, 0, 1, 0),
 		BackgroundColor3 = Color3.new(0, 0, 0),
 	}, gui)
-	Ui.text({
+	Ui.mono({
 		Position = UDim2.fromScale(0.15, 0.06),
 		Size = UDim2.fromOffset(240, 30),
+		FontFace = Ui.Fonts.MonoBold,
 		TextSize = 24,
+		TextStrokeTransparency = 0.5,
 		Text = "▶ " .. Strings.get("play"),
 	}, gui)
-	infoLabel = Ui.text({
+	infoLabel = Ui.mono({
 		AnchorPoint = Vector2.new(1, 0),
 		Position = UDim2.fromScale(0.85, 0.06),
 		Size = UDim2.fromOffset(240, 30),
+		FontFace = Ui.Fonts.MonoBold,
+		TextSize = 18,
+		TextColor3 = Ui.C.Danger,
+		TextStrokeTransparency = 0.5,
 		TextXAlignment = Enum.TextXAlignment.Right,
 		Text = "",
 	}, gui)
-	Ui.text({
+	-- The tape's own timeline: how much is left to watch, so a viewing never feels endless.
+	local timeline = Ui.frame({
 		AnchorPoint = Vector2.new(0.5, 1),
-		-- Above the hints line, which sits at the bottom edge and draws over this gui.
-		Position = UDim2.fromScale(0.5, 0.9),
-		Size = UDim2.fromOffset(420, 24),
+		Position = UDim2.new(0.5, 0, 1, -74),
+		Size = UDim2.new(0.66, 0, 0, 3),
+		BackgroundColor3 = Ui.C.Text,
+		BackgroundTransparency = 0.75,
+		ZIndex = 3,
+	}, gui)
+	progressFill = Ui.frame({
+		Size = UDim2.fromScale(0, 1),
+		BackgroundColor3 = Ui.C.Text,
+		ZIndex = 3,
+	}, timeline)
+	stopHint = Ui.mono({
+		AnchorPoint = Vector2.new(0.5, 1),
+		Position = UDim2.new(0.5, 0, 1, -84),
+		Size = UDim2.fromOffset(420, 20),
 		TextXAlignment = Enum.TextXAlignment.Center,
-		TextSize = 15,
-		TextTransparency = 0.3,
+		TextSize = 14,
+		TextTransparency = 0.25,
+		TextStrokeTransparency = 0.5,
 		Text = Strings.get("press_to_stop"),
+		ZIndex = 3,
 	}, gui)
 	-- At the top, on its own backing: the radio talks over every viewing, and this line is the clue.
 	captionLabel = Ui.text({
@@ -201,6 +224,8 @@ local function start(clip: any)
 	grade.Enabled = true
 	controllers.Hud.setCinema(true)
 	infoLabel.Text = Strings.get("play_count", clip.viewings)
+	stopHint.Text = Strings.get("press_to_stop_key", controllers.Viewfinder.keyName("play"))
+	progressFill.Size = UDim2.fromScale(0, 1)
 	captionLabel.Text = if clip.archiveOrder
 		then Strings.get("archive_order", clip.archiveOrder)
 		else ""
@@ -235,6 +260,7 @@ local function start(clip: any)
 		local position = Vector3.new(s[1], s[2], s[3])
 		camera.CFrame = CFrame.lookAt(position, position + Vector3.new(s[4], s[5], s[6]))
 		band.Position = UDim2.fromScale(0.125, (elapsed * 0.27) % 1)
+		progressFill.Size = UDim2.fromScale(math.clamp(elapsed / duration, 0, 1), 1)
 		for _, ghost in ghosts do
 			local index = math.clamp(math.floor(elapsed * Config.Tape.GhostHz) + 1, 1, #ghost.track)
 			local g = ghost.track[index]

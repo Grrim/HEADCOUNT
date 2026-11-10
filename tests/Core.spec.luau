@@ -505,6 +505,61 @@ return {
 		assert(state.timer == CONFIG.graceAfterCut)
 	end,
 
+	["he never reaches for someone who cannot see him"] = function()
+		local state = Registrar.new("aisleMid", CONFIG)
+		local blind = { { id = 1, x = 0, y = 0, z = 15, cut = false, sees = false } }
+		local events = Registrar.step(state, CONFIG, Layout.NODES, 0.25, {}, blind, 1)
+		assert(not hasEvent(events, "reach"), "reached through a wall")
+		blind[1].sees = true
+		events = Registrar.step(state, CONFIG, Layout.NODES, 0.25, {}, blind, 1)
+		assert(hasEvent(events, "reach"), "a player in plain sight must still be reachable")
+	end,
+
+	["after any arrival he waits before reaching, even an unsignalled pull"] = function()
+		local rules: Registrar.Config = table.clone(CONFIG)
+		rules.arrivalGrace = 1.2
+		local state = Registrar.new("aisleFront", rules)
+		local viewer = { { id = 1, x = 0, y = 0, z = 15, cut = false } }
+		-- A replay pulls him next to the viewer without a silence first.
+		local pulled = Registrar.onReplay(state, Layout.NODES, 0, 0, 15, rules)
+		assert(pulled and state.node == "aisleMid")
+		local events = Registrar.step(state, rules, Layout.NODES, 0.25, {}, viewer, 1)
+		assert(not hasEvent(events, "reach"), "reached the instant he arrived")
+		events = Registrar.step(state, rules, Layout.NODES, 1.0, {}, viewer, 1)
+		assert(hasEvent(events, "reach"), "the grace must run out")
+	end,
+
+	["a player watching a tape gets extra time"] = function()
+		local state = Registrar.new("aisleMid", CONFIG)
+		local watcher = { { id = 1, x = 0, y = 0, z = 15, cut = false, reachBonus = 1.2 } }
+		Registrar.step(state, CONFIG, Layout.NODES, 0.25, {}, watcher, 1)
+		local events = Registrar.step(state, CONFIG, Layout.NODES, 1.5, {}, watcher, 1)
+		assert(not hasEvent(events, "cut"), "the bonus was ignored")
+		events = Registrar.step(state, CONFIG, Layout.NODES, 1.3, {}, watcher, 1)
+		assert(hasEvent(events, "cut"))
+	end,
+
+	["exposure drains while nobody watches, so short looks never add up"] = function()
+		local rules: Registrar.Config = table.clone(CONFIG)
+		rules.exposureDecay = 0.5
+		local state = Registrar.new("archive", rules)
+		local players = { farPlayer(1) }
+		for _ = 1, 10 do
+			-- Two seconds of looking, then four away, over and over: 20 s of looking in all.
+			for _ = 1, 8 do
+				Registrar.step(state, rules, Layout.NODES, 0.25, { 1 }, players, 1)
+			end
+			for _ = 1, 16 do
+				Registrar.step(state, rules, Layout.NODES, 0.25, {}, players, 1)
+			end
+		end
+		assert(not state.registered[1], "glances registered the player")
+		for _ = 1, 24 do
+			Registrar.step(state, rules, Layout.NODES, 0.25, { 1 }, players, 1)
+		end
+		assert(state.registered[1], "a long stare must still register")
+	end,
+
 	["outrunning the window cancels the cut"] = function()
 		local state = Registrar.new("aisleMid", CONFIG)
 		local victim = { { id = 1, x = 0, y = 0, z = 15, cut = false } }

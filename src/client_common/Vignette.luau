@@ -28,7 +28,7 @@ local function edge(gui: ScreenGui, rotation: number, position: UDim2, size: UDi
 end
 
 function Vignette.start()
-	local gui = Ui.screen("Vignette", 0)
+	local gui = Ui.screen("Vignette", 0, true)
 	edge(gui, 90, UDim2.fromScale(0, 0), UDim2.fromScale(1, EDGE), Vector2.zero)
 	edge(gui, -90, UDim2.fromScale(0, 1), UDim2.fromScale(1, EDGE), Vector2.new(0, 1))
 	edge(gui, 0, UDim2.fromScale(0, 0), UDim2.fromScale(EDGE, 1), Vector2.zero)

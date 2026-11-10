@@ -172,14 +172,18 @@ function UsherView.start()
 			return
 		end
 		if kind == "punch" then
-			-- Two dry clicks of the ticket punch, somewhere in the dark.
-			AudioDirector.playAt("Wrong", current.Position, 0.7, 70)
-			task.delay(0.18, function()
-				AudioDirector.playAt("Wrong", current.Position, 0.6, 70)
+			-- Two dry clicks of the ticket punch, somewhere in the dark. Its own low, heavy click:
+			-- never the click of a wrong answer, so the two can not be confused.
+			AudioDirector.playAt("RecStart", current.Position, 0.9, 70)
+			task.delay(0.16, function()
+				AudioDirector.playAt("RecStart", current.Position, 0.8, 70)
 			end)
 		elseif kind == "noticed" and id == Players.LocalPlayer.UserId then
-			AudioDirector.play("Reach", 0.7, 1.15)
-			controllers.Hud.subtitle(Strings.get("usher_noticed"), 3)
+			AudioDirector.play("Reach", 0.55, 1.4)
+			controllers.Hud.result(Strings.get("usher_noticed"), "bad")
+		elseif kind == "caught" and id == Players.LocalPlayer.UserId then
+			AudioDirector.play("Cut", 0.9)
+			controllers.OffFrameView.setCause("usher")
 		end
 	end)
 end

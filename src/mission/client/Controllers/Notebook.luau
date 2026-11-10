@@ -59,33 +59,27 @@ local nudged: { [string]: boolean } = {}
 local rules: { string } = { "rule_tape" }
 local ruleSet: { [string]: boolean } = { rule_tape = true }
 
-local function rowsOf(seatIds: { number }): { string }
-	local set: { [string]: boolean } = {}
-	for _, seatId in seatIds do
-		local row = Seats.fromId(seatId)
-		set[Seats.rowLetter(row)] = true
-	end
-	local rows = {}
-	for row in set do
-		table.insert(rows, row)
-	end
-	table.sort(rows)
-	return rows
-end
-
+-- Seats the player's own tapes showed turned round and that nobody has checked yet. The exact
+-- seat is kept, not just the row: the tape showed it, so making the player remember it (and
+-- punishing a wrong guess down the row) only tested memory, never observation.
 local function pendingRows(): { string }
-	local set: { [string]: boolean } = {}
+	local seats = {}
 	for label in seenSeats do
 		if not foundSeats[label] then
-			set[label:sub(1, 1)] = true
+			table.insert(seats, label)
 		end
 	end
-	local rows = {}
-	for row in set do
-		table.insert(rows, row)
+	table.sort(seats)
+	return seats
+end
+
+local function labelsOf(seatIds: { number }): { string }
+	local labels = {}
+	for _, seatId in seatIds do
+		table.insert(labels, Seats.label(seatId))
 	end
-	table.sort(rows)
-	return rows
+	table.sort(labels)
+	return labels
 end
 
 local function pendingTags(): { number }
@@ -123,7 +117,7 @@ local function update()
 	local step = if ended then nil else Guide.step(facts(), Strings.get)
 	current = step
 	currentText = if step then textOf(step.key, step.args) else ""
-	controllers.Hud.setStep(currentText)
+	controllers.Hud.setStep(currentText, step)
 	local id = Guide.id(step)
 	if id ~= stepId then
 		stepId = id
@@ -255,6 +249,14 @@ local function nudgeLoop()
 	end
 end
 
+-- The breaker code as this player knows it ("4 _ 7"), or "" before any digit was read.
+function Notebook.codeText(): string
+	if next(seenCode) == nil then
+		return ""
+	end
+	return Guide.codeText(seenCode, Puzzle.CODE_LENGTH)
+end
+
 function Notebook.init(all: { [string]: any })
 	controllers = all
 	Journal.setup({
@@ -285,13 +287,14 @@ function Notebook.start()
 		update()
 	end)
 	Net.get("TapePlay").OnClientEvent:Connect(function(clip)
+		task.defer(syncTag)
 		Journal.close()
 		syncTag()
 		if clip.archiveOrder then
 			order = clip.archiveOrder
 		elseif clip.id > 0 then
 			watched[clip.id] = true
-			tapeRows[clip.id] = rowsOf(clip.seats)
+			tapeRows[clip.id] = labelsOf(clip.seats)
 			for _, seatId in clip.seats do
 				seenSeats[Seats.label(seatId)] = true
 			end
@@ -306,7 +309,7 @@ function Notebook.start()
 			learn("rule_replay")
 		end
 		if clip and clip.id > 0 and state and state.phase == "Protocol" then
-			local rows = rowsOf(clip.seats)
+			local rows = labelsOf(clip.seats)
 			if #rows > 0 then
 				controllers.Hud.subtitle(Strings.get("playback_rows", table.concat(rows, ", ")), 6)
 			else

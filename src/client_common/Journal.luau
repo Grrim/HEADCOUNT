@@ -7,10 +7,8 @@ local GuiService = game:GetService("GuiService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 
-local AudioDirector = require(ReplicatedStorage.ClientCommon.AudioDirector)
 local Brightness = require(ReplicatedStorage.ClientCommon.Brightness)
 local Input = require(ReplicatedStorage.ClientCommon.Input)
-local Palette = require(ReplicatedStorage.Shared.Config.Palette)
 local Strings = require(ReplicatedStorage.Shared.Strings)
 local Ui = require(ReplicatedStorage.ClientCommon.Ui)
 
@@ -39,6 +37,7 @@ local titleLabel: TextLabel
 local list: ScrollingFrame
 local closeButton: TextButton
 local tag: TextButton
+local tagStroke: UIStroke
 local options: Options? = nil
 local isOpen = false
 local tagWanted = true
@@ -75,13 +74,11 @@ local function render()
 	local api: Api
 	api = {
 		heading = function(text: string)
-			Ui.text({
+			Ui.eyebrow(text, {
 				LayoutOrder = nextOrder(),
-				Size = UDim2.new(1, 0, 0, 28),
+				Size = UDim2.new(1, 0, 0, 30),
 				TextYAlignment = Enum.TextYAlignment.Bottom,
-				TextSize = 14,
-				TextColor3 = Palette.Rec,
-				Text = text,
+				TextColor3 = Ui.C.Danger,
 			}, list)
 		end,
 		line = function(text: string, color: Color3?)
@@ -90,7 +87,8 @@ local function render()
 				Size = UDim2.new(1, 0, 0, 0),
 				AutomaticSize = Enum.AutomaticSize.Y,
 				TextSize = 16,
-				TextColor3 = color or Palette.Paper,
+				LineHeight = 1.1,
+				TextColor3 = color or Ui.C.Text,
 				Text = text,
 			}, list)
 		end,
@@ -105,12 +103,26 @@ local function render()
 		-- Each entry is { pc key, gamepad key, action string key }.
 		controls = function(entries: { { any } })
 			if Input.isTouch then
-				api.line(Strings.get("ctl_touch"), Palette.Crt)
+				api.line(Strings.get("ctl_touch"), Ui.C.Accent)
 				return
 			end
 			for _, entry in entries do
 				local key = if usingGamepad() then entry[2] else entry[1]
-				api.line(`{key}  {Strings.get(entry[3])}`, Palette.Crt)
+				local row = Ui.frame({
+					LayoutOrder = nextOrder(),
+					Size = UDim2.new(1, 0, 0, 28),
+					BackgroundTransparency = 1,
+				}, list)
+				Ui.list(row, 10, true).VerticalAlignment = Enum.VerticalAlignment.Center
+				Ui.keycap(tostring(key), { LayoutOrder = 1 }, row)
+				Ui.text({
+					LayoutOrder = 2,
+					Size = UDim2.new(1, -90, 0, 22),
+					TextSize = 15,
+					TextColor3 = Ui.C.Muted,
+					TextYAlignment = Enum.TextYAlignment.Center,
+					Text = Strings.get(entry[3]),
+				}, row)
 			end
 		end,
 		brightness = function()
@@ -125,7 +137,8 @@ local function render()
 				Size = UDim2.new(1, -120, 1, 0),
 				TextXAlignment = Enum.TextXAlignment.Center,
 				TextYAlignment = Enum.TextYAlignment.Center,
-				TextColor3 = Palette.Crt,
+				TextColor3 = Ui.C.Accent,
+				FontFace = Ui.Fonts.MonoBold,
 				Text = Brightness.meter(),
 			}, holder)
 			local function step(delta: number)
@@ -176,11 +189,10 @@ function Journal.open()
 	-- Reading the notebook clears the mark.
 	pingToken += 1
 	tag.Text = tagText
-	tag.TextColor3 = Palette.Paper
-	tag.BorderColor3 = Palette.Paper
-	panel.Visible = true
+	tag.TextColor3 = Ui.C.Text
+	tagStroke.Color = Ui.C.Text
+	Ui.open(panel)
 	tag.Visible = false
-	AudioDirector.play("Paper", 0.4)
 	ContextActionService:BindActionAtPriority("CloseJournal", function(_, state)
 		if state == Enum.UserInputState.Begin then
 			Journal.close()
@@ -226,14 +238,20 @@ function Journal.ping()
 	end
 	pingToken += 1
 	local token = pingToken
-	tag.Text = `{tagText} +`
-	tag.TextColor3 = Palette.Rec
-	tag.BorderColor3 = Palette.Rec
+	tag.Text = `{tagText}  +`
+	tag.TextColor3 = Ui.C.Danger
+	tagStroke.Color = Ui.C.Danger
+	-- A small nudge so the eye goes to the corner once.
+	local scale = tag:FindFirstChildOfClass("UIScale")
+	if scale then
+		scale.Scale = 1.12
+		Ui.tween(scale, TweenInfo.new(0.4, Enum.EasingStyle.Back), { Scale = 1 })
+	end
 	task.delay(6, function()
 		if token == pingToken then
 			tag.Text = tagText
-			tag.TextColor3 = Palette.Paper
-			tag.BorderColor3 = Palette.Paper
+			tag.TextColor3 = Ui.C.Text
+			tagStroke.Color = Ui.C.Text
 		end
 	end)
 end
@@ -245,36 +263,36 @@ function Journal.setup(opts: Options)
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.fromScale(0.5, 0.5),
 		Size = UDim2.new(0.62, 0, 0.78, 0),
-		BackgroundColor3 = Color3.fromRGB(12, 13, 14),
-		BackgroundTransparency = 0.04,
+		BackgroundColor3 = Ui.C.Surface,
+		BackgroundTransparency = 0.03,
 		Visible = false,
 	}, gui)
+	Ui.ticks(panel, Ui.C.Line, 12, -1)
 	Ui.make("UISizeConstraint", {
 		MinSize = Vector2.new(320, 260),
 		MaxSize = Vector2.new(640, 560),
 	}, panel)
-	Ui.make("UIStroke", { Color = Palette.Paper, Thickness = 1, Transparency = 0.6 }, panel)
+	Ui.stroke(panel, Ui.C.Line, 0.8)
 	-- A red margin rule, like the case files the objective card is cut from.
-	Ui.frame({ Size = UDim2.new(0, 3, 1, 0), BackgroundColor3 = Palette.Rec }, panel)
-	titleLabel = Ui.text({
+	Ui.frame({ Size = UDim2.new(0, 3, 1, 0), BackgroundColor3 = Ui.C.Danger }, panel)
+	titleLabel = Ui.display({
 		Position = UDim2.new(0, 20, 0, 12),
-		Size = UDim2.new(1, -130, 0, 26),
-		TextSize = 19,
+		Size = UDim2.new(1, -130, 0, 28),
+		TextSize = 24,
 		Text = Strings.get(opts.titleKey),
 	}, panel)
 	-- Modal frees the cursor from first-person lock while the notebook is open.
-	closeButton = Ui.button(Strings.get("hub_close"), {
+	closeButton = Ui.quiet(Strings.get("hub_close") .. "  ×", {
 		AnchorPoint = Vector2.new(1, 0),
 		Position = UDim2.new(1, -10, 0, 8),
-		Size = UDim2.fromOffset(96, 34),
-		TextSize = 14,
+		Size = UDim2.fromOffset(104, 34),
 		Modal = true,
 	}, panel, Journal.close)
 	Ui.frame({
 		Position = UDim2.new(0, 20, 0, 46),
 		Size = UDim2.new(1, -36, 0, 1),
-		BackgroundColor3 = Palette.Paper,
-		BackgroundTransparency = 0.7,
+		BackgroundColor3 = Ui.C.Line,
+		BackgroundTransparency = 0.82,
 	}, panel)
 	list = Ui.make("ScrollingFrame", {
 		Position = UDim2.new(0, 20, 0, 52),
@@ -284,7 +302,7 @@ function Journal.setup(opts: Options)
 		CanvasSize = UDim2.new(),
 		AutomaticCanvasSize = Enum.AutomaticSize.Y,
 		ScrollBarThickness = 6,
-		ScrollBarImageColor3 = Palette.Paper,
+		ScrollBarImageColor3 = Ui.C.Muted,
 		ScrollingDirection = Enum.ScrollingDirection.Y,
 	}, panel)
 	Ui.make("UIListLayout", {
@@ -300,11 +318,13 @@ function Journal.setup(opts: Options)
 		Position = UDim2.new(1, -14, 0, 52),
 		Size = UDim2.fromOffset(if keyName then 128 else 104, 30),
 		TextSize = 14,
+		FontFace = Ui.Fonts.MonoBold,
 		BackgroundTransparency = 0.35,
-		BackgroundColor3 = Color3.fromRGB(8, 10, 12),
-		BorderColor3 = Palette.Paper,
-		TextColor3 = Palette.Paper,
+		BackgroundColor3 = Ui.C.Ink,
+		BorderColor3 = Ui.C.Text,
+		TextColor3 = Ui.C.Text,
 	}, gui, Journal.toggle)
+	tagStroke = tag:FindFirstChildOfClass("UIStroke") :: UIStroke
 	Input.bind("Journal", Journal.toggle, { Enum.KeyCode.J, Enum.KeyCode.ButtonL1 })
 	titleLabel.Text = Strings.get(opts.titleKey)
 end

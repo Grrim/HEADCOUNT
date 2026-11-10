@@ -22,6 +22,8 @@ local RULES: Registrar.Config = {
 	contactRadius = CFG.contactRadius,
 	reachTime = CFG.reachTime,
 	graceAfterCut = CFG.graceAfterCut,
+	arrivalGrace = CFG.arrivalGrace,
+	exposureDecay = CFG.exposureDecay,
 }
 
 local services: { [string]: any }
@@ -66,7 +68,9 @@ local function wake()
 	end
 	if state and state.dormant then
 		state.dormant = false
-		state.timer = RULES.jumpInterval
+		-- Waking is announced on the radio; the first move waits long enough for the line to land
+		-- and for the team to find their feet in whatever woke him.
+		state.timer = math.max(RULES.jumpInterval, CFG.WakeGraceSeconds)
 		anchor:SetAttribute("Awake", true)
 		if not spoken then
 			spoken = true
@@ -113,7 +117,7 @@ function RegistrarAi.proceduralError(player: Player)
 		return
 	end
 	local p = root.Position
-	local event = Registrar.onReplay(state, Layout.NODES, p.X, p.Y, p.Z)
+	local event = Registrar.onReplay(state, Layout.NODES, p.X, p.Y, p.Z, RULES)
 	if event and event.node then
 		placeAnchor(event.node)
 		send("jump")
@@ -141,7 +145,7 @@ local function onVoice(player: Player)
 		return
 	end
 	local p = root.Position
-	local event = Registrar.onReplay(state :: Registrar.State, Layout.NODES, p.X, p.Y, p.Z)
+	local event = Registrar.onReplay(state :: Registrar.State, Layout.NODES, p.X, p.Y, p.Z, RULES)
 	if event and event.node then
 		placeAnchor(event.node)
 		send("jump")
@@ -165,11 +169,17 @@ function RegistrarAi.onReplay(player: Player, totalReplays: number)
 		return
 	end
 	local p = root.Position
-	local event = Registrar.onReplay(state, Layout.NODES, p.X, p.Y, p.Z)
+	local event = Registrar.onReplay(state, Layout.NODES, p.X, p.Y, p.Z, RULES)
 	if event and event.node then
 		placeAnchor(event.node)
 		send("jump")
 	end
+end
+
+-- Can this player see where he stands? He may only reach for someone who could have framed him,
+-- so a wall between them is a wall for him too.
+local function canSee(eye: Vector3): boolean
+	return services.Lens.clearLine(eye, anchor.Position)
 end
 
 local function gatherPlayers(): { Registrar.PlayerInput }
@@ -179,12 +189,15 @@ local function gatherPlayers(): { Registrar.PlayerInput }
 		local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
 		if root then
 			local p = root.Position
+			local watching = services.Tapes.isPlaying(player)
 			table.insert(list, {
 				id = player.UserId,
 				x = p.X,
 				y = p.Y,
 				z = p.Z,
 				cut = player:GetAttribute("OffFrame") == true,
+				sees = canSee(p + Vector3.new(0, 1.5, 0)),
+				reachBonus = if watching then CFG.WatchingReachBonus else 0,
 			})
 		end
 	end

@@ -2,6 +2,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterGui = game:GetService("StarterGui")
 
+local Affordance = require(ReplicatedStorage.ClientCommon.Affordance)
 local AudioDirector = require(ReplicatedStorage.ClientCommon.AudioDirector)
 local Brightness = require(ReplicatedStorage.ClientCommon.Brightness)
 local EntryCurtain = require(ReplicatedStorage.ClientCommon.EntryCurtain)
@@ -24,6 +25,7 @@ AudioDirector.start()
 Brightness.start()
 PromptText.start()
 PromptUi.start()
+Affordance.start()
 Vignette.start()
 LensView.init(nil) -- the hub's lens is purely local: nothing here is decided by it
 Loader.run(script.Parent.Controllers)

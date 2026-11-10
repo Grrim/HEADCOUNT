@@ -469,3 +469,100 @@ Zostały trzy zgłoszenia w miejscach niewidocznych z wnętrza (koniec podwyższ
 Do sprawdzenia w Studio: czy Bileter nie jest za trudny w magazynie (latarka jest tam potrzebna), czy jego postać z siatki Kadrowego z głową z części nie wygląda śmiesznie, jak wygląda ręka Kadrowego, czy poklatkowy ruch nie wygląda jak lag sieci.
 
 Poprawki po niezależnym przeglądzie kodu przeciwników: Bileter nie przechodzi przez niskie przeszkody w pościgu, nie łapie przez ścianę i nie zastyga, widząc światło piętro wyżej. Kroki i chód Biletera grają w pełnym tempie, choć kotwica rusza się tylko 10 razy na sekundę. Szyja Kadrowego liczy wysokość od rysowanej pozycji barków, więc wierzch szyi nie mignie przy skoku. Ręka Kadrowego chowa się na taśmie, przy celu dalej niż 20 jednostek i sama po czasie sięgania, gdyby misja skończyła się w jego trakcie. Radio o Bileterze (24 s) wyprzedza teraz jego start (30 s).
+
+## Osiemnasty przebieg: przegląd doświadczenia gracza
+
+Stan na 2026-11-10. Cel: gra ma być prostsza, czytelniejsza, uczciwsza i przyjemniejsza, bez nowych misji i bez nowych mechanik. Zaczęło się od audytu Misji 001 z perspektywy nowego gracza (kod czytany pod kątem tego, co gracz widzi i słyszy w danej sekundzie), a potem przyszły zmiany.
+
+### Co audyt znalazł (najważniejsze)
+
+1. **Pierwsza sekunda misji:** pięć bloków tekstu naraz (karta celu, linia NEXT, plansza rozdziału, podpowiedź klawisza, odprawa radia). Radio miało jeden wiersz napisów, więc kolejna kwestia ucinała poprzednią. Odprawa mówiła „nie odtwarzaj taśmy”, a cel i podpowiedź kazały ją odtworzyć.
+2. **Kadrowy bywał nieuczciwy:** sięgał przez ściany (zasięg 11 bez sprawdzania widoczności, a obronić się można tylko w linii wzroku), mógł sięgnąć tuż po skoku bez ciszy (pociągnięcie odtworzeniem, błędem lub głosem), a ekspozycja nigdy nie malała, więc kilka uczciwych spojrzeń w ciągu misji sumowało się do rejestracji. Gracz oglądający taśmę miał 1,5 s bez sterowania.
+3. **Licznik błędów** był jeden na całą misję i drużynę, choć nazywał się „na krok”.
+4. **Numerek miejsca:** notatnik i linia NEXT podawały tylko rząd, choć taśma pokazała konkretne krzesło. Radio radziło „przejdź rząd i zaglądaj pod siedzenia”, a każde puste krzesło liczyło się jako błąd i budziło Kadrowego.
+5. **Zanik prądu przy pierwszej wizycie:** w 24 s Kadrowy (budzony), kod, latarka, a potem drugi przeciwnik (Bileter) z odwrotną zasadą („zgaś latarkę”), który łapał nieoświetlonego gracza w tym samym takcie, w którym go zauważał. Klient nie obsługiwał złapania przez Biletera.
+6. **Anomalie** obracały krzesła w czasie zagadki „ktoś się odwrócił”, a dźwięki się dublowały (kasownik Biletera brzmiał jak klik złej odpowiedzi).
+7. Nagranie mogło przepaść bez komunikatu, jeśli R padło w tej samej chwili co podniesienie kamery (raport obiektywu szedł 5 razy na sekundę).
+8. Nagrywanie kończyło się samo po 12 s bez żadnej informacji o czasie.
+
+### Zmiany w rozgrywce
+
+| Zmiana | Pliki |
+|---|---|
+| Kadrowy sięga tylko po kogoś, kto go widzi (promień od głowy do kotwicy, ten sam test co kadrowanie) | `Core/Registrar.luau`, `RegistrarAi.luau`, `Lens.clearLine` |
+| Po każdym przemieszczeniu Kadrowy czeka 1,2 s, zanim może sięgnąć, także po pociągnięciu bez ciszy | `Core/Registrar.arrived`, `Config/Game.arrivalGrace` |
+| Ekspozycja maleje o 0,4/s, gdy nikt nie kadruje; długie wpatrywanie nadal rejestruje | `Core/Registrar`, `Config/Game.exposureDecay` |
+| Gracz oglądający taśmę dostaje +1,2 s na reakcję, a klient przerywa mu taśmę w chwili sięgania | `RegistrarAi`, `Silence.luau`, `Config/Game.WatchingReachBonus` |
+| Po przebudzeniu (np. zanikiem prądu) pierwszy skok najwcześniej po 28 s | `RegistrarAi.wake`, `Config/Game.WakeGraceSeconds` |
+| Pierwsza cisza jest raz nazwana („The building went quiet...”) | `Silence.luau` |
+| Licznik błędów zeruje się przy każdym postępie (miejsce, płaszcz, kod, szpula) | `Puzzles.luau` |
+| Notatnik, linia NEXT i radio podają dokładne miejsce z taśmy („seat C-11”) | `Notebook.luau`, `Strings` |
+| Bileter chodzi tylko od drugiej wizyty; między zauważeniem a złapaniem jest 0,9 s; klient pokazuje złapanie | `UsherAi.luau`, `Puzzles.luau`, `UsherView.luau` |
+| Obrócone krzesło i obrócony rząd czekają do końca fazy zagadki z taśmami | `OmenDirector.luau` |
+| Kasownik Biletera ma własny, niski klik | `UsherView.luau` |
+| Obiektyw zgłasza podniesienie serwerowi natychmiast, więc szybkie Q+R nie gubi nagrania | `LensView.setRaised` |
+| Odprawa krótsza i bez sprzeczności; kolejność startu: plansza rozdziału (0–5 s), odprawa (1,5 s, w kolejce), sprawdzenie kamery (5,5 s), pierwsza podpowiedź (5,5 s). Usunięta zdublowana kwestia `radio_film` | `Session.luau`, `Hints.luau`, `Strings` |
+| Klawiatura bezpiecznika otwiera się tylko w fazie zaniku prądu (inaczej komunikat), pokazuje cyfry z notatnika i przyjmuje klawisze 0–9 | `Keypad.luau`, `Notebook.codeText` |
+
+Cztery nowe testy Lune dla Kadrowego (widoczność, czas po przybyciu, premia przy taśmie, spadek ekspozycji). Razem 65.
+
+### Interfejs
+
+Jeden system dla obu miejsc w `client_common/Ui.luau`: kroje (Oswald do tytułów, Builder Sans do tekstu, Roboto Mono do liczników, Special Elite do dokumentów), kolory (atrament, papier, zielony = „możesz tego użyć”, czerwony = nagrywanie i zagrożenie, bursztyn = radio), narożniki jak na teczce, przyciski z podświetleniem, wciśnięciem, kliknięciem i zaznaczeniem dla kontrolera, bezpieczne marginesy urządzenia (`ScreenInsets`).
+
+| Ekran | Co się zmieniło |
+|---|---|
+| Ekran ładowania | Nazwa gry, czerwona linia, licznik przewijanej taśmy, pasek postępu i jedna zasada świata |
+| Karta celu | „PART I · THE ATTENDANCE”, cel, następny krok, trzy kółka szpul; po 14 s przygasa |
+| Radio | Bursztynowy znacznik RADIO, kwestie w kolejce (bez ucinania), najwyżej dwie czekające |
+| Wynik akcji | Osobny komunikat pod środkiem ekranu: ✓ zielony dla postępu z klikiem, × szary z potrząśnięciem dla pomyłki |
+| Dokumenty | Kartka papieru pisana na maszynie, przyciemnione tło, stempel; zamyka CLOSE, X, Backspace, B albo odejście o kilka kroków |
+| Podpowiedzi | Mały chip z klawiszem dla aktualnego urządzenia; znika, kiedy czynność trwa (np. podczas nagrywania) |
+| Znacznik celu | Romb z nazwą i odległością przy celu następnego kroku (płaszcz, miejsce, bezpiecznik, magnetofon, projektor, rejestr, dzwonek). Pokazuje się na 9 s po zmianie kroku i po 50 s utknięcia, nie przy podniesionej kamerze |
+| Oznaczenie obiektów | Mały oddychający romb nad każdym obiektem do użycia (bez krzeseł i płaszczy, bo ich szukanie to zagadka) |
+| Prompty | Nowe kroje, zielony pasek przytrzymania, wjazd i „skinienie” po użyciu |
+| Wycięcie z kadru | Karta: co cię złapało, dwie drogi powrotu, odliczanie do otwarcia znacznika, pasek ratowania przez kolegę, odliczanie do końca taśmy, znacznik celu na znacznik w foyer |
+| Raport końcowy | Teczka: nagłówek, wielki wynik, przy porażce przyczyna i rada, siatka liczb, odznaczenia jako znaczki; wpisuje się wiersz po wierszu. Porażka zaczyna się zwinięciem obrazu jak koniec taśmy |
+| Terminal | Misja jako karta z metadanymi, PLAY SOLO wypełniony, lista przewijana |
+| Notatnik | Nagłówki jak w teczce, sterowanie jako klawisze, animacja otwarcia |
+| Drużyna | Przy 2+ graczach pod kartą celu lista kolegów; wycięty kolega jest czerwony z „OUT OF FRAME” |
+| Dotyk | Własne okrągłe przyciski zamiast szarych kółek silnika: CAM największy pod kciukiem, REC z czerwoną kropką, stany (zielony = kamera w górze, czerwony = nagrywa), miejsce na przycisk skoku, osobny układ telefonu i tabletu, chowają się na czas taśmy i zakończenia |
+
+### Kamera
+
+Podniesienie zamyka i otwiera dwie czarne przesłony (0,07 s + 0,16 s) i zmienia ogniskową z lekkim przestrzeleniem; w ręku obraz lekko faluje (zmiany stosowane różnicowo, bo kamera Roblox odczytuje kierunek z poprzedniej klatki). Wizjer: migająca czerwona kropka REC, kod czasu, kasety jako ikony, **pasek długości nagrania z sekundami do końca**, znak „TAPE 2 SAVED · [T] PLAY IT BACK” po zapisie, błysk i znak przy zarejestrowanej anomalii, ostrzeżenie rejestracji z paskiem pod środkiem kadru. Odtwarzanie ma oś czasu taśmy i klawisz zatrzymania.
+
+### Świat
+
+- Podłoga ambientu misji podniesiona (`Ambient` 32,36,44 → 50,54,62, ekspozycja 0,25 → 0,35, rozproszenie otoczenia 0,15 → 0,3). Powód: w Studio przy obniżonej jakości grafiki (tak jak na telefonie) lampy znikają i ściany foyer robiły się czarne. Sprawdzone na żywo zmianą wartości w kliencie; ściany przy obniżonej jakości nadal są ciemne, ale szyldy, ekran i lada są czytelne.
+- Chodnik w foyer jest bordowy (112,48,42) zamiast prawie czarnego.
+
+### Testy faktycznie przeprowadzone
+
+Bramki: rojo (oba miejsca), lune (65 testów), selene, stylua — zielone. `lune run audit_map mission`: te same trzy niewidoczne styki co wcześniej.
+
+Studio, solo, PC. Klawisze (Q, R, T, E) wysyłane narzędziem, chód przez `Humanoid:MoveTo`, kierunek kamery ustawiany skryptem. **To nie jest gra człowieka.**
+
+| Test | Wynik |
+|---|---|
+| Start misji i lobby bez błędów skryptów (kilka uruchomień) | OK |
+| Karta celu, kwestie radia po kolei, chip „Q Raise the camera” | OK, zrzut |
+| Wizjer: REC, kod czasu, kasety, pasek nagrania, krzyż; chip „Record” znika w trakcie nagrania | OK, zrzuty |
+| Zapis taśmy: kaseta pusta, STBY, chip przechodzi na T | OK |
+| Odtwarzanie: PLAY, VIEWING No. 1, oś czasu nad chipem, notatnik schowany | OK po poprawce (pierwsza wersja nachodziła) |
+| Po taśmie: dokładne miejsca w linii NEXT, kwestia z miejscami, znacznik „Seat C-11 · 11 m”, „+” na notatniku | OK |
+| E pod właściwym krzesłem: „✓ Coat tag No. 40 under seat C-11”, krok „Search coat No. 40”, znacznik „Coat 40” przy krawędzi ekranu | OK |
+| Karta wycięcia (stan ustawiony atrybutami, nie prawdziwym Kadrowym) | OK po poprawce (narożniki trafiały do listy, karta nachodziła na kartę celu) |
+| Raport porażki (zdarzenie `EndMission` wysłane ręcznie) | OK, zrzut |
+| Ekran ładowania (wywołany ponownie) | OK, zrzut |
+| Terminal w lobby (postać przeniesiona pod terminal tylko dla zrzutu) | OK po poprawce brakującego znaku × i uciętej karty 002 |
+| Przyciski dotykowe: zbudowane modułem `Input` z wymuszonym trybem dotyku, okno zmniejszone do 782×346 | Układ OK, przycisk skoku ma wolne miejsce. **Prawdziwego dotyku nie było** |
+
+Niesprawdzone: gra człowieka i czas przejścia, prawdziwy telefon i dotyk, kontroler, 2–4 graczy (w tym lista drużyny), prawdziwe wycięcie przez Kadrowego po zmianach uczciwości, Bileter na drugiej wizycie, klawiatura bezpiecznika i wpisywanie cyfr, raport po sukcesie w nowym wyglądzie, brzmienie, teleport, DataStore, koszt nowych efektów na telefonie.
+
+Uwaga do zrzutów: Studio w tle obniża jakość grafiki i gasi część lamp, więc zrzuty z jednego uruchomienia potrafią mieć różną jasność.
+
+### Czego nie dało się zrobić w tym środowisku
+
+- **Nowe modele Kadrowego i widowni, własne dźwięki.** Wymagają ręcznej pracy lub wgrania plików. Specyfikacje są w `06_ASSETS.md`. Kadrowy i widownia zostają na obecnych siatkach.
+- Pomiar wydajności na telefonie.

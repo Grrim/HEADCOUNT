@@ -1,16 +1,23 @@
 # PROGRESS: HEADCOUNT
 
-Stan na 2026-11-09. Plik służy do wznowienia pracy w nowej sesji. Szczegółowe wyniki testów są w `docs/05_STATUS.md`, a lista assetów w `docs/06_ASSETS.md`.
+Stan na 2026-11-10. Plik służy do wznowienia pracy w nowej sesji. Szczegółowe wyniki testów są w `docs/05_STATUS.md`, a lista assetów w `docs/06_ASSETS.md`.
 
 ## Aktualny stan projektu
 
 Kooperacyjny horror psychologiczny na Roblox w fazie Vertical Slice (Misja 001). Lobby (Hub) i misja działają solo w Studio, z tymczasową oprawą z generatorów Roblox. Cała misja i droga przez lobby do terminala przeszły pieszo, bez teleportów (`docs/05_STATUS.md`, szósty przebieg).
 
-- **Budowanie i testy:** `python scripts/check.py [--fix]` uruchamia rojo, lune, selene i stylua oraz tworzy `build/Hub.rbxl` i `build/Mission.rbxl`. Ostatni wynik: wszystko zielone, 61 testów.
+- **Budowanie i testy:** `python scripts/check.py [--fix]` uruchamia rojo, lune, selene i stylua oraz tworzy `build/Hub.rbxl` i `build/Mission.rbxl`. Ostatni wynik: wszystko zielone, 65 testów.
 - **Nazwa:** HEADCOUNT. „Poza kadrem” zostaje nazwą stanu w grze i ukrytego zakończenia. Dostępności nazwy na Roblox nie sprawdzono.
 - **Git:** gałąź `main`, zdalne repozytorium pokazuje `git remote -v`. `build/` i `Place1.rbxl` są poza repozytorium. Plan rozwoju jest w `docs/07_ROADMAP.md`.
 - **Publikacja na Roblox:** nic nie zostało opublikowane. `Config/Places` ma identyfikatory 0, więc teleport między miejscami nie może jeszcze działać. Publikacja wymaga wyraźnej zgody właściciela.
 - **Grywalność:** gry nie przeszedł jeszcze żaden człowiek.
+
+## Wykonane 2026-11-10
+
+- Przegląd doświadczenia gracza bez nowej treści: audyt Misji 001 z perspektywy nowego gracza, uczciwszy Kadrowy (4 nowe testy, razem 65), spokojniejszy start, dokładne miejsce z taśmy, Bileter od drugiej wizyty, jeden system UI dla obu miejsc, nowa kamera (przesłona, pasek nagrania, znak zapisu), znacznik celu, oznaczenie obiektów, własne przyciski dotykowe, lista drużyny, jaśniejsze tło światła.
+- Sprawdzone w Studio solo z prawdziwymi klawiszami i zrzutami: start, wizjer, nagranie, odtwarzanie, miejsce z taśmy, krzesło, karta wycięcia, raport porażki, ekran ładowania, terminal, układ przycisków dotykowych w małym oknie. Szczegóły i lista niesprawdzonych rzeczy: `docs/05_STATUS.md`, osiemnasty przebieg.
+- Specyfikacje Kadrowego, widowni i brakujących dźwięków do zewnętrznej produkcji: `docs/06_ASSETS.md`.
+- Nic nie jest zacommitowane ani opublikowane.
 
 ## Wykonane 2026-11-09
 

@@ -86,7 +86,7 @@ end
 
 function Titles.init(all: { [string]: any })
 	controllers = all
-	local gui = Ui.screen("Titles", 3)
+	local gui = Ui.screen("Titles", 3, true)
 	holder = Ui.frame({
 		AnchorPoint = Vector2.new(0.5, 0),
 		Position = UDim2.fromScale(0.5, 0.2),
@@ -94,7 +94,8 @@ function Titles.init(all: { [string]: any })
 		BackgroundTransparency = 1,
 		Visible = false,
 	}, gui)
-	partLabel = Ui.text({
+	partLabel = Ui.mono({
+		FontFace = Ui.Fonts.MonoBold,
 		Size = UDim2.new(1, 0, 0, 22),
 		TextXAlignment = Enum.TextXAlignment.Center,
 		TextSize = 16,
@@ -104,27 +105,28 @@ function Titles.init(all: { [string]: any })
 	rule = Ui.frame({
 		AnchorPoint = Vector2.new(0.5, 0),
 		Position = UDim2.new(0.5, 0, 0, 26),
-		Size = UDim2.fromOffset(60, 2),
+		Size = UDim2.fromOffset(80, 2),
 		BackgroundColor3 = Palette.Rec,
 	}, holder)
-	nameLabel = Ui.text({
+	nameLabel = Ui.display({
+		FontFace = Ui.Fonts.DisplayBold,
 		Position = UDim2.new(0, 0, 0, 34),
-		Size = UDim2.new(1, 0, 0, 44),
+		Size = UDim2.new(1, 0, 0, 52),
 		TextXAlignment = Enum.TextXAlignment.Center,
-		TextSize = 34,
-		TextColor3 = Palette.Paper,
+		TextSize = 44,
+		TextColor3 = Ui.C.Text,
 		TextStrokeColor3 = Color3.new(0, 0, 0),
 		Text = "",
 	}, holder)
-	placeLabel = Ui.text({
-		Position = UDim2.new(0, 0, 0, 82),
+	placeLabel = Ui.mono({
+		Position = UDim2.new(0, 0, 0, 92),
 		Size = UDim2.new(1, 0, 0, 22),
 		TextXAlignment = Enum.TextXAlignment.Center,
 		TextSize = 15,
-		TextColor3 = Palette.Crt,
+		TextColor3 = Ui.C.Muted,
 		Text = "",
 	}, holder)
-	Ui.make("UITextSizeConstraint", { MaxTextSize = 34, MinTextSize = 18 }, nameLabel)
+	Ui.make("UITextSizeConstraint", { MaxTextSize = 44, MinTextSize = 22 }, nameLabel)
 	nameLabel.TextScaled = true
 end
 

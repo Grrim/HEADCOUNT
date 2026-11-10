@@ -61,5 +61,19 @@ Status aktualny: patrz `05_STATUS.md`. `[x]` znaczy „napisane”; zakres test�
 4. Stabilne 30+ FPS na telefonie średniej klasy.
 5. Zapis przeżywa teleport i ponowne wejście.
 
+## M7: Przegląd doświadczenia gracza (2026-11-10, szczegóły w `05_STATUS.md`, osiemnasty przebieg)
+- [x] T37 Audyt Misji 001 z perspektywy nowego gracza
+- [x] T38 Uczciwy Kadrowy: widoczność, czas po przybyciu, malejąca ekspozycja, czas przy taśmie
+- [x] T39 Mniej naraz: kolejka radia, spokojny start, Bileter od drugiej wizyty, licznik błędów na krok
+- [x] T40 Jeden system UI (`Ui.luau`) i nowe ekrany: ładowanie, cel, radio, wynik akcji, dokumenty, wycięcie, raport, terminal, notatnik
+- [x] T41 Kamera: przesłona, ruch w ręku, pasek nagrania, znak zapisu, oś czasu taśmy
+- [x] T42 Znacznik celu, oznaczenie obiektów do użycia, dokładne miejsce z taśmy
+- [x] T43 Własne przyciski dotykowe, lista drużyny
+- [ ] T44 Gra człowieka po tych zmianach: czy start jest zrozumiały bez instrukcji, czas przejścia
+- [ ] T45 Telefon: dotyk, czytelność, FPS z nowymi efektami (przesłona, kurz, VHS)
+- [ ] T46 2–4 graczy: lista drużyny, ratowanie, Kadrowy po zmianach uczciwości
+- [ ] T47 Assety z `06_ASSETS.md`: Kadrowy, widownia, dźwięki
+- [ ] T48 Strojenie: `arrivalGrace`, `exposureDecay`, `WakeGraceSeconds` na żywych graczach
+
 ## Poza zakresem do czasu testu slice
 Monetyzacja, kosmetyka, kolejne misje, finalny art i audio, osiągnięcia w UI, statyw, globalna lista drużyn, analityka.

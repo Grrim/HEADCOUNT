@@ -69,6 +69,17 @@ function Lens.frames(player: Player, target: Vector3): boolean
 	return hit == nil
 end
 
+-- Nothing solid between these two points (the same test framing uses), stopping just short of
+-- the target.
+function Lens.clearLine(origin: Vector3, target: Vector3): boolean
+	local offset = target - origin
+	local distance = offset.Magnitude
+	if distance < 2 then
+		return true
+	end
+	return Workspace:Raycast(origin, offset.Unit * (distance - 1.5), rayParams) == nil
+end
+
 -- Up close a large subject overflows the framing cone, so a door right in front of the lens must
 -- still count. Roughly facing it within this radius is enough; no line of sight is needed at this
 -- distance because the subject is the nearest thing there.

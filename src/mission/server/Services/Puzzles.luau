@@ -38,6 +38,11 @@ local function allowed(player: Player, prompt: ProximityPrompt): boolean
 	return (root.Position - part.Position).Magnitude <= prompt.MaxActivationDistance + 8
 end
 
+-- Real progress wipes the slate: the limit is per step, as its name says, not per mission.
+local function progressed()
+	wrongGuesses = 0
+end
+
 local function wrong(player: Player, key: string)
 	services.Session.notifyOne(player, key)
 	wrongGuesses += 1
@@ -86,6 +91,7 @@ local function onSeat(player: Player, seatId: number, prompt: ProximityPrompt)
 	prompt.Enabled = false
 	tagsFound[target.hook] = true
 	table.insert(session.tags, target.hook)
+	progressed()
 	session.notify("seat_found", target.hook, target.label)
 	session.broadcast()
 end
@@ -103,6 +109,7 @@ local function onHook(player: Player, hook: number, prompt: ProximityPrompt)
 	end
 	prompt.Enabled = false
 	Flow.reelFound(session.flow)
+	progressed()
 	session.notify("hook_found", target.reel, hook)
 	session.broadcast()
 	if session.flow.phase == "Power" then
@@ -112,8 +119,10 @@ local function onHook(player: Player, hook: number, prompt: ProximityPrompt)
 		dealDigits()
 		task.delay(2.5, session.notify, "radio_power")
 		task.delay(9, session.notify, "radio_power_cards")
-		-- And then the reason to keep the torch off.
-		task.delay(24, session.notify, "radio_usher")
+		-- And then the reason to keep the torch off, on the visits where he walks.
+		if session.take.number >= 2 then
+			task.delay(24, session.notify, "radio_usher")
+		end
 	end
 end
 
@@ -138,6 +147,7 @@ local function onCode(player: Player, entry: unknown)
 	Flow.powerRestored(session.flow)
 	services.MissionWorld.prompts.Breaker.Enabled = false
 	services.MissionWorld.setMains(true)
+	progressed()
 	session.notify("code_right")
 	session.broadcast()
 end
@@ -173,6 +183,7 @@ local function onReel(player: Player, letter: string, prompt: ProximityPrompt)
 		return
 	end
 	setCanOnTable(prompt, false)
+	progressed()
 	session.notify("reel_loaded", letter, loaded)
 	if loaded >= #session.puzzle.reelOrder and Flow.filmPlayed(session.flow) then
 		world.showFilm(session.puzzle.doorSide)

@@ -7,11 +7,14 @@ return {
 		GlobalShadows = true,
 		-- Lower than the GDD start: under Future the lamps carry the rooms, and the space between
 		-- them should fall away into blue-black rather than sit at one even grey.
-		Ambient = Color3.fromRGB(32, 36, 44),
-		OutdoorAmbient = Color3.fromRGB(10, 12, 16),
-		EnvironmentDiffuseScale = 0.15,
+		-- Raised from 32,36,44 after seeing the mission at a reduced quality level, which is what a
+		-- phone renders: with the lamps culled the walls went black and the signs unreadable. The
+		-- lamps still carry the mood at full quality; this is the floor under them.
+		Ambient = Color3.fromRGB(50, 54, 62),
+		OutdoorAmbient = Color3.fromRGB(22, 24, 30),
+		EnvironmentDiffuseScale = 0.3,
 		EnvironmentSpecularScale = 0.3,
-		ExposureCompensation = 0.25,
+		ExposureCompensation = 0.35,
 	},
 	Atmosphere = {
 		Density = 0.32,

@@ -18,10 +18,13 @@ local WALK_SPEED = 5
 local HUNT_SPEED = 11.5
 -- A lit torch within this distance and in his line of sight draws him.
 local NOTICE_RANGE = 16
--- Anyone this close is found, light or not.
+-- Anyone who walks into him is found, light or not.
 local TOUCH_RANGE = 2.2
 -- Reaching a hunted player within this distance cuts them.
 local CATCH_RANGE = 3
+-- Being found is never the same moment as being caught: after he notices someone he turns to
+-- them (the eyes light, a punch sounds) and only then can he take them. Enough to back off.
+local NOTICE_BEFORE_CATCH = 0.9
 -- How long he keeps after a light that went out before going back to his round.
 local GIVE_UP_AFTER = 2.5
 -- Grace after the mains go, so nobody is caught before they know he exists.
@@ -137,10 +140,13 @@ function UsherAi.start()
 	-- through a wall.
 	local trail: { Vector3 } = {}
 	local punchAt = 0
+	local noticedAt = 0
 	while true do
 		task.wait(STEP)
 		local session = services.Session
-		local shouldRun = session.flow.phase == "Power"
+		-- A first visit has enough to learn with the Registrar alone; the Usher walks the dark only
+		-- for teams who have closed the meeting before.
+		local shouldRun = session.flow.phase == "Power" and session.take.number >= 2
 		setActive(shouldRun)
 		if not active then
 			target = nil
@@ -178,6 +184,7 @@ function UsherAi.start()
 						table.insert(trail, position)
 					end
 					target = best
+					noticedAt = now
 					anchor:SetAttribute("Hunting", true)
 					send("noticed", best.UserId)
 				end
@@ -212,7 +219,7 @@ function UsherAi.start()
 				-- Never through a wall or a shelf: he has to be able to see who he takes.
 				local close = (root.Position - (position + Vector3.new(0, 3, 0))).Magnitude
 					< CATCH_RANGE
-				if close and sees then
+				if close and sees and now - noticedAt >= NOTICE_BEFORE_CATCH then
 					send("caught", hunted.UserId)
 					services.OffFrame.cut(hunted)
 					target = nil

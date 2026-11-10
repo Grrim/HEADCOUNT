@@ -20,7 +20,17 @@ Stan na 2026-11-07. Faza Vertical Slice: jedna misja i lobby, z tymczasową graf
 - **Mechaniki:** wizjer pokazujący niewidzialną widownię, nagrywanie i odtwarzanie taśm, Kadrowy przybliżany każdym odtworzeniem, wycięcie z kadru z powrotem, anomalie i sobowtór.
 - **Dane i sterowanie (napisane, nieprzetestowane):** teleport między miejscami, zapis w DataStore, przyciski dotykowe i kontroler.
 
-Ostatnio:
+Ostatnio (2026-11-10, przegląd doświadczenia gracza; szczegóły w `docs/05_STATUS.md`, osiemnasty przebieg):
+
+- **Uczciwszy Kadrowy:** sięga tylko po kogoś, kto go widzi, po każdym ruchu czeka chwilę, ekspozycja maleje, gdy nikt nie patrzy, a gracz oglądający taśmę dostaje więcej czasu. Licznik błędów jest na krok, nie na misję.
+- **Prostszy pierwszy raz:** spokojny start (radio w kolejce, bez sprzecznej odprawy), dokładne miejsce z taśmy zamiast samego rzędu, Bileter dopiero od drugiej wizyty, anomalie nie udają wskazówek.
+- **Nowy interfejs w jednym stylu** (`client_common/Ui.luau`): ekran ładowania, karta celu z rozdziałem, bursztynowe radio, osobny komunikat wyniku akcji, dokumenty jako kartka z maszyny, karta wycięcia z dwiema drogami powrotu i licznikami, raport jak teczka, terminal, notatnik, lista drużyny.
+- **Kamera:** przesłona przy podnoszeniu, lekki ruch w ręku, pasek długości nagrania, znak zapisu taśmy, oś czasu przy odtwarzaniu.
+- **Prowadzenie:** znacznik celu z odległością (na chwilę po zmianie kroku i przy utknięciu) i romb nad każdym obiektem do użycia.
+- **Telefon:** własne przyciski dotykowe (CAM pod kciukiem, REC z kropką, stany), bezpieczne marginesy ekranu.
+- Jaśniejsze tło światła w misji (czytelność przy niższej jakości grafiki) i bordowy chodnik w foyer.
+
+Wcześniej:
 
 - Notatnik terenowy (J): zapisuje wskazówki, pozwala ponownie przeczytać dokumenty, pokazuje sterowanie i ma suwak jasności. Karta celu ma linię „NEXT” z konkretnym następnym krokiem, a radio podpowiada, gdy gracz długo stoi w miejscu.
 - Pudełko czystych kaset na ladzie kasy w foyer: gracz, któremu skończyła się taśma, nie utknie już na stałe.
@@ -85,6 +95,8 @@ Wynik trafia do `build/Hub.rbxl` i `build/Mission.rbxl`. Otwórz je w Studio i u
 | Komunikaty radiowe | 1–4 | D-pad lewo/prawo/dół, B |
 | Pukanie (poza kadrem) | K | X |
 | Notatnik: wskazówki, dokumenty, sterowanie, jasność | J | L1 |
+| Zamknij dokument | X, Backspace lub CLOSE | B |
+| Kod bezpiecznika | klawisze 0–9 lub myszą | D-pad i A |
 
 Na urządzeniach dotykowych te same akcje są pod przyciskami ekranowymi, a notatnik otwiera przycisk NOTES w prawym górnym rogu. W lobby J otwiera pomoc z opisem pomieszczeń.
 

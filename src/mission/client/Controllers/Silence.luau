@@ -19,6 +19,7 @@ local Silence = {}
 local controllers: { [string]: any }
 local flashFrame: Frame
 local blackout = false
+local explainedSilence = false
 
 -- A single frame of colour across the whole picture.
 local function flash(color: Color3, startTransparency: number, seconds: number)
@@ -52,7 +53,8 @@ end
 
 function Silence.init(all: { [string]: any })
 	controllers = all
-	flashFrame = Ui.frame({ Size = UDim2.fromScale(1, 1), Visible = false }, Ui.screen("Flash", 30))
+	flashFrame =
+		Ui.frame({ Size = UDim2.fromScale(1, 1), Visible = false }, Ui.screen("Flash", 30, true))
 end
 
 function Silence.start()
@@ -61,13 +63,27 @@ function Silence.start()
 			LensView.setWarning(id :: number)
 		elseif kind == "preJump" then
 			AudioDirector.silence(Config.Registrar.silenceLead + 1.2)
+			-- The first silence is named once, so its meaning is learned when it happens and not
+			-- from a manual. After that, the quiet speaks for itself.
+			if not explainedSilence and Players.LocalPlayer:GetAttribute("OffFrame") ~= true then
+				explainedSilence = true
+				controllers.Hud.result(Strings.get("silence_first"), "info")
+			end
 		elseif kind == "reach" and id == Players.LocalPlayer.UserId then
+			-- A player inside a tape cannot see him coming: the tape is torn away so they can.
+			if controllers.Playback.active() then
+				controllers.Playback.stop()
+			end
 			AudioDirector.play("Reach", 0.9)
-			controllers.Hud.subtitle(Strings.get("reach_warning"), 2)
+			controllers.Hud.result(
+				Strings.get("reach_warning", controllers.Viewfinder.keyName("lens")),
+				"bad"
+			)
 			flash(Palette.Rec, 0.55, 0.9)
 		elseif kind == "cut" then
 			AudioDirector.play("Cut", 0.9)
 			if id == Players.LocalPlayer.UserId then
+				controllers.OffFrameView.setCause("registrar")
 				flash(Color3.new(1, 1, 1), 0, 0.5)
 			end
 		end

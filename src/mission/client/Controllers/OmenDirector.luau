@@ -17,6 +17,7 @@ local Palette = require(ReplicatedStorage.Shared.Config.Palette)
 local Props = require(ReplicatedStorage.Shared.World.Props)
 local Seats = require(ReplicatedStorage.Shared.Core.Seats)
 local Strings = require(ReplicatedStorage.Shared.Strings)
+local Ui = require(ReplicatedStorage.ClientCommon.Ui)
 
 local OmenDirector = {}
 
@@ -453,6 +454,10 @@ local function stage(omen: Omens.Omen): boolean
 		return bellRings()
 	elseif kind == "double" then
 		return theDouble()
+	elseif (kind == "chair_turned" or kind == "row_turned") and phase == "Protocol" then
+		-- A turned seat during the attendance would read as the puzzle's own clue ("someone on
+		-- the tape turned round"). These wait until the reels are found.
+		return false
 	elseif kind == "chair_turned" then
 		local id = omen.seatId :: number
 		local x, z = Seats.position(id)
@@ -506,8 +511,10 @@ local function logLoop()
 					if anomaly.hold >= LOG_HOLD then
 						anomaly.logged = true
 						loggedCount += 1
+						-- Caught on tape: a flash and a stamp where the player is already looking.
 						AudioDirector.play("RecStart", 0.5, 0.8)
-						controllers.Hud.subtitle(Strings.get("anomaly_logged", loggedCount), 2.5)
+						LensView.flash(0.3)
+						LensView.stamp(Strings.get("anomaly_logged", loggedCount), Ui.C.Danger)
 						for _, listener in loggedListeners do
 							task.spawn(listener, loggedCount)
 						end

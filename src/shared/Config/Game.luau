@@ -34,11 +34,20 @@ return {
 		contactRadius = 11,
 		reachTime = 1.5,
 		graceAfterCut = 22,
+		-- After any move, even an unsignalled pull, he waits this long before he may reach.
+		arrivalGrace = 1.2,
+		-- Exposure drains at this rate while nobody frames him, so a few honest looks over the
+		-- mission never add up to a registration; only a long stare does.
+		exposureDecay = 0.4,
+		-- Extra reach time for a player caught watching a tape: they must stop it and look up.
+		WatchingReachBonus = 1.2,
 		StepSeconds = 0.25,
 		AnchorHeight = 8,
 		ClimaxScale = 0.45,
 		WakeAfterSeconds = 360,
 		WakeAfterReplays = 2,
+		-- After the power cut wakes him on a first visit, the first move comes no sooner than this.
+		WakeGraceSeconds = 28,
 		FalseSilenceChance = 0.12,
 		FalseSilenceCheckEvery = 30,
 		-- Seconds between two pulls by the same player's voice.

@@ -295,7 +295,18 @@ local function foyer(folder: Folder)
 		Enum.Material.Wood
 	)
 	-- Doormat and a worn runner leading to the hall, so the floor points the way.
-	decor(folder, "Runner", -3, 0, 46, 3, 0.1, 72, Color3.fromRGB(58, 34, 34), Enum.Material.Fabric).CastShadow =
+	decor(
+		folder,
+		"Runner",
+		-3,
+		0,
+		46,
+		3,
+		0.1,
+		72,
+		Color3.fromRGB(112, 48, 42),
+		Enum.Material.Fabric
+	).CastShadow =
 		false
 	-- Ticket window: a dim, warm-lit kiosk behind the glass instead of a black hole in the wall.
 	sign(folder, 19, 8, 45.2, 8, 1.6, Enum.NormalId.Back, "TICKETS", Palette.Paper, Palette.Ink)

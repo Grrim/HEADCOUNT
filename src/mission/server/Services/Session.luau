@@ -140,7 +140,7 @@ end
 
 -- The dispatcher's voice paces the mission, and slowly stops making sense.
 local function radioPacing()
-	local saidHall, saidFilm, saidSeen, saidDoor, saidQuiet = false, false, false, false, false
+	local saidHall, saidSeen, saidDoor, saidQuiet = false, false, false, false
 	local enteredHallAt: number? = nil
 	while not Flow.isOver(Session.flow) do
 		task.wait(1)
@@ -159,14 +159,6 @@ local function radioPacing()
 		if enteredHallAt and not saidHall then
 			saidHall = true
 			Session.notify("radio_hall")
-		elseif
-			enteredHallAt
-			and not saidFilm
-			and Session.totalReplays == 0
-			and os.clock() - enteredHallAt > 75
-		then
-			saidFilm = true
-			Session.notify("radio_film")
 		elseif not saidSeen and os.clock() - Session.startedAt > 300 and phase == "Protocol" then
 			saidSeen = true
 			Session.notify("radio_seen")
@@ -213,12 +205,13 @@ local function begin()
 	Flow.begin(Session.flow)
 	Session.broadcast()
 	services.RegistrarAi.onSessionBegin()
-	Session.notify(Session.take.briefKey)
+	task.delay(1.5, Session.notify, Session.take.briefKey)
+	-- The chapter card holds the first five seconds; the radio speaks once it has gone, and the
+	-- clients queue the lines, so nothing is talked over.
+	task.delay(5.5, Session.notify, "radio_check")
 	if Session.condition.id ~= "standard" then
-		-- After the brief and the equipment check, so it is not talked over.
-		task.delay(17, Session.notify, `cond_{Session.condition.id}`)
+		task.delay(14, Session.notify, `cond_{Session.condition.id}`)
 	end
-	task.delay(10, Session.notify, "radio_check")
 	task.spawn(radioPacing)
 	print(
 		`[Session] begin seed={Session.seed} take={Session.take.number} condition={Session.condition.id}`

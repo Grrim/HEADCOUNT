@@ -91,50 +91,153 @@ local function buildBus(gui: ScreenGui): ViewportFrame
 	return viewport
 end
 
+local function stat(parent: Instance, order: number, label: string, value: string)
+	local cell = Ui.frame({
+		LayoutOrder = order,
+		Size = UDim2.fromOffset(112, 64),
+		BackgroundTransparency = 1,
+	}, parent)
+	Ui.mono({
+		Size = UDim2.new(1, 0, 0, 36),
+		FontFace = Ui.Fonts.MonoBold,
+		TextSize = 30,
+		Text = value,
+	}, cell)
+	Ui.eyebrow(label, { Position = UDim2.fromOffset(0, 40), TextSize = 11 }, cell)
+end
+
+-- The report closes the case file: what happened, in numbers.
 local function report(result: any)
-	local gui = Ui.screen("EndReport", 20)
+	local gui = Ui.screen("EndReport", 20, true)
 	local back =
 		Ui.frame({ Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(0, 0, 0) }, gui)
-	local earnedNames = {}
-	for _, id in result.earned or {} do
-		table.insert(earnedNames, Strings.get(`ach_{id}`))
-	end
-	-- A changed night is named next to the take, so a blank line never opens the report.
-	local conditionNote = if result.condition and result.condition ~= "standard"
-		then "   " .. Strings.get("report_condition", Strings.get(`condname_{result.condition}`))
-		else ""
-	local lines = {
-		Strings.get("report_take", result.take) .. conditionNote,
-		Strings.get("report_time", formatTime(result.duration)),
-		Strings.get("report_replays", result.replays),
-		Strings.get("report_cuts", result.cuts),
-		Strings.get("report_docs", result.docs),
-		Strings.get("report_anomalies", controllers.OmenDirector.loggedCount()),
-		if #earnedNames > 0
-			then Strings.get("report_earned", table.concat(earnedNames, ", "))
-			else "",
-		"",
-		-- After a closed meeting, the hook into the next one: the bus from the end of the tape.
-		if result.success then Strings.get("report_teaser", result.futureDate) else "",
-		Strings.get(if result.canTeleport then "report_return" else "report_return_studio"),
-	}
-	Ui.text({
+	local column = Ui.frame({
 		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.32),
-		Size = UDim2.fromOffset(600, 48),
-		TextSize = 34,
-		TextXAlignment = Enum.TextXAlignment.Center,
-		TextColor3 = if result.success then Palette.Paper else Palette.Rec,
+		Position = UDim2.fromScale(0.5, 0.5),
+		Size = UDim2.new(0.86, 0, 0, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
+		BackgroundTransparency = 1,
+	}, back)
+	Ui.make("UISizeConstraint", { MaxSize = Vector2.new(640, math.huge) }, column)
+	Ui.list(column, 14)
+	local camera = Workspace.CurrentCamera
+	if camera and camera.ViewportSize.Y < 520 then
+		Ui.make("UIScale", { Scale = math.max(0.66, camera.ViewportSize.Y / 560) }, column)
+	end
+
+	-- A changed night is named next to the take.
+	local conditionNote = if result.condition and result.condition ~= "standard"
+		then "  ·  " .. Strings.get(`condname_{result.condition}`)
+		else ""
+	local items: { GuiObject } = {}
+	local function add(item: GuiObject)
+		table.insert(items, item)
+	end
+	add(Ui.eyebrow(`001 · THE MEETING  ·  TAKE {result.take}{conditionNote}`, {
+		LayoutOrder = 1,
+		TextColor3 = Ui.C.Danger,
+	}, column))
+	add(Ui.display({
+		LayoutOrder = 2,
+		Size = UDim2.new(1, 0, 0, 56),
+		FontFace = Ui.Fonts.DisplayBold,
+		TextSize = 52,
+		TextColor3 = if result.success then Ui.C.Text else Ui.C.Danger,
 		Text = Strings.get(if result.success then "end_success" else "end_failed"),
-	}, back)
-	Ui.text({
-		AnchorPoint = Vector2.new(0.5, 0),
-		Position = UDim2.fromScale(0.5, 0.42),
-		Size = UDim2.new(0.7, 0, 0.4, 0),
-		TextSize = 19,
-		TextXAlignment = Enum.TextXAlignment.Center,
-		Text = table.concat(lines, "\n"),
-	}, back)
+	}, column))
+	if not result.success then
+		-- A loss says what happened and what to try, so it is something to learn from.
+		add(Ui.text({
+			LayoutOrder = 3,
+			Size = UDim2.new(1, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
+			TextSize = 17,
+			Text = Strings.get("report_fail_why"),
+		}, column))
+		add(Ui.text({
+			LayoutOrder = 4,
+			Size = UDim2.new(1, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
+			TextSize = 16,
+			TextColor3 = Ui.C.Accent,
+			Text = "›  " .. Strings.get("report_fail_tip"),
+		}, column))
+	end
+	add(Ui.frame({
+		LayoutOrder = 5,
+		Size = UDim2.new(1, 0, 0, 1),
+		BackgroundColor3 = Ui.C.Line,
+		BackgroundTransparency = 0.8,
+	}, column))
+	local grid = Ui.frame({
+		LayoutOrder = 6,
+		Size = UDim2.new(1, 0, 0, 64),
+		AutomaticSize = Enum.AutomaticSize.Y,
+		BackgroundTransparency = 1,
+	}, column)
+	Ui.make("UIGridLayout", {
+		CellSize = UDim2.fromOffset(112, 64),
+		CellPadding = UDim2.fromOffset(12, 10),
+		SortOrder = Enum.SortOrder.LayoutOrder,
+	}, grid)
+	stat(grid, 1, "TIME", formatTime(result.duration))
+	stat(grid, 2, "VIEWINGS", tostring(result.replays))
+	stat(grid, 3, "CUTS", tostring(result.cuts))
+	stat(grid, 4, "DOCUMENTS", tostring(result.docs))
+	stat(grid, 5, "ANOMALIES", tostring(controllers.OmenDirector.loggedCount()))
+	add(grid)
+	local earned = result.earned or {}
+	if #earned > 0 then
+		local chips = Ui.frame({
+			LayoutOrder = 7,
+			Size = UDim2.new(1, 0, 0, 30),
+			AutomaticSize = Enum.AutomaticSize.Y,
+			BackgroundTransparency = 1,
+		}, column)
+		Ui.list(chips, 8, true).Wraps = true
+		for index, id in earned do
+			local chip = Ui.text({
+				LayoutOrder = index,
+				Size = UDim2.fromOffset(0, 28),
+				AutomaticSize = Enum.AutomaticSize.X,
+				FontFace = Ui.Fonts.BodyBold,
+				TextSize = 14,
+				TextColor3 = Ui.C.Accent,
+				TextWrapped = false,
+				TextYAlignment = Enum.TextYAlignment.Center,
+				Text = "✓  " .. Strings.get(`ach_{id}`),
+			}, chips)
+			Ui.pad(chip, 10, 0)
+			Ui.stroke(chip, Ui.C.Accent, 0.6)
+		end
+		add(chips)
+	end
+	if result.success then
+		-- After a closed meeting, the hook into the next one: the bus from the end of the tape.
+		add(Ui.mono({
+			LayoutOrder = 8,
+			Size = UDim2.new(1, 0, 0, 20),
+			TextSize = 14,
+			TextColor3 = Ui.C.Radio,
+			Text = Strings.get("report_teaser", result.futureDate),
+		}, column))
+	end
+	add(Ui.mono({
+		LayoutOrder = 9,
+		Size = UDim2.new(1, 0, 0, 20),
+		TextSize = 13,
+		TextColor3 = Ui.C.Muted,
+		Text = Strings.get(if result.canTeleport then "report_return" else "report_return_studio"),
+	}, column))
+	-- The file is typed up line by line.
+	for _, item in items do
+		item.Visible = false
+	end
+	for _, item in items do
+		item.Visible = true
+		AudioDirector.play("RecStart", 0.15, 1.6)
+		task.wait(0.12)
+	end
 end
 
 local function play(result: any)
@@ -148,8 +251,25 @@ local function play(result: any)
 	controllers.Audience.refresh()
 
 	if not result.success then
-		task.wait(1.5)
-		report(result)
+		-- The picture rolls and dies, like a tape running off its reel.
+		AudioDirector.setLoop("TapeMotor", true, 0.4, 0.7)
+		local out = Ui.screen("TapeOut", 18, true)
+		Vhs.apply(out, { strength = 1, zIndex = 2 })
+		local fade = Ui.frame({
+			Size = UDim2.fromScale(1, 1),
+			BackgroundColor3 = Color3.new(0, 0, 0),
+			BackgroundTransparency = 1,
+		}, out)
+		TweenService:Create(
+			fade,
+			TweenInfo.new(1.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+			{ BackgroundTransparency = 0 }
+		):Play()
+		task.wait(1.6)
+		AudioDirector.setLoop("TapeMotor", false)
+		task.spawn(report, result)
+		task.wait(0.1)
+		out:Destroy()
 		return
 	end
 
@@ -157,7 +277,7 @@ local function play(result: any)
 	local camera = Workspace.CurrentCamera
 	camera.CameraType = Enum.CameraType.Scriptable
 	camera.FieldOfView = 50
-	local gui = Ui.screen("FinalTape", 15)
+	local gui = Ui.screen("FinalTape", 15, true)
 	-- The last tape is the most worn of all.
 	Vhs.apply(gui, { strength = 1, zIndex = 50 })
 	local cover = Ui.frame(

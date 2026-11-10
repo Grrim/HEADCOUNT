@@ -51,7 +51,7 @@ local function measure(): number
 end
 
 local function buildGui()
-	local gui = Ui.screen("Dread", 1)
+	local gui = Ui.screen("Dread", 1, true)
 	-- A deep red rim that closes in with every beat.
 	edge = Ui.frame({
 		Size = UDim2.fromScale(1, 1),

@@ -21,7 +21,7 @@ local localPlayer = Players.LocalPlayer
 local action: RemoteEvent
 local gui: ScreenGui
 local panel: Frame
-local content: Frame
+local content: ScrollingFrame
 local errorLabel: TextLabel
 local prep: Frame
 local prepList: TextLabel
@@ -67,12 +67,11 @@ local function row(y: number, height: number): Frame
 end
 
 local function heading(y: number, text: string, color: Color3?)
-	Ui.text({
-		Position = UDim2.new(0, 0, 0, y),
-		Size = UDim2.new(1, 0, 0, 24),
-		Text = text,
-		TextSize = 17,
-		TextColor3 = color or Palette.Crt,
+	Ui.eyebrow(text, {
+		Position = UDim2.new(0, 0, 0, y + 6),
+		Size = UDim2.new(1, 0, 0, 16),
+		TextSize = 12,
+		TextColor3 = color or Ui.C.Accent,
 	}, content)
 end
 
@@ -184,26 +183,65 @@ end
 local function renderLobby()
 	local y = 0
 	for _, mission in Missions do
-		-- Who it is for and how long it takes, before anyone commits to it.
-		local meta = if mission.metaKey then "\n" .. Strings.get(mission.metaKey) else ""
-		local line = row(y, if mission.metaKey then 84 else 62)
+		-- Each mission is a case file: number, title, one line of summary and, before anyone
+		-- commits, who it is for and how long it takes. The two ways in sit beside it, the
+		-- one-press SOLO filled so it is read first.
+		local available = mission.available
+		local height = if available then 112 else 66
+		local card = row(y, height)
+		card.BackgroundColor3 = if available then Ui.C.AccentDeep else Ui.C.Ink
+		card.BackgroundTransparency = if available then 0.35 else 0.6
+		Ui.stroke(
+			card,
+			if available then Ui.C.Accent else Ui.C.Faint,
+			if available then 0.6 else 0.8
+		)
+		local textWidth = if available then 0.58 else 1
+		local info = Ui.frame({
+			Size = UDim2.new(textWidth, 0, 1, 0),
+			BackgroundTransparency = 1,
+		}, card)
+		Ui.pad(info, 12, 10)
+		Ui.list(info, 3)
+		Ui.display({
+			LayoutOrder = 1,
+			Size = UDim2.new(1, 0, 0, 24),
+			TextSize = 22,
+			TextColor3 = if available then Ui.C.Text else Ui.C.Faint,
+			TextTruncate = Enum.TextTruncate.AtEnd,
+			TextWrapped = false,
+			Text = Strings.get(mission.titleKey),
+		}, info)
 		Ui.text({
-			Size = UDim2.new(if mission.available then 0.46 else 1, 0, 1, 0),
-			Text = `{Strings.get(mission.titleKey)}\n{Strings.get(mission.summaryKey)}{meta}`,
+			LayoutOrder = 2,
+			Size = UDim2.new(1, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
 			TextSize = 14,
-			TextColor3 = if mission.available then Palette.Paper else Palette.WallDark,
-		}, line)
-		if mission.available then
+			TextColor3 = if available then Ui.C.Muted else Ui.C.Faint,
+			Text = Strings.get(mission.summaryKey),
+		}, info)
+		if mission.metaKey then
+			Ui.mono({
+				LayoutOrder = 3,
+				Size = UDim2.new(1, 0, 0, 16),
+				TextSize = 12,
+				TextColor3 = Ui.C.Accent,
+				TextTruncate = Enum.TextTruncate.AtEnd,
+				TextWrapped = false,
+				Text = Strings.get(mission.metaKey),
+			}, info)
+		end
+		if available then
 			-- Alone, one press is enough. With friends, an expedition they can join.
 			local solo = Ui.primary(
 				Strings.get("hub_solo"),
 				{
 					AnchorPoint = Vector2.new(1, 0),
-					Position = UDim2.fromScale(1, 0),
-					Size = UDim2.new(0.26, 0, 0, 52),
-					TextSize = 14,
+					Position = UDim2.new(1, -10, 0, 10),
+					Size = UDim2.new(0.38, -10, 0, 50),
+					TextSize = 19,
 				},
-				line,
+				card,
 				function()
 					send("solo", mission.id)
 				end
@@ -212,18 +250,18 @@ local function renderLobby()
 			Ui.button(
 				Strings.get("hub_create"),
 				{
-					AnchorPoint = Vector2.new(1, 0),
-					Position = UDim2.new(0.74, -6, 0, 0),
-					Size = UDim2.new(0.26, 0, 0, 52),
+					AnchorPoint = Vector2.new(1, 1),
+					Position = UDim2.new(1, -10, 1, -10),
+					Size = UDim2.new(0.38, -10, 0, 36),
 					TextSize = 13,
 				},
-				line,
+				card,
 				function()
 					send("create", mission.id)
 				end
 			)
 		end
-		y += if mission.metaKey then 90 else 68
+		y += height + 8
 	end
 	y += 4
 	heading(y, Strings.get("hub_open_list"))
@@ -294,15 +332,15 @@ local function buildGui()
 	panel = Ui.frame({
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.fromScale(0.5, 0.5),
-		Size = UDim2.new(0.6, 0, 0.66, 0),
+		Size = UDim2.new(0.92, 0, 0.9, 0),
 		BackgroundColor3 = Color3.fromRGB(10, 14, 10),
 		BorderSizePixel = 0,
 		Visible = false,
 	}, gui)
 	Ui.make("UISizeConstraint", {
-		MinSize = Vector2.new(340, 300),
-		MaxSize = Vector2.new(660, 440),
+		MaxSize = Vector2.new(680, 500),
 	}, panel)
+	Ui.ticks(panel, Palette.Crt, 12, -4)
 	-- A sharp border and a soft second one outside it: the phosphor bleeding past the glass.
 	Ui.make("UIStroke", { Color = Palette.Crt, Thickness = 2 }, panel)
 	local glow = Ui.frame({
@@ -319,21 +357,20 @@ local function buildGui()
 		BackgroundColor3 = Palette.Crt,
 		BackgroundTransparency = 0.6,
 	}, panel)
-	Ui.text({
-		Position = UDim2.new(0, 16, 0, 12),
-		Size = UDim2.new(1, -110, 0, 26),
+	Ui.display({
+		Position = UDim2.new(0, 16, 0, 9),
+		Size = UDim2.new(1, -130, 0, 28),
 		Text = Strings.get("hub_title"),
-		TextSize = 19,
+		TextSize = 22,
 		TextColor3 = Palette.Crt,
 	}, panel)
 	-- Modal releases the cursor from first-person lock while the panel is open.
-	Ui.button(
-		Strings.get("hub_close"),
+	Ui.quiet(
+		Strings.get("hub_close") .. "  ×",
 		{
 			AnchorPoint = Vector2.new(1, 0),
-			Position = UDim2.new(1, -8, 0, 8),
-			Size = UDim2.fromOffset(92, 34),
-			TextSize = 14,
+			Position = UDim2.new(1, -8, 0, 5),
+			Size = UDim2.fromOffset(104, 32),
 			Modal = true,
 		},
 		panel,
@@ -350,11 +387,17 @@ local function buildGui()
 		TextYAlignment = Enum.TextYAlignment.Bottom,
 		Text = "",
 	}, panel)
-	content = Ui.frame({
-		Position = UDim2.new(0, 16, 0, 48),
-		Size = UDim2.new(1, -32, 1, -100),
+	-- Scrolls on a short phone screen instead of cutting the open expeditions off.
+	content = Ui.make("ScrollingFrame", {
+		Position = UDim2.new(0, 16, 0, 50),
+		Size = UDim2.new(1, -24, 1, -96),
 		BackgroundTransparency = 1,
-		ClipsDescendants = true,
+		BorderSizePixel = 0,
+		CanvasSize = UDim2.new(),
+		AutomaticCanvasSize = Enum.AutomaticSize.Y,
+		ScrollBarThickness = 4,
+		ScrollBarImageColor3 = Palette.Crt,
+		ScrollingDirection = Enum.ScrollingDirection.Y,
 	}, panel)
 
 	-- Preparation screen
@@ -364,11 +407,12 @@ local function buildGui()
 		Visible = false,
 		ZIndex = 20,
 	}, gui)
-	Ui.text({
+	Ui.display({
 		AnchorPoint = Vector2.new(0.5, 0),
 		Position = UDim2.fromScale(0.5, 0.2),
 		Size = UDim2.new(0.8, 0, 0, 40),
-		TextSize = 26,
+		FontFace = Ui.Fonts.DisplayBold,
+		TextSize = 34,
 		TextXAlignment = Enum.TextXAlignment.Center,
 		Text = Strings.get("hub_preparing"),
 		ZIndex = 21,
@@ -381,7 +425,8 @@ local function buildGui()
 		Text = "",
 		ZIndex = 21,
 	}, prep)
-	prepCount = Ui.text({
+	prepCount = Ui.mono({
+		FontFace = Ui.Fonts.MonoBold,
 		AnchorPoint = Vector2.new(0.5, 0),
 		Position = UDim2.fromScale(0.5, 0.58),
 		Size = UDim2.new(0.8, 0, 0, 40),
@@ -490,8 +535,8 @@ function Terminal.start()
 		local prompt = terminal:WaitForChild("ProximityPrompt", 10) :: ProximityPrompt?
 		if prompt then
 			prompt.Triggered:Connect(function()
-				panel.Visible = true
 				render()
+				Ui.open(panel)
 			end)
 		end
 	end
