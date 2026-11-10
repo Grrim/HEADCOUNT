@@ -566,3 +566,20 @@ Uwaga do zrzutów: Studio w tle obniża jakość grafiki i gasi część lamp, w
 
 - **Nowe modele Kadrowego i widowni, własne dźwięki.** Wymagają ręcznej pracy lub wgrania plików. Specyfikacje są w `06_ASSETS.md`. Kadrowy i widownia zostają na obecnych siatkach.
 - Pomiar wydajności na telefonie.
+
+## Dziewiętnasty przebieg: nowa sylwetka Kadrowego
+
+Stan na 2026-11-10. Kadrowy nie jest już siatką zwykłego mężczyzny w garniturze (dłonie przy biodrach, normalne proporcje), tylko postacią złożoną z części w `RegistrarView.buildBody`:
+
+- 15 studów do barków, wąskie barki opadające stromo od kołnierza, lekkie pochylenie,
+- kolana odgięte w złą stronę (goleń do tyłu, udo do przodu), stopy lekko do środka,
+- marynarka o rozmiar za duża, poły poniżej bioder, ciemniejsze klapy, biały kołnierz, koszula i ciemny krawat,
+- ramiona tak długie, że dłonie wiszą poniżej kolan; wąska blada dłoń i cztery długie palce,
+- prawe ramię chowa się, kiedy wysuwa się długa ręka do sięgania, więc nigdy nie ma trzech rąk,
+- słabe, zimne światło przy piersi (bez cieni), żeby w ciemności był obecnością na siedzeniach obok, zanim stanie się kształtem.
+
+Bez nowych plików z modelem i bez wgrywania. Szyja, klatkowanie, pochylanie się i sięganie działają jak wcześniej. Materiał to gładki plastik: `Fabric` w tym projekcie dostaje teksturę wykładziny i błyszczał na garniturze.
+
+Sprawdzone w Studio (solo, kotwica Kadrowego przestawiona ręcznie, kamera podniesiona): z odległości ok. 26 i 20 studów czyta się jako postać za wysoka na salę, stojąca w przejściu między widownią, z kołnierzem wysoko i dłońmi na wysokości oparć. Z bliska (13 studów) to głównie ciemna sylwetka z bladymi dłońmi. **Zrzuty powstały przy obniżonej jakości grafiki** (pięć okien Studio naraz), więc działania światła przy piersi nie dało się ocenić. Niesprawdzone: sięganie długą ręką z nowym ramieniem, wygląd na taśmie i na finałowej taśmie, koszt 30 części przesuwanych co klatkę na telefonie.
+
+Stara siatka `Registrar.rbxmx` zostaje w projekcie; nadal używa jej Bileter (`UsherView`).

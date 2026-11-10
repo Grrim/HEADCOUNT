@@ -38,6 +38,8 @@ Tych assetów nie dało się zrobić w tym środowisku. Gra działa bez nich na 
 
 ### 1. Kadrowy (`Registrar.rbxmx`) — najważniejszy
 
+Od 2026-11-10 gra rysuje Kadrowego z części według tej specyfikacji (`RegistrarView.buildBody`, opis w `05_STATUS.md`, dziewiętnasty przebieg). Ręcznie robiony model nadal jest celem przed premierą; powinien zachować te proporcje.
+
 - **Sylwetka:** wyższy od drzwi (ok. 9–10 studów do barków), wąskie, opadające barki, za długie ramiona (dłonie poniżej kolan), garnitur urzędnika z lat 70. o zbyt luźnym kroju. Z daleka ma się czytać jako „urzędnik”, z bliska jako „coś udaje urzędnika”.
 - **Głowa:** poza kadrem, zawsze. Kod rysuje szyję rosnącą w sufit (`RegistrarView.luau`), więc model kończy się kołnierzem ze sztywną, zbyt długą szyją (ok. 1,5 studa), z której wychodzi szyja proceduralna.
 - **Ręka do sięgania:** osobna siatka przedramienia i dłoni z czterema palcami (kod ją wysuwa i zaciska palce). Punkt obrotu w barku.
