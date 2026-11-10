@@ -14,6 +14,8 @@ Kooperacyjny horror psychologiczny na Roblox w fazie Vertical Slice (Misja 001).
 
 ## Wykonane 2026-11-10
 
+- **Prywatna wersja testowa opublikowana** (właściciel opublikował, ID odczytane z logów Studio): gra „HEADCOUNT (test)”, universe 10775647200, lobby 77620606106061 (miejsce startowe), misja 102362153460645. ID są w `Config/Places.luau`. Obie opublikowane wersje sprawdzone przez otwarcie ich z chmury w Studio: mają aktualny kod i właściwe ID. Błędy 429 przy publikacji misji dotyczyły tylko historii wersji skryptów. Gry w prawdziwym kliencie (teleport, zapis, powrót) jeszcze nikt nie przeszedł. Po każdej zmianie kodu: `rojo build` i ponowna publikacja obu plików przez Publish to Roblox As… → istniejące miejsce.
+
 - Przegląd doświadczenia gracza bez nowej treści: audyt Misji 001 z perspektywy nowego gracza, uczciwszy Kadrowy (4 nowe testy, razem 65), spokojniejszy start, dokładne miejsce z taśmy, Bileter od drugiej wizyty, jeden system UI dla obu miejsc, nowa kamera (przesłona, pasek nagrania, znak zapisu), znacznik celu, oznaczenie obiektów, własne przyciski dotykowe, lista drużyny, jaśniejsze tło światła.
 - Sprawdzone w Studio solo z prawdziwymi klawiszami i zrzutami: start, wizjer, nagranie, odtwarzanie, miejsce z taśmy, krzesło, karta wycięcia, raport porażki, ekran ładowania, terminal, układ przycisków dotykowych w małym oknie. Szczegóły i lista niesprawdzonych rzeczy: `docs/05_STATUS.md`, osiemnasty przebieg.
 - Specyfikacje Kadrowego, widowni i brakujących dźwięków do zewnętrznej produkcji: `docs/06_ASSETS.md`.
