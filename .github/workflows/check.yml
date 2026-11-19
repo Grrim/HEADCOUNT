@@ -35,7 +35,18 @@ jobs:
           echo "$HOME/tools" >> "$GITHUB_PATH"
 
       - name: Gates (rojo build, lune tests, selene, stylua)
-        run: python3 scripts/check.py
+        # The report is also posted as an annotation, which anyone can read without signing in.
+        run: |
+          set +e
+          python3 scripts/check.py 2>&1 | tee check.log
+          status=${PIPESTATUS[0]}
+          report=$(sed -e 's/%/%25/g' check.log | sed -e ':a;N;$!ba;s/\n/%0A/g')
+          if [ "$status" -eq 0 ]; then
+            echo "::notice title=gates::$report"
+          else
+            echo "::error title=gates::$report"
+          fi
+          exit "$status"
 
       - name: Keep the built places
         if: always()
