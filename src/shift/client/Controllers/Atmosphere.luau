@@ -142,8 +142,10 @@ function Atmosphere.start()
 		end
 	end)
 
-	flashFrame =
-		Ui.frame({ Size = UDim2.fromScale(1, 1), Visible = false }, Ui.screen("ShiftFlash", 30, true))
+	flashFrame = Ui.frame(
+		{ Size = UDim2.fromScale(1, 1), Visible = false },
+		Ui.screen("ShiftFlash", 30, true)
+	)
 	Net.get("RegistrarEvent").OnClientEvent:Connect(function(kind: string, id: number?)
 		if kind == "preJump" then
 			AudioDirector.silence(2.5)
@@ -152,7 +154,10 @@ function Atmosphere.start()
 			LensView.setWarning(id)
 		elseif kind == "reach" and id == player.UserId then
 			AudioDirector.play("Reach", 0.9)
-			controllers.ShiftHud.toast("It's reaching for you! Raise the camera (Q) and film it!", Ui.C.Danger)
+			controllers.ShiftHud.toast(
+				"It's reaching for you! Raise the camera (Q) and film it!",
+				Ui.C.Danger
+			)
 			flash(Ui.C.Danger)
 		elseif kind == "cut" then
 			AudioDirector.play("Cut", 0.8)
