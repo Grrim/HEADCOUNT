@@ -91,11 +91,14 @@ local function lookFor(depth: number): Look
 	return LOOKS[math.clamp(depth, 1, #LOOKS)]
 end
 
+-- Behind the door leaves (they sit at z -1.2..-0.8), so nobody in the doorway counts as aboard.
+ShiftWorld.INSIDE_MAX_Z = -1.3
+
 function ShiftWorld.inLift(position: Vector3): boolean
 	return position.X >= LIFT.minX
 		and position.X <= LIFT.maxX
 		and position.Z >= LIFT.minZ
-		and position.Z <= LIFT.maxZ + 0.5
+		and position.Z <= ShiftWorld.INSIDE_MAX_Z
 		and position.Y < LIFT.height + 2
 end
 
@@ -307,20 +310,25 @@ local function furnish(
 			end
 		end
 	elseif kind == "corridor" then
+		-- Curtains along both side walls, parted where a doorway may be (z - 3..z + 3), and soft:
+		-- nobody should be walled in by fabric.
 		for _, side in { -1, 1 } do
 			local wx = x + side * (CELL / 2 - 1.2)
-			Build.box(
-				parent,
-				"Curtain",
-				wx - 0.4,
-				0,
-				z - 12,
-				wx + 0.4,
-				ROOM_HEIGHT,
-				z + 12,
-				Palette.Curtain,
-				Enum.Material.Fabric
-			)
+			for _, span in { { -12, -4.5 }, { 4.5, 12 } } do
+				local curtain = Build.box(
+					parent,
+					"Curtain",
+					wx - 0.4,
+					0,
+					z + span[1],
+					wx + 0.4,
+					ROOM_HEIGHT,
+					z + span[2],
+					Palette.Curtain,
+					Enum.Material.Fabric
+				)
+				curtain.CanCollide = false
+			end
 		end
 	end
 end

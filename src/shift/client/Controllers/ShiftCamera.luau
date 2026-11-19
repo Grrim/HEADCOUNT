@@ -46,6 +46,10 @@ local function startRecording()
 	if not LensView.raised or recording then
 		return
 	end
+	if controllers.ShiftHud.phase() ~= "floor" then
+		controllers.ShiftHud.toast("Nothing to film here. Footage counts on a floor.")
+		return
+	end
 	local left = player:GetAttribute("TapesLeft")
 	if typeof(left) == "number" and left <= 0 then
 		controllers.ShiftHud.toast("No tapes left. The lift has new ones.")
@@ -185,7 +189,8 @@ function ShiftCamera.start()
 		end
 		local camera = Workspace.CurrentCamera
 		if camera and now - lastSample >= 1 / TAPE.SampleHz then
-			lastSample = now
+			-- A steady 10 Hz: the server counts seconds as samples / 10. After a stall, start afresh.
+			lastSample = if now - lastSample > 0.25 then now else lastSample + 1 / TAPE.SampleHz
 			local p = camera.CFrame.Position
 			local l = camera.CFrame.LookVector
 			table.insert(track, { p.X, p.Y, p.Z, l.X, l.Y, l.Z })

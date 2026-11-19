@@ -11,7 +11,9 @@ local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
 local AudioDirector = require(ReplicatedStorage.ClientCommon.AudioDirector)
+local LensView = require(ReplicatedStorage.ClientCommon.LensView)
 local Net = require(ReplicatedStorage.Shared.Net)
+local Ui = require(ReplicatedStorage.ClientCommon.Ui)
 
 local Atmosphere = {}
 
@@ -20,6 +22,20 @@ local controllers: { [string]: any }
 local riding = false
 local rideStarted = 0
 local random = Random.new()
+local flashFrame: Frame
+
+-- The motor of the cabin. Not "Hum": that one is the building, and its silence is the warning.
+local RIDE_LOOP = "Projector"
+
+local function flash(color: Color3)
+	flashFrame.BackgroundColor3 = color
+	flashFrame.BackgroundTransparency = 0.55
+	flashFrame.Visible = true
+	local fade = Ui.tween(flashFrame, TweenInfo.new(0.9), { BackgroundTransparency = 1 })
+	fade.Completed:Once(function()
+		flashFrame.Visible = false
+	end)
+end
 
 local function liftPart(name: string): Instance?
 	local map = Workspace:FindFirstChild("Map")
@@ -69,7 +85,7 @@ local OMENS = { flicker, stepsOnRoof, wrongFloor }
 local function startRide(seconds: number)
 	riding = true
 	rideStarted = os.clock()
-	AudioDirector.setLoop("Hum", true, 0.35, 0.7)
+	AudioDirector.setLoop(RIDE_LOOP, true, 0.3, 0.55)
 	task.delay(random:NextNumber(2, math.max(2.5, seconds - 3)), function()
 		if riding then
 			OMENS[random:NextInteger(1, #OMENS)]()
@@ -82,7 +98,7 @@ local function endRide()
 		return
 	end
 	riding = false
-	AudioDirector.setLoop("Hum", false)
+	AudioDirector.setLoop(RIDE_LOOP, false)
 	AudioDirector.play("Bell", 0.6)
 	local character = player.Character
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
@@ -126,11 +142,23 @@ function Atmosphere.start()
 		end
 	end)
 
-	Net.get("RegistrarEvent").OnClientEvent:Connect(function(kind: string)
+	flashFrame =
+		Ui.frame({ Size = UDim2.fromScale(1, 1), Visible = false }, Ui.screen("ShiftFlash", 30, true))
+	Net.get("RegistrarEvent").OnClientEvent:Connect(function(kind: string, id: number?)
 		if kind == "preJump" then
 			AudioDirector.silence(2.5)
+		elseif kind == "exposure" and typeof(id) == "number" then
+			-- Watching him too long registers you: the lens says how close that is.
+			LensView.setWarning(id)
+		elseif kind == "reach" and id == player.UserId then
+			AudioDirector.play("Reach", 0.9)
+			controllers.ShiftHud.toast("It's reaching for you! Raise the camera (Q) and film it!", Ui.C.Danger)
+			flash(Ui.C.Danger)
 		elseif kind == "cut" then
 			AudioDirector.play("Cut", 0.8)
+			if id == player.UserId then
+				flash(Color3.new(1, 1, 1))
+			end
 		end
 	end)
 

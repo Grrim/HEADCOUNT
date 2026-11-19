@@ -339,6 +339,10 @@ local function onDown(player: Player)
 	if ShiftSession.busy or player:GetAttribute("OffFrame") == true then
 		return
 	end
+	if shift.phase == "over" then
+		ShiftSession.tell(player, "The shift is over. Press NEXT SHIFT on the pay screen.")
+		return
+	end
 	if not Shift.canDescend(shift) then
 		ShiftSession.tell(player, "This is the bottom floor. The only way is up.")
 		return
@@ -431,6 +435,13 @@ local function onAction(player: Player, action: unknown, arg: unknown)
 		if phase == "over" and not ShiftSession.busy then
 			newShift()
 		end
+	elseif action == "hello" then
+		-- The client is listening now; anything sent before this may have reached only one of its
+		-- controllers.
+		stateRemote:FireClient(player, snapshot())
+		if phase == "over" then
+			sendResult(player)
+		end
 	end
 end
 
@@ -444,9 +455,6 @@ function ShiftSession.init(all: { [string]: any })
 	anomalyFolder.Parent = Workspace
 	Players.PlayerAdded:Connect(function(player)
 		refill(player)
-		task.defer(function()
-			stateRemote:FireClient(player, snapshot())
-		end)
 	end)
 	Players.PlayerRemoving:Connect(function(player)
 		kits[player] = nil

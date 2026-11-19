@@ -6,6 +6,7 @@ Kooperacyjny horror na Roblox (1–4 graczy). Kamera pokazuje to, czego nie widz
 
 - Nowy kierunek (GDD v2): [docs/09_GDD_V2.md](docs/09_GDD_V2.md)
 - Test haka filmikiem przed prototypem: [docs/10_TEST_FILMIKIEM.md](docs/10_TEST_FILMIKIEM.md)
+- Prototyp zmiany (winda, piętra, nagrania): [docs/11_PROTOTYP.md](docs/11_PROTOTYP.md)
 - Koncepcja i projekt: [docs/02_GDD.md](docs/02_GDD.md)
 - Architektura: [docs/03_TDD.md](docs/03_TDD.md)
 - Aktualny stan, testy i znane problemy: [docs/05_STATUS.md](docs/05_STATUS.md)

@@ -79,7 +79,12 @@ local function inLift(): boolean
 		return false
 	end
 	local p = root.Position
-	return p.X >= -6 and p.X <= 6 and p.Z >= -12 and p.Z <= 0 and p.Y < 12
+	-- Matches ShiftWorld.inLift on the server.
+	return p.X >= -6 and p.X <= 6 and p.Z >= -12 and p.Z <= -1.3 and p.Y < 12
+end
+
+function ShiftHud.phase(): string
+	return state.phase or "ready"
 end
 
 local function closeResults()
@@ -176,9 +181,11 @@ local function showResults(data: { [string]: any })
 		},
 		results,
 		function()
+			closeResults()
 			Net.get("ShiftAction"):FireServer("next")
 		end
 	)
+	Ui.quiet("CLOSE", { Size = UDim2.new(1, 0, 0, 28), LayoutOrder = 51 }, results, closeResults)
 end
 
 local function build()
@@ -295,12 +302,14 @@ function ShiftHud.start()
 			ShiftHud.toast(incoming.notice)
 		end
 		local phase = incoming.phase
-		if phase ~= previousPhase and (phase == "ready" or phase == "ride") then
+		if phase ~= previousPhase and phase == "ride" then
 			closeResults()
 		end
 	end)
 
 	Net.get("ShiftResult").OnClientEvent:Connect(showResults)
+	-- Listening now: ask for the current state instead of trusting what was sent before.
+	Net.get("ShiftAction"):FireServer("hello")
 
 	Net.get("FootageScored").OnClientEvent:Connect(function(data)
 		if data.teammate then
