@@ -28,6 +28,11 @@ local NAMES = {
 	"EndMission",
 	"CodeDigits",
 	"UsherEvent",
+	-- shift prototype
+	"ShiftState",
+	"ShiftAction",
+	"FootageScored",
+	"ShiftResult",
 	-- hub
 	"PartyAction",
 	"PartyState",

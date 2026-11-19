@@ -1,0 +1,53 @@
+{
+  "name": "Headcount_Shift",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "Shared": {
+        "$path": "src/shared"
+      },
+      "ClientCommon": {
+        "$path": "src/client_common"
+      }
+    },
+    "ServerScriptService": {
+      "Common": {
+        "$path": "src/server_common"
+      },
+      "Shift": {
+        "$path": "src/shift/server",
+        "Lens": {
+          "$path": "src/mission/server/Services/Lens.luau"
+        }
+      }
+    },
+    "StarterPlayer": {
+      "$properties": {
+        "CameraMode": "LockFirstPerson",
+        "CharacterWalkSpeed": 13,
+        "CharacterJumpHeight": 3
+      },
+      "StarterPlayerScripts": {
+        "Shift": {
+          "$path": "src/shift/client",
+          "RegistrarView": {
+            "$path": "src/mission/client/Controllers/RegistrarView.luau"
+          }
+        }
+      }
+    },
+    "Workspace": {
+      "$properties": {
+        "StreamingEnabled": false
+      }
+    },
+    "Lighting": {
+      "$properties": {
+        "Technology": "Future"
+      }
+    },
+    "MaterialService": {
+      "$path": "src/materials"
+    }
+  }
+}

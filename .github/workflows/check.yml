@@ -48,6 +48,24 @@ jobs:
           fi
           exit "$status"
 
+      # When formatting is all that is wrong, post the exact fix as annotations, so it can be
+      # applied with `git apply` on a machine that has no stylua.
+      - name: Post the formatting fix
+        if: failure()
+        run: |
+          stylua src tests lune
+          git diff > fmt.patch
+          if [ -s fmt.patch ]; then
+            python3 - <<'PY'
+          text = open("fmt.patch", encoding="utf-8").read()
+          size = 30000
+          parts = [text[i:i + size] for i in range(0, len(text), size)]
+          for index, part in enumerate(parts):
+              body = part.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+              print(f"::warning title=fmt.patch {index + 1}/{len(parts)}::{body}")
+          PY
+          fi
+
       - name: Keep the built places
         if: always()
         uses: actions/upload-artifact@v4

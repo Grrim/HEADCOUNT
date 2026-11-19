@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Project gates, cheapest first: rojo build (both places), lune tests, selene, stylua.
+"""Project gates, cheapest first: rojo build (all three places), lune tests, selene, stylua.
 
     python scripts/check.py        run every gate
     python scripts/check.py --fix  let stylua rewrite instead of failing
 
-Output lands in build/Hub.rbxl and build/Mission.rbxl; open those in Studio to playtest.
+Output lands in build/Hub.rbxl, build/Mission.rbxl and build/Shift.rbxl; open those in Studio.
 """
 import argparse
 import subprocess
@@ -34,6 +34,7 @@ def main():
     for name, cmd in [
         ("rojo build hub", ["rojo", "build", "hub.project.json", "-o", "build/Hub.rbxl"]),
         ("rojo build mission", ["rojo", "build", "mission.project.json", "-o", "build/Mission.rbxl"]),
+        ("rojo build shift", ["rojo", "build", "shift.project.json", "-o", "build/Shift.rbxl"]),
     ]:
         if not run(name, cmd):
             return 1

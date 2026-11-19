@@ -68,6 +68,33 @@ return {
 		DoorCloseUpRadius = 7,
 	},
 	RoomTone = { MinGap = 22, MaxGap = 55, Volume = 0.45 },
+	-- The shift prototype (docs/09_GDD_V2.md, §2). Starting values, to be tuned on playtests.
+	Shift = {
+		RideSeconds = 12,
+		ReturnSeconds = 8,
+		DoorCloseSeconds = 4,
+		DoorOpenSeconds = 1.5,
+		-- The Registrar sleeps this long after the doors open, so the floor can be looked at first.
+		WakeFirstFloor = 25,
+		WakeDeeper = 12,
+		-- Each floor down he jumps this much more often (0.15 = 15% shorter waits per floor).
+		HastePerFloor = 0.15,
+		-- Alone, he waits this much longer between jumps.
+		SoloSlower = 1.25,
+		RecordSeconds = 10,
+		-- Battery recharge per second while lowered, and the multiplier inside the lift.
+		Recharge = 1,
+		LiftRecharge = 3,
+		-- An empty battery comes back only once it holds this share of its capacity.
+		BatteryResume = 0.2,
+		RescueSeconds = 3,
+		SelfReturnAfter = 30,
+		AllCutGrace = 75,
+		-- What a five-star shot of each kind of anomaly is worth, before the floor's multiplier.
+		Values = { common = 10, rare = 25, epic = 60 },
+		-- Height of the point the lens has to hold, above the floor.
+		TargetHeight = 3.5,
+	},
 	Session = {
 		WaitForPartySeconds = 25,
 		DevStartDelay = 2,
