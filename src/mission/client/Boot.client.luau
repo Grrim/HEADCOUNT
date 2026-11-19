@@ -13,7 +13,17 @@ local PromptText = require(ReplicatedStorage.ClientCommon.PromptText)
 local PromptUi = require(ReplicatedStorage.ClientCommon.PromptUi)
 local Props = require(ReplicatedStorage.Shared.World.Props)
 local RoomTone = require(ReplicatedStorage.ClientCommon.RoomTone)
+local Teaser = require(script.Parent.Teaser)
 local Vignette = require(ReplicatedStorage.ClientCommon.Vignette)
+
+-- Studio-only teaser (docs/10_TEST_FILMIKIEM.md): the real lens and Registrar, nothing else.
+if Teaser.enabled() then
+	print("[Headcount] Teaser (Studio only)")
+	AudioDirector.start()
+	LensView.init(nil)
+	Teaser.run(script.Parent.Controllers.RegistrarView)
+	return
+end
 
 print("[Headcount] Mission client build 0.1")
 

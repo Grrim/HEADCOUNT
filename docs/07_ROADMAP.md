@@ -1,5 +1,7 @@
 # 07. Plan rozwoju
 
+> **2026-11-19:** jeśli kierunek z `09_GDD_V2.md` zostanie przyjęty, ten plan zastępuje §12 tamtego dokumentu (prototyp rund, alfa, premiera, gra na żywo). Poniżej plan dla starego kierunku.
+
 Stan na 2026-11-07. Kolejność wynika z ryzyka: najpierw sprawdzamy, czy gra działa i czy straszy, a dopiero potem rozbudowujemy treść. Terminów celowo nie podaję, bo nie mamy jeszcze danych z testów. Szczegóły projektowe są w `02_GDD.md`, a aktualne wyniki testów w `05_STATUS.md`.
 
 ## Gdzie jesteśmy
