@@ -56,7 +56,7 @@ Idziesz korytarzem za kolegą. Kolega pisze na czacie, że jest w piwnicy. Podno
    - **W dół:** następne piętro z wyższym mnożnikiem (×1, ×1,5, ×2, ×3, ×4), rzadszymi anomaliami i groźniejszymi przeciwnikami.
 4. **Porażka:** gdy wszyscy są wycięci, drużyna traci nagrania z tej zmiany, ale Biuro płaci 25% „wynagrodzenia zasadniczego” za to, co już było w windzie. Porażka boli, ale nie zeruje wieczoru.
 
-Winda jest jedyną bezpieczną strefą: Kadrowy do niej nie wchodzi, a w środku ładuje się bateria.
+Winda jest jedyną bezpieczną strefą: Kadrowy do niej nie wchodzi, a w środku ładuje się bateria. Szczegóły windy (licznik osób, zjazd, zamykanie drzwi, rekord głębokości) są w §2.8.
 
 ### 2.3 Zagrożenia
 Każde ma jedną regułę i jeden sygnał. Gracz poznaje je stopniowo: nowe pojawiają się wraz z głębokością i rangą.
@@ -113,6 +113,38 @@ Zachowany filar z `02_GDD.md`:
 | 9:00–11:00 | Jeden wycięty, ratunek kadrem albo kamera kolegi podniesiona z podłogi | Szczyt |
 | 11:00–12:00 | Ucieczka do windy, drzwi się zamykają, w szparze stoi Kadrowy | Ulga |
 | po zmianie | Ciemnia: ocena ujęć, wypłata, taśma zmiany | „Jeszcze jedna” |
+
+### 2.8 Winda
+Winda to jedyne bezpieczne miejsce w grze i jedyna droga między piętrami (§2.2). Jest też sceną, a nie tylko przejściem.
+
+**Licznik osób** [START]
+- Nad drzwiami świeci tabliczka „PERSONS: 2”. Pokazuje prawdziwą liczbę postaci w kabinie, łącznie ze Statystą.
+- Od piętra −2 Statysta może wsiąść razem z drużyną, wyglądając jak jeden z was. Gołym okiem wszystko się zgadza, poza tabliczką. W kamerze widać, kto jest za dużo.
+- **Uczciwa reguła:** w windzie Statysta nikogo nie wycina. Sfilmowany w kabinie przez 2 s znika, a takie ujęcie jest wyjątkowo cenne. Jeśli nikt go nie sfilmuje, wysiada z wami i chodzi za drużyną po następnym piętrze.
+- Solo: jedziesz sam, a tabliczka pokazuje „2”. To nazwa gry w jednej scenie.
+
+**Zjazd jako krótkie wydarzenie** [PROTO: wersja podstawowa]
+- Zjazd trwa 10–15 s. Daje oddech między piętrami i czas na ładowanie baterii.
+- Każdy zjazd losuje jedno drobne zdarzenie bez zagrożenia: mrugające światło, kroki na dachu kabiny, głos w głośniku Biura, wskaźnik pięter, który na chwilę pokazuje piętro, którego nie ma (np. −13).
+- Zdarzenia korzystają z istniejącego systemu omenów (`Core/Omens`, `OmenDirector`).
+
+**Zamykanie drzwi** [PROTO]
+- Drzwi zamykają się powoli, przez około 4 s. Kadrowy, który dobiegnie do windy, staje w szparze.
+- Dopóki ktoś trzyma go w kadrze, nie wejdzie. Gdy drzwi się domkną, odjeżdżacie.
+- To zamierzony najczęstszy moment do nagrania: ucieczka w ostatniej sekundzie.
+
+**Rekord głębokości** [START]
+- Najgłębsze piętro, z którego gracz wrócił, jest w profilu i na tablicy w lobby („DEEPEST RETURN: −7”).
+- Liczy się tylko powrót windą, nie samo zejście. Rekord nagradza dobrą decyzję przy windzie, a nie brawurę.
+
+**Każde piętro wygląda inaczej** [START]
+- Im głębiej, tym dziwniej. W lokacji Dom Kultury:
+  - −1: jasny, zwyczajny dom kultury,
+  - −2: wieczór, część świateł nie działa,
+  - −3: magazyny taśm,
+  - −4: korytarze, w których meble stoją pod sufitem,
+  - −5: coś, co wygląda jak lobby gry, tylko źle (zapowiedź finału sezonu z `02_GDD.md`).
+- Głębokość zmienia też oświetlenie, dźwięk tła i pulę anomalii, więc gracz czuje zejście bez czytania liczb.
 
 ## 3. Pierwsza sesja
 Cel: **pierwsza zmiana zaczyna się najpóźniej 45 s od wejścia.**
@@ -240,7 +272,7 @@ Telefon minimum 30 FPS. Moduły z prostej geometrii, światło lokalne, głębia
 ## 12. Plan produkcji
 
 ### Etap 0: prototyp [PROTO], 2–3 tygodnie
-Szare boksy, lokacja Dom Kultury z 6–8 modułów, generator, 2 piętra, Kadrowy (obecne AI), kamera z baterią, ocena ujęć, norma, winda w górę i w dół, Klatki i 2 ulepszenia (zapis w pamięci, bez blokady sesji). Solo i 2 graczy.
+Szare boksy, lokacja Dom Kultury z 6–8 modułów, generator, 2 piętra, Kadrowy (obecne AI), kamera z baterią, ocena ujęć, norma, winda w górę i w dół (z prostym zjazdem i zamykaniem drzwi przed Kadrowym, §2.8), Klatki i 2 ulepszenia (zapis w pamięci, bez blokady sesji). Solo i 2 graczy.
 
 Test: 3 sesje, w każdej solo i w parach, co najmniej połowa testerów w wieku 10–14 lat.
 
