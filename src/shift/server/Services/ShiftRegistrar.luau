@@ -171,7 +171,8 @@ function ShiftRegistrar.start()
 		end
 		if current.dormant then
 			-- Studio only: walk a floor without being hunted.
-			local paused = RunService:IsStudio() and Workspace:GetAttribute("DevPauseRegistrar") == true
+			local paused = RunService:IsStudio()
+				and Workspace:GetAttribute("DevPauseRegistrar") == true
 			if os.clock() >= wakeAt and not paused then
 				current.dormant = false
 				anchor:SetAttribute("Awake", true)
@@ -187,7 +188,17 @@ function ShiftRegistrar.start()
 			local exposure = current.exposure[player.UserId] or 0
 			eventRemote:FireClient(player, "exposure", math.min(exposure / RULES.registerTime, 1))
 		end
-		apply(Registrar.step(current, RULES, graph, CFG.StepSeconds, framedBy, gatherPlayers(), scale()))
+		apply(
+			Registrar.step(
+				current,
+				RULES,
+				graph,
+				CFG.StepSeconds,
+				framedBy,
+				gatherPlayers(),
+				scale()
+			)
+		)
 
 		if os.clock() >= nextFalseSilence then
 			nextFalseSilence = os.clock() + CFG.FalseSilenceCheckEvery

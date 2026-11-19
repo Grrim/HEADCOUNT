@@ -328,7 +328,9 @@ local function arrive()
 	local shift = ShiftSession.shift
 	Shift.arrive(shift)
 	updateIndicator()
-	ShiftSession.broadcast(`Floor {depthText(shift.depth)}. Footage pays x{Shift.multiplier(shift.depth)}.`)
+	ShiftSession.broadcast(
+		`Floor {depthText(shift.depth)}. Footage pays x{Shift.multiplier(shift.depth)}.`
+	)
 	moveDoors(0, CFG.DoorOpenSeconds)
 end
 
@@ -472,7 +474,8 @@ function ShiftSession.start()
 					kit.empty = true
 				end
 			else
-				local rate = CFG.Recharge * (if ShiftSession.inLift(player) then CFG.LiftRecharge else 1)
+				local rate = CFG.Recharge
+					* (if ShiftSession.inLift(player) then CFG.LiftRecharge else 1)
 				kit.battery = math.min(capacity, kit.battery + step * rate)
 				if kit.empty and kit.battery >= capacity * CFG.BatteryResume then
 					kit.empty = false

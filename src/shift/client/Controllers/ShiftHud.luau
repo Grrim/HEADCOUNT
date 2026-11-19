@@ -67,7 +67,8 @@ local function render()
 		.. (if carried > 0 then `   ({carried} not yet in the lift)` else "")
 	quotaBanked.Size = UDim2.fromScale(math.clamp(banked / quota, 0, 1), 1)
 	quotaCarried.Position = UDim2.fromScale(math.clamp(banked / quota, 0, 1), 0)
-	quotaCarried.Size = UDim2.fromScale(math.clamp(carried / quota, 0, 1 - math.clamp(banked / quota, 0, 1)), 1)
+	quotaCarried.Size =
+		UDim2.fromScale(math.clamp(carried / quota, 0, 1 - math.clamp(banked / quota, 0, 1)), 1)
 	quotaBanked.BackgroundColor3 = if banked + carried >= quota then Ui.C.Accent else Ui.C.Radio
 end
 
@@ -100,7 +101,10 @@ local function showResults(data: { [string]: any })
 	}, results)
 
 	local returned = data.result == "returned"
-	local title = if not returned then "CUT OUT OF FRAME" elseif data.met then "SHIFT COMPLETE" else "QUOTA MISSED"
+	local title = if not returned
+		then "CUT OUT OF FRAME"
+		elseif data.met then "SHIFT COMPLETE"
+		else "QUOTA MISSED"
 	Ui.display({
 		Size = UDim2.new(1, 0, 0, 34),
 		TextSize = 30,
@@ -139,14 +143,19 @@ local function showResults(data: { [string]: any })
 		}, row)
 		if upgrade.cost then
 			local affordable = (data.money or 0) >= upgrade.cost
-			Ui.button(`BUY  {upgrade.cost}`, {
-				AnchorPoint = Vector2.new(1, 0),
-				Position = UDim2.fromScale(1, 0),
-				Size = UDim2.new(0.36, 0, 1, 0),
-				TextColor3 = if affordable then Ui.C.Accent else Ui.C.Faint,
-			}, row, function()
-				Net.get("ShiftAction"):FireServer("buy", upgrade.id)
-			end)
+			Ui.button(
+				`BUY  {upgrade.cost}`,
+				{
+					AnchorPoint = Vector2.new(1, 0),
+					Position = UDim2.fromScale(1, 0),
+					Size = UDim2.new(0.36, 0, 1, 0),
+					TextColor3 = if affordable then Ui.C.Accent else Ui.C.Faint,
+				},
+				row,
+				function()
+					Net.get("ShiftAction"):FireServer("buy", upgrade.id)
+				end
+			)
 		else
 			Ui.mono({
 				AnchorPoint = Vector2.new(1, 0),
@@ -159,12 +168,17 @@ local function showResults(data: { [string]: any })
 			}, row)
 		end
 	end
-	Ui.primary("NEXT SHIFT", {
-		Size = UDim2.new(1, 0, 0, 44),
-		LayoutOrder = 50,
-	}, results, function()
-		Net.get("ShiftAction"):FireServer("next")
-	end)
+	Ui.primary(
+		"NEXT SHIFT",
+		{
+			Size = UDim2.new(1, 0, 0, 44),
+			LayoutOrder = 50,
+		},
+		results,
+		function()
+			Net.get("ShiftAction"):FireServer("next")
+		end
+	)
 end
 
 local function build()
@@ -298,7 +312,10 @@ function ShiftHud.start()
 			if (data.best or 0) > 0 then
 				ShiftHud.toast("Nothing better than what the team already has.", Ui.C.Muted)
 			else
-				ShiftHud.toast("Nothing on that tape. Get it in frame, longer and closer.", Ui.C.Muted)
+				ShiftHud.toast(
+					"Nothing on that tape. Get it in frame, longer and closer.",
+					Ui.C.Muted
+				)
 			end
 			return
 		end
@@ -339,7 +356,8 @@ function ShiftHud.start()
 			if phase == "ready" then
 				liftHint.Text = "Press DOWN on the panel to start the shift."
 			elseif state.canDescend then
-				liftHint.Text = `DOWN: next floor pays x{state.nextMultiplier}.   UP: end the shift and get paid.`
+				liftHint.Text =
+					`DOWN: next floor pays x{state.nextMultiplier}.   UP: end the shift and get paid.`
 			else
 				liftHint.Text = "Bottom floor. UP ends the shift."
 			end

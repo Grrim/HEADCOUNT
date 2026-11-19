@@ -88,14 +88,8 @@ local function onStop(player: Player, raw: unknown)
 	end
 	local map = Workspace:FindFirstChild("Map")
 	rayParams.FilterDescendantsInstances = if map then { map } else {}
-	local shots = Footage.score(
-		samples,
-		targets,
-		TAPE.SampleHz,
-		COS,
-		Config.Lens.FramingRange,
-		blocked
-	)
+	local shots =
+		Footage.score(samples, targets, TAPE.SampleHz, COS, Config.Lens.FramingRange, blocked)
 	local gain, improved = Footage.improve(session.best, shots)
 	local added = session.addFootage(player, gain)
 
@@ -103,9 +97,15 @@ local function onStop(player: Player, raw: unknown)
 	for _, shot in improved do
 		local anomaly = byId[shot.id]
 		session.markFilmed(shot.id, shot.stars)
-		table.insert(report, { stars = shot.stars, rarity = anomaly and anomaly.rarity or "common" })
+		table.insert(
+			report,
+			{ stars = shot.stars, rarity = anomaly and anomaly.rarity or "common" }
+		)
 	end
-	scoredRemote:FireClient(player, { shots = report, added = added, best = shots[1] and shots[1].stars or 0 })
+	scoredRemote:FireClient(
+		player,
+		{ shots = report, added = added, best = shots[1] and shots[1].stars or 0 }
+	)
 	if added > 0 then
 		for _, other in Players:GetPlayers() do
 			if other ~= player then

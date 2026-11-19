@@ -149,7 +149,10 @@ function ShiftOffFrame.start()
 			then
 				selfReturned[player] = true
 				ShiftOffFrame.restore(player)
-				services.ShiftSession.tell(player, "You walked back into frame. That works once a shift.")
+				services.ShiftSession.tell(
+					player,
+					"You walked back into frame. That works once a shift."
+				)
 			end
 		end
 	end

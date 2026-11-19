@@ -163,7 +163,8 @@ function Anomalies.start()
 		for _, figure in figures do
 			if figure.kind == "watcher" then
 				local position = figure.base.Position
-				local look = Vector3.new(camera.CFrame.Position.X, position.Y, camera.CFrame.Position.Z)
+				local look =
+					Vector3.new(camera.CFrame.Position.X, position.Y, camera.CFrame.Position.Z)
 				if (look - position).Magnitude > 0.5 then
 					-- A chair and its sitter look along -Z of their CFrame, so this faces the lens.
 					figure.model:PivotTo(CFrame.lookAt(position, look))

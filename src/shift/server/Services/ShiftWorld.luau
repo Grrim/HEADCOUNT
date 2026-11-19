@@ -144,13 +144,15 @@ local function buildLift(map: Folder)
 	)
 
 	local function leaf(name: string): Part
-		local part = Build.box(lift, name, 0, 0, 0, 3.2, DOOR_HEIGHT, 0.4, metal, Enum.Material.Metal)
+		local part =
+			Build.box(lift, name, 0, 0, 0, 3.2, DOOR_HEIGHT, 0.4, metal, Enum.Material.Metal)
 		return part
 	end
 	doorLeft = leaf("DoorLeft")
 	doorRight = leaf("DoorRight")
 
-	local lamp = Build.box(lift, "LiftLamp", -2, LIFT.height - 0.2, -8, 2, LIFT.height, -5, Palette.Bulb)
+	local lamp =
+		Build.box(lift, "LiftLamp", -2, LIFT.height - 0.2, -8, 2, LIFT.height, -5, Palette.Bulb)
 	lamp.Material = Enum.Material.Neon
 	lamp.CanCollide = false
 	liftLight = Instance.new("PointLight")
@@ -177,7 +179,8 @@ local function buildLift(map: Folder)
 	indicator.Parent = gui
 
 	local function button(name: string, y: number, color: Color3, action: string): ProximityPrompt
-		local part = Build.box(lift, name, 5.6, y - 0.3, -4.3, 5.9, y + 0.3, -3.7, color, Enum.Material.Neon)
+		local part =
+			Build.box(lift, name, 5.6, y - 0.3, -4.3, 5.9, y + 0.3, -3.7, color, Enum.Material.Neon)
 		local prompt = Instance.new("ProximityPrompt")
 		prompt.ActionText = action
 		prompt.ObjectText = "Lift"
@@ -205,7 +208,14 @@ local function buildLift(map: Folder)
 end
 
 -- Furniture by room kind. `rng` is the floor's own, so a floor always looks the same.
-local function furnish(parent: Folder, kind: string, x: number, z: number, depth: number, rng: Random)
+local function furnish(
+	parent: Folder,
+	kind: string,
+	x: number,
+	z: number,
+	depth: number,
+	rng: Random
+)
 	local upsideDown = depth >= 4
 	local function chairAt(cx: number, cz: number)
 		local cf = CFrame.lookAt(Vector3.new(cx, 0, cz), Vector3.new(cx, 0, cz + 1))
@@ -215,8 +225,30 @@ local function furnish(parent: Folder, kind: string, x: number, z: number, depth
 		Build.chair(parent, "Chair", cf)
 	end
 	if kind == "lobby" then
-		Build.box(parent, "Bench", x - 14, 0, z - 4, x - 12, 1.6, z + 6, Palette.WoodDark, Enum.Material.Wood)
-		Build.box(parent, "Bench", x + 12, 0, z - 4, x + 14, 1.6, z + 6, Palette.WoodDark, Enum.Material.Wood)
+		Build.box(
+			parent,
+			"Bench",
+			x - 14,
+			0,
+			z - 4,
+			x - 12,
+			1.6,
+			z + 6,
+			Palette.WoodDark,
+			Enum.Material.Wood
+		)
+		Build.box(
+			parent,
+			"Bench",
+			x + 12,
+			0,
+			z - 4,
+			x + 14,
+			1.6,
+			z + 6,
+			Palette.WoodDark,
+			Enum.Material.Wood
+		)
 	elseif kind == "hall" then
 		for row = 0, 2 do
 			for seat = -2, 2 do
@@ -228,23 +260,67 @@ local function furnish(parent: Folder, kind: string, x: number, z: number, depth
 			local dx = x + side * 11
 			local bottom = if upsideDown then ROOM_HEIGHT - 2.6 else 0
 			local top = if upsideDown then ROOM_HEIGHT else 2.6
-			Build.box(parent, "Desk", dx - 3, bottom, z + 8, dx + 3, top, z + 11, Palette.WoodDark, Enum.Material.Wood)
+			Build.box(
+				parent,
+				"Desk",
+				dx - 3,
+				bottom,
+				z + 8,
+				dx + 3,
+				top,
+				z + 11,
+				Palette.WoodDark,
+				Enum.Material.Wood
+			)
 		end
 	elseif kind == "storage" then
 		Build.shelf(parent, x - 14, z + 11, x - 4, z + 13, 0, 7)
 		Build.shelf(parent, x + 4, z + 11, x + 14, z + 13, 0, 7)
 	elseif kind == "cloakroom" then
-		Build.box(parent, "Rail", x - 12, 6.5, z + 12, x + 12, 6.8, z + 12.3, Palette.Metal, Enum.Material.Metal)
+		Build.box(
+			parent,
+			"Rail",
+			x - 12,
+			6.5,
+			z + 12,
+			x + 12,
+			6.8,
+			z + 12.3,
+			Palette.Metal,
+			Enum.Material.Metal
+		)
 		for index = 0, 9 do
 			if rng:NextNumber() < 0.7 then
 				local cx = x - 11 + index * 2.4
-				Build.box(parent, "Coat", cx - 0.9, 2.6, z + 11.6, cx + 0.9, 6.4, z + 12.6, Palette.Suit, Enum.Material.Fabric)
+				Build.box(
+					parent,
+					"Coat",
+					cx - 0.9,
+					2.6,
+					z + 11.6,
+					cx + 0.9,
+					6.4,
+					z + 12.6,
+					Palette.Suit,
+					Enum.Material.Fabric
+				)
 			end
 		end
 	elseif kind == "corridor" then
 		for _, side in { -1, 1 } do
 			local wx = x + side * (CELL / 2 - 1.2)
-			Build.box(parent, "Curtain", wx - 0.4, 0, z - 12, wx + 0.4, ROOM_HEIGHT, z + 12, Palette.Curtain, Enum.Material.Fabric)
+			Build.box(
+				parent,
+				"Curtain",
+				wx - 0.4,
+				0,
+				z - 12,
+				wx + 0.4,
+				ROOM_HEIGHT,
+				z + 12,
+				Palette.Curtain,
+				Enum.Material.Fabric
+			)
 		end
 	end
 end

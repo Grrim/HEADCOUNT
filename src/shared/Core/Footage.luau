@@ -45,14 +45,28 @@ function Footage.score(
 			local x, y, z = sample[1], sample[2], sample[3]
 			local lx, ly, lz = sample[4], sample[5], sample[6]
 			if
-				Framing.isFramed(x, y, z, lx, ly, lz, target.x, target.y, target.z, cosHalfFov, range)
-				and not (blocked and blocked(sample, target))
+				Framing.isFramed(
+					x,
+					y,
+					z,
+					lx,
+					ly,
+					lz,
+					target.x,
+					target.y,
+					target.z,
+					cosHalfFov,
+					range
+				) and not (blocked and blocked(sample, target))
 			then
 				framed += 1
 				local dx, dy, dz = target.x - x, target.y - y, target.z - z
 				local distance = math.sqrt(dx * dx + dy * dy + dz * dz)
 				nearest = math.min(nearest, distance)
-				if distance > 0.001 and (dx * lx + dy * ly + dz * lz) / distance >= Footage.CENTRE_COS then
+				if
+					distance > 0.001
+					and (dx * lx + dy * ly + dz * lz) / distance >= Footage.CENTRE_COS
+				then
 					centred = true
 				end
 			end

@@ -188,21 +188,31 @@ return {
 		for _ = 1, 30 do
 			table.insert(samples, { 0, 0, 0, 0, 0, -1 })
 		end
-		local shots = Footage.score(samples, {
-			{ id = 1, x = 0, y = 0, z = -10, value = 10 },
-		}, 10, math.cos(math.rad(24)), 110, function()
-			return true
-		end)
+		local shots = Footage.score(
+			samples,
+			{
+				{ id = 1, x = 0, y = 0, z = -10, value = 10 },
+			},
+			10,
+			math.cos(math.rad(24)),
+			110,
+			function()
+				return true
+			end
+		)
 		assert(#shots == 0)
 	end,
 
 	["filming the same subject again only pays the improvement"] = function()
 		local best = {}
-		local gain = Footage.improve(best, { { id = 1, stars = 2, value = 4, seconds = 2, distance = 30 } })
+		local gain =
+			Footage.improve(best, { { id = 1, stars = 2, value = 4, seconds = 2, distance = 30 } })
 		assert(gain == 4)
-		gain = Footage.improve(best, { { id = 1, stars = 3, value = 6, seconds = 3, distance = 20 } })
+		gain =
+			Footage.improve(best, { { id = 1, stars = 3, value = 6, seconds = 3, distance = 20 } })
 		assert(gain == 2)
-		gain = Footage.improve(best, { { id = 1, stars = 1, value = 2, seconds = 1, distance = 50 } })
+		gain =
+			Footage.improve(best, { { id = 1, stars = 1, value = 2, seconds = 1, distance = 50 } })
 		assert(gain == 0)
 	end,
 
