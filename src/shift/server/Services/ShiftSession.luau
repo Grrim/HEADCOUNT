@@ -401,7 +401,7 @@ function ShiftSession.onEveryoneCut()
 	ShiftSession.busy = false
 end
 
-function ShiftSession.addFootage(player: Player, gain: number): number
+function ShiftSession.addFootage(_player: Player, gain: number): number
 	local added = Shift.addFootage(ShiftSession.shift, gain)
 	if added > 0 then
 		ShiftSession.broadcast()

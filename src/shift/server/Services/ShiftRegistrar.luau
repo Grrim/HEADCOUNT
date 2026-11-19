@@ -127,9 +127,12 @@ local function apply(events: { Registrar.Event })
 		if kind == "jump" or kind == "retreat" then
 			placeAnchor(event.node :: string)
 			send(kind)
-		elseif kind == "preJump" or kind == "reach" or kind == "reachCancelled" then
-			send(kind, event.id)
-		elseif kind == "registered" then
+		elseif
+			kind == "preJump"
+			or kind == "reach"
+			or kind == "reachCancelled"
+			or kind == "registered"
+		then
 			send(kind, event.id)
 		elseif kind == "cut" then
 			send("cut", event.id)

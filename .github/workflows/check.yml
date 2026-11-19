@@ -58,11 +58,14 @@ jobs:
           if [ -s fmt.patch ]; then
             python3 - <<'PY'
           text = open("fmt.patch", encoding="utf-8").read()
-          size = 30000
+          # An annotation holds about 4 KB, and a step may post 10 of each level.
+          size = 3000
           parts = [text[i:i + size] for i in range(0, len(text), size)]
-          for index, part in enumerate(parts):
+          levels = ["warning", "notice", "error"]
+          for index, part in enumerate(parts[:30]):
               body = part.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
-              print(f"::warning title=fmt.patch {index + 1}/{len(parts)}::{body}")
+              level = levels[index // 10]
+              print(f"::{level} title=fmt.patch {index + 1}/{len(parts)}::{body}")
           PY
           fi
 
