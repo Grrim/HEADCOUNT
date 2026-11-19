@@ -17,8 +17,8 @@ Stan na 2026-11-19. Kierunek gry opisuje `09_GDD_V2.md`. Ten dokument opisuje ta
 **Benchmark:** krótkie horrory z zasadami z `00_RESEARCH.md` (ref. 3: jedna reguła, napisy po kilka słów, wybór na końcu). Bierzemy rytm i czytelność. Nie bierzemy samego jumpscare'u ani wyglądu cudzych postaci.
 
 **Rozważone struktury:**
-1. **POV za kolegą, wiadomość na czacie, podniesienie kamery** (wybrana). Sprzedaje dokładnie nową zasadę: ukryty gracz i kamera jako jedyny dowód.
-2. Pusta sala, podniesienie kamery i pełna widownia. Odrzucona: to obraz ze starego kierunku i nie pokazuje ukrytego gracza.
+1. **POV za kolegą, wiadomość na czacie, podniesienie kamery** (wybrana). Sprzedaje dokładnie nową zasadę: Statysta udaje kogoś z drużyny, a kamera jest jedynym dowodem.
+2. Pusta sala, podniesienie kamery i pełna widownia. Odrzucona: to obraz ze starego kierunku i nie pokazuje Statysty.
 3. Podzielony ekran: oko i kamera obok siebie. Odrzucona: tłumaczy zamiast straszyć, a pierwszy kadr jest słabszy.
 
 **Ustawienia:** 9:16, 15 s, napisy w świecie gry (hak i czat), stała rzecz w kadrze to kolega idący korytarzem. Jeden kolor akcentu: czerwień REC, tylko przy „9” i pod tytułem. Moment kulminacyjny (podniesienie kamery) wypada w 7,1 s, ciągnie się do 11,4 s i jest najgłośniejszym momentem.
@@ -49,7 +49,7 @@ Stan na 2026-11-19. Kierunek gry opisuje `09_GDD_V2.md`. Ten dokument opisuje ta
 
 | Wariant | Linia 1 | Linia 2 | Czat |
 |---|---|---|---|
-| **A** | THERE WERE 8 OF US. | THE HEADCOUNT SAID **9**. | where r u?? im in the basement |
+| **A** | THERE WERE 3 OF US. | THE HEADCOUNT SAID **4**. | where r u?? im in the basement |
 | **B** | MY FRIEND WAS IN THE BASEMENT. | SO WHO WAS I FOLLOWING? | bro im STILL in the basement. where r u |
 | **C** | ONE OF US ISN'T HUMAN. | ONLY THE CAMERA CAN TELL. | where r u?? im in the basement |
 

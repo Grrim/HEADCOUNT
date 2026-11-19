@@ -2,7 +2,7 @@
 
 Kooperacyjny horror na Roblox (1–4 graczy). Kamera pokazuje to, czego nie widzi oko, a każde odtworzenie nagrania przybliża to, co jest na taśmie.
 
-> **Zmiana kierunku (2026-11-19, propozycja):** głównym trybem ma zostać rundowy horror dla 6–12 graczy z ukrytym Statystą, którego widać tylko w kamerze. Obecna misja zostaje jako tryb fabularny. Szczegóły: [docs/09_GDD_V2.md](docs/09_GDD_V2.md). Opis poniżej dotyczy jeszcze starego kierunku.
+> **Zmiana kierunku (2026-11-19, propozycja):** głównym trybem mają zostać zmiany dla 1–4 graczy (solo albo ze znajomymi): zjazd windą coraz niżej, filmowanie anomalii za walutę i ulepszenia, Kadrowy, który rusza się tylko poza kadrem, i Statysta udający kogoś z drużyny. Obecna misja zostaje jako tryb fabularny. Szczegóły: [docs/09_GDD_V2.md](docs/09_GDD_V2.md). Opis poniżej dotyczy jeszcze starego kierunku.
 
 - Nowy kierunek (GDD v2): [docs/09_GDD_V2.md](docs/09_GDD_V2.md)
 - Test haka filmikiem przed prototypem: [docs/10_TEST_FILMIKIEM.md](docs/10_TEST_FILMIKIEM.md)

@@ -49,7 +49,7 @@ type Hook = { lines: { string }, chat: string }
 
 local HOOKS: { [string]: Hook } = {
 	A = {
-		lines = { "THERE WERE 8 OF US.", `THE HEADCOUNT SAID <font color="#{RED}">9</font>.` },
+		lines = { "THERE WERE 3 OF US.", `THE HEADCOUNT SAID <font color="#{RED}">4</font>.` },
 		chat = "where r u?? im in the basement",
 	},
 	B = {
