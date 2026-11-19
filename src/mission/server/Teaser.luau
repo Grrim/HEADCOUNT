@@ -43,10 +43,8 @@ end
 -- The friend is built once on the server and handed to the client as a template; the client
 -- clones it and moves its own copy, so every frame of the walk is driven by the film's clock.
 local function buildFriend(userId: number)
-	local model = Players:CreateHumanoidModelFromDescription(
-		description(userId),
-		Enum.HumanoidRigType.R15
-	)
+	local model =
+		Players:CreateHumanoidModelFromDescription(description(userId), Enum.HumanoidRigType.R15)
 	for _, child in model:GetDescendants() do
 		if child:IsA("BaseScript") then
 			child:Destroy()
