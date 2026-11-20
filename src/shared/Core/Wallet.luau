@@ -12,6 +12,7 @@
 -- hold a record for ever. A transform that returns nil leaves the cloud record untouched.
 local Highlight = require("./Highlight")
 local Pass = require("./Pass")
+local Rank = require("./Rank")
 local PassConfig = require("../Config/Pass")
 local Quests = require("./Quests")
 
@@ -69,6 +70,8 @@ export type Data = {
 	-- What the player wears: a viewfinder frame and a title (nil for none).
 	frame: string?,
 	title: string?,
+	-- Experience for rank, for good (Core/Rank).
+	rankXp: number,
 }
 
 export type Lock = { id: string, at: number }
@@ -92,9 +95,11 @@ function Wallet.default(): Data
 		quests = Quests.fresh(0),
 		pass = Pass.fresh(""),
 		cosmetics = {},
-		titles = {},
+		-- Rank 1's title comes with the job.
+		titles = { [Rank.REWARDS[1].title :: string] = true },
 		frame = nil,
 		title = nil,
+		rankXp = 0,
 	}
 end
 
@@ -103,6 +108,14 @@ Wallet.BASE_FRAMES = { "paper", "crt", "amber" }
 
 local rewardFrames: { [string]: boolean } = {}
 local rewardTitles: { [string]: boolean } = {}
+for _, reward in Rank.REWARDS do
+	if reward.frame then
+		rewardFrames[reward.frame] = true
+	end
+	if reward.title then
+		rewardTitles[reward.title] = true
+	end
+end
 for _, season in PassConfig.Seasons do
 	for _, track in { season.free, season.premium } do
 		for _, reward in track do
@@ -134,6 +147,17 @@ function Wallet.grant(data: Data, rewards: { Pass.Reward })
 			data.titles[reward.title] = true
 		end
 	end
+end
+
+-- Experience towards rank. Returns the rank before and after, and the rewards of every rank
+-- reached (already unlocked in the wallet).
+function Wallet.rankXp(data: Data, amount: number): (number, number, { Rank.Reward })
+	local before = Rank.of(data.rankXp)
+	data.rankXp += math.max(0, math.floor(amount))
+	local after = Rank.of(data.rankXp)
+	local rewards = Rank.rewardsBetween(before, after)
+	Wallet.grant(data, rewards :: any)
+	return before, after, rewards
 end
 
 -- Experience towards the season's pass, and every reward it reaches. Returns those rewards.
@@ -241,6 +265,9 @@ function Wallet.migrate(raw: any): Record
 			data.weekDeepest = count(stored.weekDeepest, 0, 100) or 0
 			data.weekEarned = count(stored.weekEarned, 0, 1e12) or 0
 			data.rewardedWeek = count(stored.rewardedWeek, 0, 1e7) or 0
+			-- Wallets from before ranks start at what they have earned, so nobody loses a floor
+			-- they could already reach.
+			data.rankXp = count(stored.rankXp, 0, 1e9) or data.earned
 			local pass = stored.pass
 			if typeof(pass) == "table" and typeof(pass.season) == "string" then
 				data.pass = {
@@ -475,6 +502,7 @@ function Wallet.merge(record: Data, early: Data): Data
 	for title in early.titles do
 		record.titles[title] = true
 	end
+	record.rankXp += early.rankXp
 	-- Weekly rewards are only ever claimed on a saved wallet, so the early one holds none.
 	return record
 end

@@ -10,6 +10,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Pass = require(ReplicatedStorage.Shared.Core.Pass)
+local Rank = require(ReplicatedStorage.Shared.Core.Rank)
 local PassConfig = require(ReplicatedStorage.Shared.Config.Pass)
 local Wallet = require(ReplicatedStorage.Shared.Core.Wallet)
 
@@ -27,6 +28,10 @@ local function publish(player: Player)
 	local data = services.ShiftBank.data(player)
 	player:SetAttribute("FrameId", data.frame or "paper")
 	player:SetAttribute("Title", data.title or "")
+	local rank, into, need = Rank.progress(data.rankXp)
+	player:SetAttribute("Rank", rank)
+	player:SetAttribute("RankInto", into)
+	player:SetAttribute("RankNeed", need)
 	local season = Pass.current(os.time())
 	if season then
 		local view = Pass.view(data.pass, season, os.time(), premium[player] == true)
@@ -48,17 +53,36 @@ local function announce(player: Player, rewards: { Pass.Reward })
 	services.ShiftSession.tell(player, `Biuro Pass: {table.concat(parts, ", ")}.`)
 end
 
--- Experience earned on a shift. Pays any tiers it reaches.
+-- Experience earned on a shift: towards rank, for good, and towards the season's pass. Pays any
+-- rank or tier it reaches.
 function ShiftPass.xp(player: Player, amount: number)
-	local season = Pass.current(os.time())
-	if not season or amount <= 0 or not player.Parent then
+	if amount <= 0 or not player.Parent then
 		return
 	end
 	local bank = services.ShiftBank
-	local due = Wallet.passXp(bank.data(player), season, amount, premium[player] == true)
-	if #due > 0 then
+	local data = bank.data(player)
+	local before, after, rankRewards = Wallet.rankXp(data, amount)
+	if after > before then
+		local line = `Rank {after}.`
+		local opened = Rank.depthLimit(after)
+		if opened > Rank.depthLimit(before) then
+			line ..= ` Floor -{opened} is open to you now.`
+		end
+		for _, reward in rankRewards do
+			if reward.title then
+				line ..= ` New title: "{reward.title}".`
+			end
+			if reward.frame then
+				line ..= ` New viewfinder: "{reward.frame}".`
+			end
+		end
+		services.ShiftSession.tell(player, line)
+	end
+	local season = Pass.current(os.time())
+	local due = if season then Wallet.passXp(data, season, amount, premium[player] == true) else {}
+	announce(player, due)
+	if #due > 0 or after > before then
 		bank.changed(player)
-		announce(player, due)
 	else
 		bank.touch(player)
 	end

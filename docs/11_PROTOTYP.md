@@ -90,6 +90,13 @@ Stan na 2026-11-20. Gałąź `prototype-shift`. Etap 0 z `09_GDD_V2.md` §12 (pr
   - pierwsza wypłata zawiera powitanie Biura, +60 Klatek, więc od razu stać go na pierwsze ulepszenie (bateria kosztuje 60), a ekran wypłaty mu je podsuwa.
   - Gdy w windzie jest choć jeden weteran, zmiana jest zwykła, a nowi i tak dostają linie radia.
 
+- **Rangi** (§5 GDD, „stopień służbowy”) od 1 do 50: to samo doświadczenie co w Biuro Pass (nagrania przywiezione windą, norma, zadania dzienne), ale na stałe, bez resetu sezonu. Ranga 2 przy 100 XP, 10 przy 4500, 50 przy 122 500 (`Core/Rank`).
+  - **Głębsze piętra:** ranga 1–2 zjeżdża do −2, ranga 3 do −3, 6 do −4, 10 do −5. Drużyna jedzie tak głęboko, jak pozwala najwyższa ranga w windzie, więc weteran może zabrać nowych znajomych niżej. Przy zablokowanym piętrze winda mówi, od której rangi się otwiera.
+  - **Nagrody:** tytuły na rangach 1, 5, 10, 20, 35 i 50, ramki wizjera na 15, 30 i 50. Zakłada się je tak jak te z Passa.
+  - Gracze sprzed rang zaczynają z XP równym sumie zarobionych Klatek, więc nikt nie traci pięter, na które już mógł zjechać.
+  - Ranga i postęp są na ekranie wypłaty, a przy imionach na liście drużyny jest „[R7]”.
+  - **Do decyzji właściciela:** czy Misja 001 (Story Tape) ma być odblokowywana rangą (§10 i pytanie 3 w §13 GDD). Na razie zostaje otwarta dla wszystkich.
+
 **Czego jeszcze nie ma:** taśmy zmiany (klipu z najlepszym momentem), zadań dziennych, dźwięków i grafiki docelowej.
 
 ## 2. Jak uruchomić (bez instalowania czegokolwiek)

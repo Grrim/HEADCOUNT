@@ -17,6 +17,10 @@ return {
 		{ id = "neon", name = "Exit Sign", color = Color3.fromRGB(60, 255, 120) },
 		{ id = "minus13", name = "-13", color = Color3.fromRGB(255, 40, 40) },
 		{ id = "gold", name = "Commendation Gold", color = Color3.fromRGB(230, 190, 60) },
+		-- From rank (Core/Rank).
+		{ id = "brass", name = "Brass", color = Color3.fromRGB(181, 140, 70) },
+		{ id = "silver", name = "Silver", color = Color3.fromRGB(196, 200, 206) },
+		{ id = "black", name = "Bureau Black", color = Color3.fromRGB(20, 20, 24) },
 	},
 	Frames = {
 		{ id = "paper", color = Color3.fromRGB(214, 206, 186), nameKey = "frame_paper" },

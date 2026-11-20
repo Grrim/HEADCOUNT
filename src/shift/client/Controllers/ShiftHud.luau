@@ -282,6 +282,17 @@ local function showResults(data: { [string]: any })
 		`Your frames: {data.money}`
 			.. (if data.saved then "" else "   (not saved: this server only)"),
 	}
+	-- Rank, for good (docs/09_GDD_V2.md §5), with how far the next one is.
+	local rank = player:GetAttribute("Rank")
+	if typeof(rank) == "number" then
+		local into, need = player:GetAttribute("RankInto"), player:GetAttribute("RankNeed")
+		table.insert(
+			lines,
+			if typeof(need) == "number" and need > 0
+				then `Rank {rank}   {into}/{need} xp to rank {rank + 1}`
+				else `Rank {rank}: the top of the Bureau.`
+		)
+	end
 	for index, line in lines do
 		Ui.text({
 			Size = UDim2.new(1, 0, 0, 22),
@@ -301,14 +312,14 @@ local function showResults(data: { [string]: any })
 			table.insert(parts, "?")
 		end
 	end
-	Ui.eyebrow(`ARCHIVE  {found}/{#archive}`, { LayoutOrder = 6 }, results)
+	Ui.eyebrow(`ARCHIVE  {found}/{#archive}`, { LayoutOrder = 7 }, results)
 	Ui.mono({
 		Size = UDim2.new(1, 0, 0, 36),
 		TextSize = 13,
 		TextWrapped = true,
 		TextColor3 = Ui.C.Muted,
 		Text = table.concat(parts, "   "),
-		LayoutOrder = 7,
+		LayoutOrder = 8,
 	}, results)
 	-- Commendations for places on finished weeks' boards, best first.
 	local honours = data.honours or {}
@@ -325,7 +336,7 @@ local function showResults(data: { [string]: any })
 			TextSize = 13,
 			TextColor3 = Ui.C.Accent,
 			Text = `COMMENDATIONS  {table.concat(won, "   ")}`,
-			LayoutOrder = 8,
+			LayoutOrder = 9,
 		}, results)
 	end
 	-- The Biuro Pass: where the player stands this season, what comes next, the premium track.
@@ -801,6 +812,10 @@ function ShiftHud.start()
 			for index, other in players do
 				local where = other:GetAttribute("Where")
 				local name = if other == player then "You" else other.DisplayName
+				local otherRank = other:GetAttribute("Rank")
+				if typeof(otherRank) == "number" then
+					name ..= ` [R{otherRank}]`
+				end
 				-- A title from the Biuro Pass, worn by choice.
 				local title = other:GetAttribute("Title")
 				if typeof(title) == "string" and title ~= "" then

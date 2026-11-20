@@ -17,6 +17,7 @@ local FloorGen = require(ReplicatedStorage.Shared.Core.FloorGen)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Palette = require(ReplicatedStorage.Shared.Config.Palette)
 local RateLimit = require(ReplicatedStorage.Shared.Core.RateLimit)
+local Rank = require(ReplicatedStorage.Shared.Core.Rank)
 local Records = require(ReplicatedStorage.Shared.Core.Records)
 local Shift = require(ReplicatedStorage.Shared.Core.Shift)
 local Upgrades = require(ReplicatedStorage.Shared.Core.Upgrades)
@@ -710,11 +711,16 @@ local function onDown(player: Player)
 		return
 	end
 	if not Shift.canDescend(shift) then
+		local nextFloor = shift.depth + 1
+		local opensAt = Rank.forDepth(nextFloor)
 		ShiftSession.tell(
 			player,
 			if ShiftSession.guided
 				then "Your first shift is one floor. UP ends it and pays."
-				else "This is the bottom floor. The only way is up."
+				elseif
+					shift.depth >= Shift.MAX_DEPTH or not opensAt
+				then "This is the bottom floor. The only way is up."
+				else `Floor -{nextFloor} opens at rank {opensAt}. UP ends the shift.`
 		)
 		return
 	end
@@ -740,6 +746,13 @@ local function onDown(player: Player)
 		if everyoneNew then
 			shift.quota = Shift.FIRST_QUOTA
 			shift.limit = 1
+		else
+			-- How deep this crew may go: as deep as the highest rank aboard (docs/09_GDD_V2.md §5).
+			local best = 1
+			for _, member in Players:GetPlayers() do
+				best = math.max(best, Rank.of(services.ShiftBank.data(member).rankXp))
+			end
+			shift.limit = Rank.depthLimit(best)
 		end
 	end
 	whileBusy(function()
