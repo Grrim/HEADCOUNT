@@ -309,6 +309,9 @@ local function renderLobby()
 	}, content)
 end
 
+-- Set while a teleport is under way (from the terminal or a lift), cleared if it fails.
+local teleporting = false
+
 local function render()
 	content:ClearAllChildren()
 	mainButton = nil
@@ -319,10 +322,12 @@ local function render()
 		for _, member in party.members do
 			prepList.Text ..= member.name .. "\n"
 		end
-		prep.Visible = party.starting
+		prep.Visible = party.starting or teleporting
 	else
 		renderLobby()
-		prep.Visible = false
+		-- A lift ride has no party, but its loading screen must stay up until the teleport.
+		prepList.Text = ""
+		prep.Visible = teleporting
 	end
 	Panels.reselect(panel)
 end
@@ -549,12 +554,15 @@ function Terminal.start()
 			prepCount.Text = Strings.get("hub_starting_in", value)
 			prepAbort.Visible = true
 		elseif stage == "aborted" then
+			teleporting = false
 			prep.Visible = false
 		elseif stage == "teleporting" then
+			teleporting = true
 			prep.Visible = true
 			prepCount.Text = Strings.get("hub_loading")
 			prepAbort.Visible = false
 		elseif stage == "error" then
+			teleporting = false
 			prep.Visible = false
 			errorLabel.Text = Strings.get(value)
 			panel.Visible = true

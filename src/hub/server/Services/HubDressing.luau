@@ -534,7 +534,8 @@ local function archiveClutter(folder: Folder)
 			grain
 		)
 	end
-	for _, door in { { -10, -2 }, { 10, 18 } } do
+	-- The tape room, the locker room, and the two lifts.
+	for _, door in { { -10, -2 }, { 10, 18 }, { -37.5, -33.5 }, { -29, -23 } } do
 		local a, b = door[1], door[2]
 		decor(folder, "DoorFrame", 39.3, 0, a - 0.5, 40.7, 9.5, a + 0.15, wood, grain)
 		decor(folder, "DoorFrame", 39.3, 0, b - 0.15, 40.7, 9.5, b + 0.5, wood, grain)
@@ -556,17 +557,20 @@ local function archiveClutter(folder: Folder)
 		false
 	decor(folder, "Wainscot", -39.5, 0, 3, -39.2, 4.5, 19.5, Palette.Wood, Enum.Material.Wood)
 	decor(folder, "Wainscot", -39.5, 0, -39.5, -39.2, 4.5, -7, Palette.Wood, Enum.Material.Wood)
-	decor(folder, "Wainscot", 39.2, 0, -39.5, 39.5, 4.5, -11, Palette.Wood, Enum.Material.Wood)
+	-- Broken where the two lifts open in the east wall.
+	decor(folder, "Wainscot", 39.2, 0, -39.5, 39.5, 4.5, -37.5, Palette.Wood, Enum.Material.Wood)
+	decor(folder, "Wainscot", 39.2, 0, -33.5, 39.5, 4.5, -29, Palette.Wood, Enum.Material.Wood)
+	decor(folder, "Wainscot", 39.2, 0, -23, 39.5, 4.5, -11, Palette.Wood, Enum.Material.Wood)
 end
 
 -- Bills from the places the expeditions go, pinned up in the hall. The spots avoid the sconces
--- (west z -30, -20, 8; east z -34, -16 at y 6.8-7.8), the doors (west z -6..2, east -10..-2 and
--- 10..18) and the signs over them.
+-- (west z -30, -20, 8; east z -31, -16 at y 6.8-7.8), the doors (west z -6..2, east -10..-2,
+-- 10..18 and the lifts at -37.5..-33.5 and -29..-23) and the signs over them.
 local function hallPosters(folder: Folder)
 	local spots = {
 		{ "headcount", Vector3.new(-39.5, 6.9, -25), Vector3.xAxis, -1 },
 		{ "missing", Vector3.new(-39.5, 6.9, 13.5), Vector3.xAxis, 2 },
-		{ "cinema", Vector3.new(39.5, 6.9, -25), -Vector3.xAxis, 1 },
+		{ "cinema", Vector3.new(39.5, 6.9, -19.5), -Vector3.xAxis, 1 },
 		{ "choir", Vector3.new(39.5, 6.9, 4), -Vector3.xAxis, -1.5 },
 	}
 	for _, spot in spots do
@@ -589,7 +593,7 @@ function HubDressing.start()
 	for _, z in { -30, -20, 8 } do
 		sconce(folder, -39.2, z, 1)
 	end
-	for _, z in { -34, -16 } do
+	for _, z in { -31, -16 } do
 		sconce(folder, 39.2, z, -1)
 	end
 	-- Pendants over the reception counter.

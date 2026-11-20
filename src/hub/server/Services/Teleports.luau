@@ -87,6 +87,8 @@ function Teleports.launch(party: Party.Party): boolean
 		v = 1,
 		mission = party.missionId,
 		seed = Random.new():NextInteger(1, 2 ^ 30),
+		-- The shift sets its first quota for everyone on the way, not only the first to load.
+		crew = #members,
 	})
 	for _, member in members do
 		task.spawn(remember, member, serverId, placeId)

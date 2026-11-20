@@ -210,7 +210,7 @@ local EN: { [string]: string } = {
 	err_mission_locked = "That file is sealed.",
 	err_teleport_failed = "Could not leave. Try again.",
 	notice_expedition_over = "This expedition has already ended. Returning you to the Archive.",
-	err_not_published = "Teleporting needs a published game with place ids. Open the mission place to test it here.",
+	err_not_published = "Teleporting needs the published game with its place ids. In Studio, open that place directly to test it.",
 	-- intro
 	intro_hello = "Good evening. Take the camera.",
 	intro_folder = "Read the folder on the desk.",
@@ -389,7 +389,7 @@ local EN: { [string]: string } = {
 	guide_go_line = "The terminal is at the end of the hall, under the green sign.",
 	guide_terminal = "Expeditions",
 	guide_chosen = "Pick an expedition at the terminal.",
-	guide_chosen_line = "PLAY SOLO starts at once. Waiting for friends? Look around the hall through the camera.",
+	guide_chosen_line = "PLAY SOLO starts at once. Or take a lift by the east wall: SOLO, or CREW with whoever steps in.",
 	board_title = "Archive 03 · Tonight",
 	board_open = "Open",
 	board_sealed = "Sealed",
@@ -399,6 +399,17 @@ local EN: { [string]: string } = {
 	board_shift = "On shift: {1}",
 	guide_lower_chip = "Lower the camera",
 	notes_hub_lens = "Raise the camera in the hall now and then. The archive is never as empty as it looks.",
+	shift_title = "THE SHIFT: GOING DOWN",
+	shift_summary = "Ride the Bureau's lift down. Film what the eye can't see, make the quota, come back up.",
+	shift_meta = "1-4 PLAYERS  ·  10-15 MIN  ·  EVERY FLOOR NEW",
+	lift_solo = "SOLO LIFT",
+	lift_crew = "CREW LIFT",
+	lift_crew_idle = "Step in. Leaves 30 s after the first, or when full.",
+	lift_crew_wait = "{1}/4 aboard  ·  leaves in {2} s",
+	lift_record = "YOUR DEEPEST RETURN: {1}",
+	lift_go_alone = "Go down alone",
+	lift_go_now = "Leave now",
+	err_in_party = "You're in an expedition party. Leave it at the terminal first.",
 }
 
 local PL: { [string]: string } = {
@@ -588,7 +599,7 @@ local PL: { [string]: string } = {
 	err_mission_locked = "Ta teczka jest zapieczętowana.",
 	err_teleport_failed = "Nie udało się wyruszyć. Spróbuj ponownie.",
 	notice_expedition_over = "Ta ekspedycja już się zakończyła. Wracasz do Archiwum.",
-	err_not_published = "Teleport wymaga opublikowanej gry z ID miejsc. Aby to przetestować tutaj, otwórz miejsce misji.",
+	err_not_published = "Teleport wymaga opublikowanej gry z ID miejsc. W Studio otwórz to miejsce bezpośrednio.",
 	intro_hello = "Dobry wieczór. Proszę usiąść.",
 	intro_folder = "Przeczytaj teczkę na biurku.",
 	intro_camera = "Weź kamerę.",
@@ -723,6 +734,17 @@ local PL: { [string]: string } = {
 	notes_hub_tag = "[{1}] POMOC",
 	btn_notes = "NOTATKI",
 	btn_help = "POMOC",
+	shift_title = "ZMIANA: W DÓŁ",
+	shift_summary = "Zjedź windą Biura. Nagraj to, czego nie widzi oko, wyrób normę i wróć na górę.",
+	shift_meta = "1-4 graczy  |  10-15 min  |  każde piętro inne",
+	lift_solo = "WINDA SOLO",
+	lift_crew = "WINDA EKIPY",
+	lift_crew_idle = "Wejdź. Odjeżdża 30 s po pierwszym albo gdy jest pełna.",
+	lift_crew_wait = "{1}/4 w środku  ·  odjazd za {2} s",
+	lift_record = "TWÓJ NAJGŁĘBSZY POWRÓT: {1}",
+	lift_go_alone = "Zjedź sam",
+	lift_go_now = "Jedź teraz",
+	err_in_party = "Jesteś w drużynie ekspedycji. Najpierw wyjdź z niej przy terminalu.",
 }
 
 local function localeIsPolish(): boolean

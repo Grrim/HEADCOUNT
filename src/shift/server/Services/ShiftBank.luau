@@ -34,6 +34,8 @@ type Entry = {
 	dirty: boolean,
 	writing: boolean,
 	gone: boolean,
+	-- True after this server gave the lock back for a teleport: only then may it take it back.
+	released: boolean,
 }
 
 local session = HttpService:GenerateGUID(false)
@@ -76,6 +78,7 @@ local function entryOf(player: Player): Entry
 		dirty = false,
 		writing = false,
 		gone = false,
+		released = false,
 	}
 	if player.Parent then
 		entries[player] = fresh
@@ -235,6 +238,46 @@ function ShiftBank.changed(player: Player)
 		entry.dirty = true
 		task.spawn(flush, player, entry)
 	end
+end
+
+-- Before a teleport to the lobby: save and give the lock back, so whichever server the player
+-- lands on next can take the record at once. True when nothing is left unsaved.
+function ShiftBank.release(player: Player): boolean
+	local entry = entries[player]
+	if not entry then
+		return false
+	end
+	local deadline = os.clock() + 10
+	while entry.writing and os.clock() < deadline do
+		task.wait(0.1)
+	end
+	if not entry.owned then
+		-- Never owned (playing unsaved): there is nothing to give back.
+		return true
+	end
+	local ok = write(player, entry, true)
+	entry.released = ok
+	return ok
+end
+
+-- The teleport failed and the player stays: take the lock back and keep saving this wallet,
+-- which is the newest copy there is (this server wrote last).
+function ShiftBank.resume(player: Player)
+	local entry = entries[player]
+	local dataStore = getStore()
+	-- Only a wallet this server saved and let go of is newer than the cloud's. A wallet that was
+	-- never saved must never be written over the stored one.
+	if not entry or not entry.released or entry.owned or not dataStore then
+		return
+	end
+	entry.released = false
+	task.spawn(function()
+		if claim(player, dataStore) and entries[player] == entry then
+			entry.owned = true
+			entry.dirty = true
+			flush(player, entry)
+		end
+	end)
 end
 
 local function leave(player: Player)

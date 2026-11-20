@@ -75,7 +75,8 @@ local function compose(): { { text: string, color: Color3 } }
 		add(Strings.get("board_none"), DIM)
 	end
 	for index, party in parties do
-		if index > 3 then
+		-- Always leave the last row for who is on shift.
+		if index > 3 or #rows >= LINES - 1 then
 			break
 		end
 		local lead = party.members[1] and party.members[1].name or "?"

@@ -1,6 +1,6 @@
 # 11. Zmiana: jak ją uruchomić i co sprawdzić
 
-Stan na 2026-11-20. Gałąź `prototype-shift`. Etap 0 z `09_GDD_V2.md` §12 (prototyp) i kod Etapu 1 (alfa) bez połączenia z lobby. Misja 001 i lobby są nietknięte.
+Stan na 2026-11-20. Gałąź `prototype-shift`. Etap 0 z `09_GDD_V2.md` §12 (prototyp) i kod Etapu 1 (alfa), razem z windami w lobby i teleportem. Misja 001 jest nietknięta.
 
 ## 1. Co jest w grze
 
@@ -36,7 +36,21 @@ Stan na 2026-11-20. Gałąź `prototype-shift`. Etap 0 z `09_GDD_V2.md` §12 (pr
 - **Archiwum anomalii:** najlepsze gwiazdki każdego rodzaju (Sitter, Stander, Watcher, The Extra), na ekranie wypłaty z licznikiem.
 - **Analityka:** zdarzenia `ShiftDescend`, `ShiftEnd` (wynik, czas, liczba graczy), `ShiftCut` (przyczyna) i `UpgradeBought` przez `AnalyticsService:LogCustomEvent`, w `pcall`, więc błąd analityki nie psuje zmiany.
 
-**Czego jeszcze nie ma:** windy „Solo” i „dołącz do ekipy” w lobby i teleportu lobby → zmiana → lobby (świadomie poza tym zakresem), tablicy rekordów w lobby, statywu i innych ulepszeń poza baterią i kasetami, taśmy zmiany (klipu z najlepszym momentem), zadań dziennych, dźwięków i grafiki docelowej.
+### Lobby i teleport, dodane 2026-11-20
+
+- **Dwie windy w lobby**, we wschodniej ścianie Hali Rejestrów, na północ od pokoju taśm:
+  - **SOLO:** wejdź, przytrzymaj E przy przycisku i zjeżdżasz sam.
+  - **EKIPA (CREW):** kto stoi w kabinie, ten jedzie. Winda odjeżdża 30 s po wejściu pierwszej osoby, od razu przy czterech albo po przycisku „Leave now”. Kto wyjdzie z kabiny, wysiada. Gracze z drużyną z terminala nie wsiadają (jadą z drużyną).
+  - Tabliczki nad drzwiami: przy SOLO twój najgłębszy powrót, przy EKIPIE liczba osób i odliczanie.
+- **Terminal:** zmiana jest pierwszą pozycją katalogu, otwartą dla wszystkich. Drużyna znajomych zakłada ekspedycję „THE SHIFT” jak dotąd i startuje razem, a PLAY SOLO działa też dla zmiany.
+- **Teleport:** windy i terminal używają tego samego teleportu na zarezerwowany serwer co misja (cała ekipa ląduje na jednym serwerze, z ponawianiem i powrotem po rozłączeniu). Norma liczy się z liczby graczy obecnych przy pierwszym DOWN, więc spóźnieni z ekipy są w niej uwzględnieni.
+- **Powrót:** na ekranie wypłaty „BACK TO THE LOBBY”. Serwer zmiany najpierw zapisuje portfel i zwalnia blokadę, potem teleportuje. Gdy teleport się nie uda, odzyskuje blokadę i gracz zostaje.
+- Lobby czyta zapis zmiany tylko do odczytu (bez blokady), żeby pokazać rekord.
+- Przegląd tej części znalazł i poprawiono m.in.: możliwą utratę zapisu przy nieudanym teleporcie z niezapisanego portfela, podwójny start z windy SOLO, przyciski wind działające przez ściany, teleport mimo nieudanego zapisu i normę pierwszej zmiany liczoną tylko dla pierwszego gracza ekipy (teraz liczy wszystkich wysłanych z lobby).
+
+**Do zrobienia przez właściciela:** opublikować `build/Shift.rbxl` jako trzecie miejsce i wpisać jego ID do `MISSIONS.SHIFT` w `src/shared/Config/Places.luau` (README, „Publikacja”). Do tego czasu windy i terminal mówią, że teleport wymaga opublikowanej gry, a w Studio teleport nie działa wcale.
+
+**Czego jeszcze nie ma:** tablicy rekordów wszystkich graczy w lobby, wspólnej kolejki windy ekipy między serwerami lobby (ekipa składa się z graczy z tego samego serwera), skrótu do windy w przewodniku dla nowych, statywu i innych ulepszeń poza baterią i kasetami, taśmy zmiany (klipu z najlepszym momentem), zadań dziennych, dźwięków i grafiki docelowej.
 
 ## 2. Jak uruchomić (bez instalowania czegokolwiek)
 

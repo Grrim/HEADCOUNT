@@ -67,6 +67,9 @@ local anomalyFolder: Folder
 local cameraFolder: Folder
 local noticeId = 0
 local shiftStarted = 0
+-- How many the lobby sent here together (teleport data), so a crew's first quota counts the
+-- ones still loading. Client-visible data, so it can only raise the quota, never pay more.
+local expectedCrew = 1
 
 local function kitOf(player: Player): Kit
 	local kit = kits[player]
@@ -588,6 +591,10 @@ local function onDown(player: Player)
 		ShiftSession.tell(player, "Everyone has to be in the lift.")
 		return
 	end
+	if shift.phase == "ready" then
+		-- A crew from the lobby arrives over a few seconds: the quota counts who is here now.
+		shift.quota = Shift.quotaFor(math.max(#Players:GetPlayers(), expectedCrew))
+	end
 	whileBusy(function()
 		if shift.phase == "floor" and not closeDoors() then
 			return
@@ -676,8 +683,8 @@ local function onAction(player: Player, action: unknown, arg: unknown)
 		if phase ~= "over" and phase ~= "ready" then
 			return
 		end
-		if not services.ShiftBank.loaded(player) then
-			ShiftSession.tell(player, "Your wallet is still loading.")
+		if not services.ShiftBank.loaded(player) or services.ShiftTravel.isLeaving(player) then
+			ShiftSession.tell(player, "Your wallet is busy. Try again in a moment.")
 			return
 		end
 		local data = services.ShiftBank.data(player)
@@ -689,6 +696,15 @@ local function onAction(player: Player, action: unknown, arg: unknown)
 			track(player, "UpgradeBought", Upgrades.level(data.levels, arg), { arg })
 		end
 		sendResult(player)
+	elseif action == "lobby" then
+		-- Only between shifts: mid-shift the lift is the only way out.
+		if services.ShiftTravel.isLeaving(player) then
+			return
+		elseif (phase == "over" or phase == "ready") and not ShiftSession.busy then
+			services.ShiftTravel.toLobby(player)
+		else
+			ShiftSession.tell(player, "Finish the shift first. The lift is the only way out.")
+		end
 	elseif action == "next" then
 		if phase == "over" and not ShiftSession.busy then
 			newShift()
@@ -716,6 +732,13 @@ function ShiftSession.init(all: { [string]: any })
 	cameraFolder.Parent = Workspace
 	Players.PlayerAdded:Connect(function(player)
 		refill(player)
+		local ok, join = pcall(function()
+			return player:GetJoinData()
+		end)
+		local data = if ok and typeof(join) == "table" then join.TeleportData else nil
+		if typeof(data) == "table" and typeof(data.crew) == "number" then
+			expectedCrew = math.clamp(math.floor(data.crew), expectedCrew, 4)
+		end
 	end)
 	-- Upgrades bought in an earlier session arrive with the wallet.
 	services.ShiftBank.onLoaded(function(player)

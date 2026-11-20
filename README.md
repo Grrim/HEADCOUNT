@@ -113,8 +113,9 @@ W Studio serwer misji wypisuje w Output rozwiązanie zagadki. Na żywym serwerze
 
 1. Opublikuj `build/Hub.rbxl` jako Start Place nowego doświadczenia.
 2. Dodaj drugie miejsce w tym doświadczeniu i opublikuj do niego `build/Mission.rbxl`.
-3. Wpisz oba ID do `src/shared/Config/Places.luau`, przebuduj i opublikuj oba miejsca ponownie.
-4. W Creator Hub ustaw dla misji Access Control na **Secure within universe only**.
-5. W Game Settings włącz dostęp do API (Enable Studio Access to API Services) do testów DataStore.
-6. Wypełnij kwestionariusz Maturity & Compliance. Cel to Mild.
-7. Włącz czat głosowy w Game Settings > Communication. Bez niego gra działa, ale Kadrowy nie słyszy graczy.
+3. Dodaj trzecie miejsce i opublikuj do niego `build/Shift.rbxl` (zmiana).
+4. Wpisz wszystkie ID do `src/shared/Config/Places.luau` (ID zmiany w `MISSIONS.SHIFT`), przebuduj i opublikuj wszystkie trzy miejsca ponownie.
+5. W Creator Hub ustaw dla misji i zmiany Access Control na **Secure within universe only**.
+6. W Game Settings włącz dostęp do API (Enable Studio Access to API Services) do testów DataStore.
+7. Wypełnij kwestionariusz Maturity & Compliance. Cel to Mild.
+8. Włącz czat głosowy w Game Settings > Communication. Bez niego gra działa, ale Kadrowy nie słyszy graczy.

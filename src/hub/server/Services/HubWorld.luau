@@ -1,6 +1,7 @@
 --!strict
--- Archive 03: the starting room, a corridor, the Registry Hall, the tape room and a room with no
--- door. Greybox, built from code like the mission.
+-- Archive 03: the starting room, a corridor, the Registry Hall, the tape room, a room with no
+-- door, and the Bureau's two lifts down to the shift behind the hall's east wall. Greybox, built
+-- from code like the mission.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
@@ -12,6 +13,19 @@ local Palette = require(ReplicatedStorage.Shared.Config.Palette)
 local HubWorld = {}
 
 HubWorld.prompts = {} :: { [string]: ProximityPrompt }
+
+export type Box = { minX: number, maxX: number, minZ: number, maxZ: number }
+
+-- The lifts, north of the tape room. Openings in the east wall, then a cabin behind each.
+local SOLO =
+	{ open = { -37.5, -33.5 }, inside = { minX = 40.5, maxX = 47.5, minZ = -38.5, maxZ = -32.5 } }
+local CREW = { open = { -29, -23 }, inside = { minX = 40.5, maxX = 49.5, minZ = -30, maxZ = -22 } }
+
+-- Inside the crew cabin (anyone standing here is aboard); the doorway does not count.
+HubWorld.soloCabin =
+	{ minX = 40, maxX = SOLO.inside.maxX, minZ = SOLO.inside.minZ, maxZ = SOLO.inside.maxZ } :: Box
+HubWorld.crewCabin =
+	{ minX = 41, maxX = CREW.inside.maxX, minZ = CREW.inside.minZ, maxZ = CREW.inside.maxZ } :: Box
 
 local PD = Config.Puzzle.PromptDistance
 
@@ -46,6 +60,8 @@ local function structure(map: Folder)
 	Build.wallZ(map, "HallEast", 40, -40, 20, 0, 26, {
 		{ -10, -2, 0, 9 },
 		{ 10, 18, 0, 9 },
+		{ SOLO.open[1], SOLO.open[2], 0, 9 },
+		{ CREW.open[1], CREW.open[2], 0, 9 },
 	}, Palette.WallDark)
 	Build.wallZ(map, "HallWest", -40, -40, 20, 0, 26, { { -6, 2, 0, 9 } }, Palette.WallDark)
 	-- The west opening looks like wall. Only a lens shows the door in it.
@@ -226,6 +242,98 @@ local function camcorderModel(holder: BasePart)
 	cue.Parent = rec
 end
 
+-- One lift cabin: metal box, a lamp, a button panel, and a sign over the doorway in the hall.
+local function liftCabin(map: Folder, name: string, spec: any, actionKey: string, objectKey: string)
+	local box: Box = spec.inside
+	local metal = Palette.Metal
+	Build.box(
+		map,
+		`{name}Floor`,
+		40,
+		-1,
+		box.minZ,
+		box.maxX,
+		0,
+		box.maxZ,
+		Palette.WoodDark,
+		Enum.Material.Wood
+	)
+	Build.box(map, `{name}Ceiling`, 40.5, 9, box.minZ, box.maxX, 10, box.maxZ, Palette.Ceiling)
+	Build.wallX(
+		map,
+		`{name}North`,
+		box.minZ - 0.5,
+		40.5,
+		box.maxX + 1,
+		0,
+		10,
+		{},
+		metal,
+		Enum.Material.Metal
+	)
+	Build.wallX(
+		map,
+		`{name}South`,
+		box.maxZ + 0.5,
+		40.5,
+		box.maxX + 1,
+		0,
+		10,
+		{},
+		metal,
+		Enum.Material.Metal
+	)
+	Build.wallZ(
+		map,
+		`{name}Back`,
+		box.maxX + 0.5,
+		box.minZ - 1,
+		box.maxZ + 1,
+		0,
+		10,
+		{},
+		metal,
+		Enum.Material.Metal
+	)
+	local midZ = (box.minZ + box.maxZ) / 2
+	Build.panel(map, (40.5 + box.maxX) / 2, 8.9, midZ, 3, 2, 1.3, 16, Palette.Bulb)
+	local button = Build.box(
+		map,
+		`{name}Button`,
+		box.maxX - 0.3,
+		3.4,
+		midZ + 1.5,
+		box.maxX,
+		4.4,
+		midZ + 2.3,
+		Palette.Rec,
+		Enum.Material.Neon
+	)
+	button.CanCollide = false
+	local prompt = Build.prompt(button, actionKey, objectKey, nil, 8, 0.4)
+	-- Never through a wall: each button belongs to its own cabin.
+	prompt.RequiresLineOfSight = true
+	HubWorld.prompts[name] = prompt
+	-- Over the doorway on the hall side; each client writes its own text on it (Lifts).
+	local sign = Build.box(
+		map,
+		`{name}Sign`,
+		39.2,
+		9.6,
+		spec.open[1] - 0.5,
+		39.5,
+		11.4,
+		spec.open[2] + 0.5,
+		Palette.Ink
+	)
+	sign.CanCollide = false
+	local label = Build.label(sign, Enum.NormalId.Left, "", Palette.Rec)
+	label.Name = "SignText";
+	(label.Parent :: SurfaceGui).Name = "SignGui"
+	sign:AddTag("LiftSign")
+	sign:SetAttribute("Lift", name)
+end
+
 local function dressing(map: Folder)
 	-- The starting room
 	Build.box(map, "Desk", -5, 0, 43, 5, 3.2, 47, Palette.Wood, Enum.Material.Wood)
@@ -295,6 +403,8 @@ function HubWorld.init()
 	structure(map)
 	lights(map)
 	dressing(map)
+	liftCabin(map, "SoloLift", SOLO, "lift_go_alone", "lift_solo")
+	liftCabin(map, "CrewLift", CREW, "lift_go_now", "lift_crew")
 	local spawn = Instance.new("SpawnLocation")
 	spawn.Name = "Spawn"
 	spawn.Anchored = true

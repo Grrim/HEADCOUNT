@@ -139,6 +139,8 @@ return {
 		CountdownSeconds = 5,
 		TeleportRetries = 3,
 		RejoinTtlSeconds = 1800,
+		-- The crew lift in the lobby leaves this long after its first rider steps in.
+		CrewLiftSeconds = 30,
 	},
 	Rates = {
 		-- { per second, burst }

@@ -228,7 +228,15 @@ local function showResults(data: { [string]: any })
 			Net.get("ShiftAction"):FireServer("next")
 		end
 	)
-	Ui.quiet("CLOSE", { Size = UDim2.new(1, 0, 0, 28), LayoutOrder = 51 }, results, closeResults)
+	Ui.quiet(
+		"BACK TO THE LOBBY",
+		{ Size = UDim2.new(1, 0, 0, 28), LayoutOrder = 51 },
+		results,
+		function()
+			Net.get("ShiftAction"):FireServer("lobby")
+		end
+	)
+	Ui.quiet("CLOSE", { Size = UDim2.new(1, 0, 0, 28), LayoutOrder = 52 }, results, closeResults)
 end
 
 local function build()

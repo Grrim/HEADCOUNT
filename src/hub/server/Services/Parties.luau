@@ -29,6 +29,15 @@ local function missionById(id: string): any
 	return nil
 end
 
+-- Open entries (the shift) need no unlock; story missions need the player's progress.
+local function unlocked(mission: any, player: Player): boolean
+	if not mission or not mission.available then
+		return false
+	end
+	local data = PlayerData.get(player)
+	return mission.open == true or (data ~= nil and data.missions[mission.id] == true)
+end
+
 local function snapshot(): { any }
 	local list = {}
 	for _, party in registry.parties do
@@ -53,6 +62,11 @@ local function snapshot(): { any }
 		return a.id < b.id
 	end)
 	return list
+end
+
+-- The lifts leave out anyone already signed up at the terminal.
+function Parties.inParty(player: Player): boolean
+	return Party.of(registry, player.UserId) ~= nil
 end
 
 function Parties.broadcast()
@@ -105,8 +119,7 @@ local ACTIONS: { [string]: (Player, any) -> () } = {
 			return
 		end
 		local mission = missionById(missionId)
-		local data = PlayerData.get(player)
-		if not mission or not mission.available or not (data and data.missions[missionId]) then
+		if not unlocked(mission, player) then
 			fail(player, "mission_locked")
 			return
 		end
@@ -162,8 +175,7 @@ local ACTIONS: { [string]: (Player, any) -> () } = {
 			return
 		end
 		local mission = missionById(missionId)
-		local data = PlayerData.get(player)
-		if not mission or not mission.available or not (data and data.missions[missionId]) then
+		if not unlocked(mission, player) then
 			fail(player, "mission_locked")
 			return
 		end

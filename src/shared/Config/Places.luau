@@ -6,5 +6,7 @@ return {
 	HUB = 77620606106061,
 	MISSIONS = {
 		M001 = 102362153460645,
+		-- The shift place (build/Shift.rbxl). Not published yet: lifts and the terminal say so.
+		SHIFT = 0,
 	} :: { [string]: number },
 }
