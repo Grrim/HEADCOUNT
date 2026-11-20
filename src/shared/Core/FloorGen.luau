@@ -8,6 +8,12 @@
 -- single doorway can be locked, so locking it never cuts the floor in two. The code is not part
 -- of the floor: anyone can rebuild a floor from its seed, so the server draws the code apart.
 --
+-- Some floors have one hand-made special room (docs/09_GDD_V2.md §8), so the generator never
+-- feels like the same few rooms shuffled: a hall set out as an auditorium whose every seat is
+-- taken through the lens, a meeting room with one chair left, or a second lift door that never
+-- opens. It is drawn after everything else, so a floor is the same with or without one; only the
+-- look of that room changes (World/FloorBuild).
+--
 -- Grid rows grow towards +Z. The start room is always in row 0 and its centre sits on x = 0, so
 -- the lift, which never moves, always opens into it at z = 0.
 local Graph = require("./Graph")
@@ -18,8 +24,10 @@ local FloorGen = {}
 FloorGen.CELL = 36
 FloorGen.DOOR_WIDTH = 6
 FloorGen.VAULT_FROM_DEPTH = 2
+FloorGen.SPECIAL_CHANCE = 65
+FloorGen.OTHER_LIFT_FROM_DEPTH = 2
 
-export type Room = { id: number, cx: number, cz: number, kind: string }
+export type Room = { id: number, cx: number, cz: number, kind: string, special: string? }
 export type Link = { a: number, b: number }
 export type Spot = {
 	id: number,
@@ -30,6 +38,9 @@ export type Spot = {
 	kind: string,
 }
 export type Vault = { room: number, link: Link }
+-- `side` is the wall of the room the special leans on ("north", "south", "east", "west"): for
+-- the other lift, always one without a doorway.
+export type Special = { room: number, kind: string, side: string }
 export type Floor = {
 	depth: number,
 	width: number,
@@ -41,10 +52,14 @@ export type Floor = {
 	links: { Link },
 	spots: { Spot },
 	vault: Vault?,
+	special: Special?,
 }
 
 local KINDS = { "hall", "office", "storage", "cloakroom", "corridor" }
 local KIND_FOR_RARITY = { common = "sitter", rare = "standing", epic = "watcher" }
+-- A special room keeps a kind the radio can name: an auditorium is a hall, a meeting an office.
+local SPECIAL_KIND = { auditorium = "hall", meeting = "office" }
+local SIDES = { "south", "east", "north", "west" }
 
 local function sizeFor(depth: number): (number, number)
 	if depth <= 1 then
@@ -59,6 +74,24 @@ end
 
 local function linkKey(a: number, b: number): string
 	return if a < b then `{a}-{b}` else `{b}-{a}`
+end
+
+-- The room across one wall of a room, or nil at the floor's edge.
+local function across(width: number, height: number, room: Room, side: string): number?
+	local cx, cz = room.cx, room.cz
+	if side == "south" then
+		cz -= 1
+	elseif side == "north" then
+		cz += 1
+	elseif side == "west" then
+		cx -= 1
+	else
+		cx += 1
+	end
+	if cx < 0 or cz < 0 or cx >= width or cz >= height then
+		return nil
+	end
+	return idOf(width, cx, cz)
 end
 
 -- Rarity by depth: deeper floors hide more of the good ones.
@@ -202,6 +235,44 @@ function FloorGen.generate(seed: number, depth: number): Floor
 		end
 	end
 
+	-- Drawn last of all, for the same reason.
+	local special: Special? = nil
+	if rng:int(1, 100) <= FloorGen.SPECIAL_CHANCE then
+		local candidates = {}
+		for id = 1, width * height do
+			if id ~= start and not (vault and vault.room == id) then
+				table.insert(candidates, id)
+			end
+		end
+		local id = candidates[rng:int(1, #candidates)]
+		local room = rooms[id]
+		-- The walls with no doorway in them, in a fixed order.
+		local solid = {}
+		for _, side in SIDES do
+			local other = across(width, height, room, side)
+			local open = false
+			if other then
+				local key = linkKey(id, other)
+				open = linked[key] == true
+			end
+			if not open then
+				table.insert(solid, side)
+			end
+		end
+		local kinds = { "auditorium", "meeting" }
+		if depth >= FloorGen.OTHER_LIFT_FROM_DEPTH and #solid > 0 then
+			table.insert(kinds, "lift")
+		end
+		local kind = kinds[rng:int(1, #kinds)]
+		local side = if kind == "lift"
+			then solid[rng:int(1, #solid)]
+			elseif #solid > 0 then solid[1]
+			else "north"
+		room.special = kind
+		room.kind = SPECIAL_KIND[kind] or room.kind
+		special = { room = id, kind = kind, side = side }
+	end
+
 	return {
 		depth = depth,
 		width = width,
@@ -213,6 +284,7 @@ function FloorGen.generate(seed: number, depth: number): Floor
 		links = links,
 		spots = spots,
 		vault = vault,
+		special = special,
 	}
 end
 
@@ -238,6 +310,12 @@ function FloorGen.doorway(floor: Floor, link: Link): (number, number, boolean)
 	local ax, az = FloorGen.roomCentre(floor, link.a)
 	local bx, bz = FloorGen.roomCentre(floor, link.b)
 	return (ax + bx) / 2, (az + bz) / 2, ax == bx
+end
+
+-- Whether a wall of a room has a doorway in it (the lift's opening does not count).
+function FloorGen.sideOpen(floor: Floor, id: number, side: string): boolean
+	local other = across(floor.width, floor.height, floor.rooms[id], side)
+	return other ~= nil and FloorGen.linked(floor, id, other)
 end
 
 function FloorGen.linked(floor: Floor, a: number, b: number): boolean
