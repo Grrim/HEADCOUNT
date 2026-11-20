@@ -2,6 +2,9 @@
 -- Daily tasks on a shift (Core/Quests): the other services report what a player did, this counts it
 -- in their wallet, pays a task the moment it is done and says so, and keeps the player's own view
 -- of today's tasks (the Quests attribute, as JSON) up to date for the HUD.
+--
+-- It also keeps the attendance card (Core/Attendance): a player's day is stamped when their saved
+-- wallet loads on a shift, and again at a shift's end for anyone who played on past midnight.
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -45,9 +48,33 @@ function ShiftQuests.event(player: Player, event: string, amount: number?)
 	publish(player)
 end
 
+-- Stamps today on the player's attendance card (once a day) and says what it paid.
+function ShiftQuests.attend(player: Player)
+	local bank = services.ShiftBank
+	if not player.Parent or not bank.loaded(player) then
+		return
+	end
+	local stamp, square = Wallet.attend(bank.data(player), Quests.day(os.time()))
+	if not stamp then
+		return
+	end
+	bank.changed(player)
+	local line = `Attendance, day {square} of 7: +{stamp.frames} frames.`
+	if stamp.frame then
+		line ..= ` The card is full: the "Punch Card" viewfinder is yours.`
+	end
+	-- A player who has just joined may not be listening yet.
+	task.delay(4, function()
+		if player.Parent then
+			services.ShiftSession.tell(player, line)
+		end
+	end)
+end
+
 function ShiftQuests.init(all: { [string]: any })
 	services = all
 	services.ShiftBank.onLoaded(publish)
+	services.ShiftBank.onLoaded(ShiftQuests.attend)
 end
 
 function ShiftQuests.start()

@@ -10,6 +10,7 @@
 --
 -- A lock is stale once nobody has refreshed it for `ttl` seconds, so a crashed server can not
 -- hold a record for ever. A transform that returns nil leaves the cloud record untouched.
+local Attendance = require("./Attendance")
 local Highlight = require("./Highlight")
 local Pass = require("./Pass")
 local Rank = require("./Rank")
@@ -76,6 +77,8 @@ export type Data = {
 	rankXp: number,
 	-- The last week whose anomaly of the week this player has filmed (and been paid for).
 	weeklyWeek: number,
+	-- The attendance card: days in a row with a shift (Core/Attendance).
+	attendance: Attendance.Card,
 }
 
 export type Lock = { id: string, at: number }
@@ -105,6 +108,7 @@ function Wallet.default(): Data
 		title = nil,
 		rankXp = 0,
 		weeklyWeek = 0,
+		attendance = Attendance.fresh(),
 	}
 end
 
@@ -113,6 +117,7 @@ Wallet.BASE_FRAMES = { "paper", "crt", "amber" }
 
 local rewardFrames: { [string]: boolean } = {}
 local rewardTitles: { [string]: boolean } = {}
+rewardFrames[Attendance.FRAME] = true
 for _, reward in Rank.REWARDS do
 	if reward.frame then
 		rewardFrames[reward.frame] = true
@@ -152,6 +157,20 @@ function Wallet.grant(data: Data, rewards: { Pass.Reward })
 			data.titles[reward.title] = true
 		end
 	end
+end
+
+-- Stamps today on the attendance card and pays it. Returns the stamp (nil when today was already
+-- stamped) and the square it filled.
+function Wallet.attend(data: Data, today: number): (Attendance.Stamp?, number)
+	local stamp, square = Attendance.stamp(data.attendance, today)
+	if stamp then
+		data.frames += stamp.frames
+		data.earned += stamp.frames
+		if stamp.frame then
+			data.cosmetics[stamp.frame] = true
+		end
+	end
+	return stamp, square
 end
 
 -- The anomaly of the week filmed well: pays `reward` the first time in that week. Returns whether
@@ -287,6 +306,12 @@ function Wallet.migrate(raw: any): Record
 			-- they could already reach.
 			data.rankXp = count(stored.rankXp, 0, 1e9) or data.earned
 			data.weeklyWeek = count(stored.weeklyWeek, 0, 1e7) or 0
+			if typeof(stored.attendance) == "table" then
+				data.attendance = {
+					day = count(stored.attendance.day, 0, 1e7) or 0,
+					streak = count(stored.attendance.streak, 0, 1e6) or 0,
+				}
+			end
 			local pass = stored.pass
 			if typeof(pass) == "table" and typeof(pass.season) == "string" then
 				data.pass = {

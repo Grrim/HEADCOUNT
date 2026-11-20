@@ -102,6 +102,8 @@ Stan na 2026-11-20. Gałąź `prototype-shift`. Etap 0 z `09_GDD_V2.md` §12 (pr
   - **Anomalia tygodnia:** na zmianę co tydzień „ta, która stoi” (rzadka) albo „ta, która patrzy” (epicka). Pojawia się na ok. 60% pięter jako dodatkowa postać, płaci podwójnie, w wizjerze ma napis „OF THE WEEK”, a pierwsze dobre ujęcie w tygodniu (od 3 gwiazdek) daje +100 Klatek. Stoi w danych piętra (`FloorGen`), więc wraca też na taśmie.
   - Obie rzeczy widać w HUD pod normą.
 
+- **Karta obecności** (§4 GDD, „seria logowań z kosmetykiem w dniu 7”): każdy dzień (UTC), w którym gracz był na zmianie, dostaje pieczątkę. Kolejne dni z rzędu idą po karcie, opuszczony dzień zaczyna ją od nowa. Pieczątki płacą 20 / 30 / 40 / 50 / 60 / 80 Klatek, a siódma 100 Klatek i ramkę wizjera „Punch Card”, dostępną tylko z karty; potem zaczyna się nowa karta. Pieczątka wpada, gdy zapisany portfel wczyta się na zmianie (liczy się więc dzień ze zmianą, nie samo wejście do lobby: tylko serwer zmiany może zapisywać portfel), a także na końcu zmiany, jeśli gracz grał po północy. Karta jest na ekranie wypłaty (`Core/Attendance`, `ShiftQuests.attend`).
+
 **Czego jeszcze nie ma:** taśmy zmiany (klipu z najlepszym momentem), zadań dziennych, dźwięków i grafiki docelowej.
 
 ## 2. Jak uruchomić (bez instalowania czegokolwiek)

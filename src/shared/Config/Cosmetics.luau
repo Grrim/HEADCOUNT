@@ -21,6 +21,8 @@ return {
 		{ id = "brass", name = "Brass", color = Color3.fromRGB(181, 140, 70) },
 		{ id = "silver", name = "Silver", color = Color3.fromRGB(196, 200, 206) },
 		{ id = "black", name = "Bureau Black", color = Color3.fromRGB(20, 20, 24) },
+		-- From the attendance card's seventh day (Core/Attendance).
+		{ id = "punchcard", name = "Punch Card", color = Color3.fromRGB(222, 196, 140) },
 	},
 	Frames = {
 		{ id = "paper", color = Color3.fromRGB(214, 206, 186), nameKey = "frame_paper" },

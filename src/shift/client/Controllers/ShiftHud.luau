@@ -327,14 +327,29 @@ local function showResults(data: { [string]: any })
 			table.insert(parts, "?")
 		end
 	end
-	Ui.eyebrow(`ARCHIVE  {found}/{#archive}`, { LayoutOrder = 7 }, results)
+	-- The attendance card: a square for each day in a row with a shift.
+	local card = data.attendance
+	if typeof(card) == "table" then
+		local squares = string.rep("■", card.filled or 0)
+			.. string.rep("□", (card.length or 7) - (card.filled or 0))
+		Ui.mono({
+			Size = UDim2.new(1, 0, 0, 18),
+			TextSize = 13,
+			TextColor3 = Ui.C.Accent,
+			Text = `ATTENDANCE  {squares}  ` .. (if card.stampedToday
+				then `back tomorrow: +{card.next}`
+				else `next shift today: +{card.next}`),
+			LayoutOrder = 7,
+		}, results)
+	end
+	Ui.eyebrow(`ARCHIVE  {found}/{#archive}`, { LayoutOrder = 8 }, results)
 	Ui.mono({
 		Size = UDim2.new(1, 0, 0, 36),
 		TextSize = 13,
 		TextWrapped = true,
 		TextColor3 = Ui.C.Muted,
 		Text = table.concat(parts, "   "),
-		LayoutOrder = 8,
+		LayoutOrder = 9,
 	}, results)
 	-- Commendations for places on finished weeks' boards, best first.
 	local honours = data.honours or {}
@@ -351,7 +366,7 @@ local function showResults(data: { [string]: any })
 			TextSize = 13,
 			TextColor3 = Ui.C.Accent,
 			Text = `COMMENDATIONS  {table.concat(won, "   ")}`,
-			LayoutOrder = 9,
+			LayoutOrder = 10,
 		}, results)
 	end
 	-- The Biuro Pass: where the player stands this season, what comes next, the premium track.

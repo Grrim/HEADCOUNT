@@ -17,6 +17,7 @@ local FloorGen = require(ReplicatedStorage.Shared.Core.FloorGen)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Palette = require(ReplicatedStorage.Shared.Config.Palette)
 local RateLimit = require(ReplicatedStorage.Shared.Core.RateLimit)
+local Attendance = require(ReplicatedStorage.Shared.Core.Attendance)
 local Nights = require(ReplicatedStorage.Shared.Core.Nights)
 local Quests = require(ReplicatedStorage.Shared.Core.Quests)
 local Rank = require(ReplicatedStorage.Shared.Core.Rank)
@@ -605,6 +606,19 @@ local function sendResult(player: Player)
 		honours = data.honours,
 		-- Straight after a first shift: point at the first upgrade.
 		firstUpgrade = data.shifts == 1,
+		-- The attendance card: squares filled today, and what the next stamp pays.
+		attendance = (function()
+			local today = Quests.day(os.time())
+			local filled = Attendance.filled(data.attendance, today)
+			local stampedToday = data.attendance.day == today
+			local nextSquare = if stampedToday then (filled % Attendance.LENGTH) + 1 else filled + 1
+			return {
+				filled = filled,
+				length = Attendance.LENGTH,
+				stampedToday = stampedToday,
+				next = Attendance.STAMPS[math.clamp(nextSquare, 1, Attendance.LENGTH)].frames,
+			}
+		end)(),
 		-- The shift's tape, and the ones this player keeps in their Archive.
 		tape = services.ShiftTapes.highlight,
 		tapes = data.tapes,
@@ -656,6 +670,8 @@ local function payEveryone()
 		)
 		services.ShiftBank.changed(player)
 		services.ShiftRecords.submit(player)
+		-- Played on past midnight: the new day is stamped too.
+		services.ShiftQuests.attend(player)
 		if returned then
 			-- Biuro Pass experience: footage brought back, and the quota met.
 			local xp = services.ShiftPass.XP
