@@ -73,6 +73,28 @@ local function lockerRoom(folder: Folder)
 		end
 	end
 	Build.box(folder, "LockerBench", 44, 0, 15, 54, 1.8, 17, Palette.Wood, Enum.Material.Wood)
+	-- The television on its trolley by the east wall, facing whoever comes in from the hall: the
+	-- shift tapes everyone here has kept (HubTapes, TapeShelf). It stands clear of the wall.
+	Build.box(
+		folder,
+		"TvTrolley",
+		55.2,
+		0,
+		10.4,
+		57.3,
+		2.6,
+		14.6,
+		Palette.WoodDark,
+		Enum.Material.Wood
+	)
+	local tv = Build.box(folder, "ArchiveTv", 55.6, 2.6, 10.8, 57.3, 5.8, 14.2, Palette.Metal)
+	local glass =
+		Build.box(folder, "ArchiveTvScreen", 55.45, 3, 11.2, 55.6, 5.4, 13.8, Palette.Shadow)
+	glass.CanCollide = false
+	glass.Material = Enum.Material.Glass
+	Build.label(glass, Enum.NormalId.Left, "ARCHIVE TAPES  >", Palette.Crt)
+	Build.prompt(tv, "act_watch_tapes", "obj_archive_tv", nil, Config.Puzzle.PromptDistance + 2)
+	tv:AddTag("TapeShelfTv")
 	Build.panel(folder, 49, 10.9, 16, 6, 2, 1.6, 22, WARM)
 end
 

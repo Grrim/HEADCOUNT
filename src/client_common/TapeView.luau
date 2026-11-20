@@ -1,5 +1,6 @@
 --!strict
--- Playing a shift tape (docs/09_GDD_V2.md §7) on the pay screen. A tape is a floor's seed and depth
+-- Playing a shift tape (docs/09_GDD_V2.md §7): on the shift's pay screen (ShiftHud) and on the
+-- television in the lobby's locker room (TapeShelf). A tape is a floor's seed and depth
 -- and a camera path (Core/Highlight); the floor, gone since the lift left it, is rebuilt here from
 -- those (World/FloorBuild) with every figure the lens saw on it (World/Figures), inside a
 -- ViewportFrame, and the path is flown again and again in the tape's look.
@@ -18,7 +19,7 @@ local Palette = require(ReplicatedStorage.Shared.Config.Palette)
 local Tape = require(ReplicatedStorage.Shared.Core.Tape)
 local Ui = require(ReplicatedStorage.ClientCommon.Ui)
 
-local ShiftTapeView = {}
+local TapeView = {}
 
 local RARITY_LABELS = {
 	common = "COMMON",
@@ -33,7 +34,7 @@ end
 
 -- Fills `screen` (a Frame) with a playing copy of the tape. Returns a function that stops it, or
 -- nil when the tape can not be played.
-function ShiftTapeView.play(screen: Frame, tape: any): (() -> ())?
+function TapeView.play(screen: Frame, tape: any): (() -> ())?
 	local track = if typeof(tape) == "table" then Highlight.unpack(tape.track) else nil
 	if
 		not track
@@ -133,4 +134,4 @@ function ShiftTapeView.play(screen: Frame, tape: any): (() -> ())?
 	return stop
 end
 
-return ShiftTapeView
+return TapeView

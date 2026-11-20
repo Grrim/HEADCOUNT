@@ -14,6 +14,7 @@ local TweenService = game:GetService("TweenService")
 local AudioDirector = require(ReplicatedStorage.ClientCommon.AudioDirector)
 local LensView = require(ReplicatedStorage.ClientCommon.LensView)
 local Net = require(ReplicatedStorage.Shared.Net)
+local TapeView = require(ReplicatedStorage.ClientCommon.TapeView)
 local Ui = require(ReplicatedStorage.ClientCommon.Ui)
 
 local ShiftHud = {}
@@ -35,7 +36,6 @@ local results: Frame
 -- Beside the pay screen: the shift tape playing, and the tapes kept in the Archive.
 local tapePanel: Frame
 local tapeScreen: Frame
-local controllers: { [string]: any }
 local lastNoticeId = 0
 local state: { [string]: any } = { phase = "ready", depth = 0, quota = 40, banked = 0, carried = 0 }
 local toastToken = 0
@@ -175,7 +175,7 @@ local function showTapes(data: { [string]: any })
 	}, tapePanel)
 	Ui.list(holder, 6)
 	local function playTape(tape: any)
-		controllers.ShiftTapeView.play(tapeScreen, tape)
+		TapeView.play(tapeScreen, tape)
 	end
 	if typeof(shiftTape) == "table" then
 		playTape(shiftTape)
@@ -500,10 +500,6 @@ local function build()
 	}, gui)
 	Ui.pad(teamList, 10, 8)
 	Ui.list(teamList, 2)
-end
-
-function ShiftHud.init(all: { [string]: any })
-	controllers = all
 end
 
 function ShiftHud.start()

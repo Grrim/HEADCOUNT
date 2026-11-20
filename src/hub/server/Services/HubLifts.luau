@@ -16,9 +16,8 @@
 -- Both lifts send their riders through Teleports.launch, the same reserved-server teleport the
 -- terminal uses. Anyone already in a terminal party is left out: they go with their party.
 --
--- This also reads each player's shift record (DataStore Shift_v1, written only by the shift
--- place) once, without its lock, to show the depth record over the lifts.
-local DataStoreService = game:GetService("DataStoreService")
+-- The depth record on the solo lift's sign comes from HubTapes, which reads each player's shift
+-- record once.
 local HttpService = game:GetService("HttpService")
 local MemoryStoreService = game:GetService("MemoryStoreService")
 local Players = game:GetService("Players")
@@ -32,7 +31,6 @@ local CrewLink = require(ReplicatedStorage.Shared.Core.CrewLink)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Party = require(ReplicatedStorage.Shared.Core.Party)
 local RateLimit = require(ReplicatedStorage.Shared.Core.RateLimit)
-local Wallet = require(ReplicatedStorage.Shared.Core.Wallet)
 
 local HubLifts = {}
 
@@ -320,19 +318,6 @@ local function onGoNow(player: Player)
 	end
 end
 
--- The depth record and frames from the shift place, read once, for the signs.
-local function readRecord(player: Player)
-	local ok, raw = pcall(function()
-		return DataStoreService:GetDataStore("Shift_v1"):GetAsync(`u_{player.UserId}`)
-	end)
-	if not ok or not player.Parent then
-		return
-	end
-	local data = Wallet.migrate(raw).data
-	player:SetAttribute("ShiftDeepest", data.deepest)
-	player:SetAttribute("ShiftFrames", data.frames)
-end
-
 -- Once a second: keep this cabin's seats on the shared lift right, and when it leaves, send the
 -- riders who hold them.
 local function linkLoop()
@@ -403,12 +388,6 @@ function HubLifts.start()
 	local map = Workspace:WaitForChild("Map")
 	local crewSign = map:WaitForChild("CrewLiftSign") :: BasePart
 
-	Players.PlayerAdded:Connect(function(player)
-		task.spawn(readRecord, player)
-	end)
-	for _, player in Players:GetPlayers() do
-		task.spawn(readRecord, player)
-	end
 	Players.PlayerRemoving:Connect(function(player)
 		launching[player.UserId] = nil
 		refused[player.UserId] = nil

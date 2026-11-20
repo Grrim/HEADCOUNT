@@ -71,7 +71,9 @@ Stan na 2026-11-20. Gałąź `prototype-shift`. Etap 0 z `09_GDD_V2.md` §12 (pr
 
 - **Taśma zmiany** (§7 GDD): serwer zapamiętuje najlepsze ujęcie zmiany (według tego, ile zapłaciło, z mnożnikiem piętra) i wycina z niego 8 s, które najdłużej trzymały obiekt w kadrze. Na ekranie wypłaty, w panelu obok, taśma gra w pętli: piętro, którego już nie ma, jest odbudowywane z ziarna i głębokości (wspólne moduły `World/FloorBuild` i `World/Figures`, tymi samymi serwer buduje piętro do gry) w ViewportFrame, ze wszystkimi postaciami, które pokazywał wizjer. Kamera leci zapisaną ścieżką, z liniami i opisem jak na kasecie. **SAVE TO ARCHIVE** zachowuje taśmę w zapisanym portfelu (do 5; pełne Archiwum oddaje najsłabszą taśmę za lepszą), a zapisane taśmy można obejrzeć przyciskami w tym samym panelu. Taśma to tylko liczby (ziarno, głębokość, spakowana ścieżka, około 3 KB), więc da się ją odtworzyć gdziekolwiek, także w przyszłości na telewizorze w szafce w lobby. Na wąskim ekranie (telefon) panel taśmy jest pomijany. Ujawnienie Statysty nie trafia na taśmę, bo nie ma nagranej ścieżki kamery.
 
-**Czego jeszcze nie ma:** telewizora w szafce w lobby z zapisanymi taśmami, taśmy zmiany (klipu z najlepszym momentem), zadań dziennych, dźwięków i grafiki docelowej.
+- **Telewizor w szatni lobby:** stoi na wózku przy wschodniej ścianie szatni, ekranem do wejścia z hali. E otwiera panel z taśmami zmian wszystkich graczy w tym lobby (twoje pierwsze), zgodnie z §5 GDD („każdy może je obejrzeć”). Taśma gra tak samo jak na ekranie wypłaty: piętro odbudowane z ziarna w ViewportFrame (`client_common/TapeView`, wspólny dla zmiany i lobby). Serwer lobby czyta zapis zmiany każdego gracza raz przy wejściu (`HubTapes`, ten sam odczyt daje rekord na tabliczce windy) i wysyła tylko opisy taśm; ścieżkę kamery wysyła dopiero dla taśmy, którą ktoś włączy, a klient trzyma ją do końca wizyty. Taśmy zapisane po wejściu do lobby pojawią się po ponownym wejściu.
+
+**Czego jeszcze nie ma:** taśmy zmiany (klipu z najlepszym momentem), zadań dziennych, dźwięków i grafiki docelowej.
 
 ## 2. Jak uruchomić (bez instalowania czegokolwiek)
 

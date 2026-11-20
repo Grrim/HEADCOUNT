@@ -428,6 +428,12 @@ local EN: { [string]: string } = {
 	guide_solo_in_line = "Alone: the Bureau sets your quota for one.",
 	guide_crew_in = "Stay in the cabin. It leaves with everyone in it.",
 	guide_crew_in_line = "Players from other lobbies can join. Hold E at the red button to leave now.",
+	act_watch_tapes = "Watch tapes",
+	obj_archive_tv = "Archive TV",
+	tv_title = "SHIFT TAPES  ·  EVERYONE IN THIS LOBBY",
+	tv_loading = "Rewinding...",
+	tv_empty = "Nobody here has kept a shift tape yet. Save one from the pay screen after a shift.",
+	tv_close = "CLOSE",
 }
 
 local PL: { [string]: string } = {
@@ -781,6 +787,12 @@ local PL: { [string]: string } = {
 	guide_solo_in_line = "Sam: Biuro ustala normę na jedną osobę.",
 	guide_crew_in = "Zostań w kabinie. Odjedzie ze wszystkimi w środku.",
 	guide_crew_in_line = "Mogą dołączyć gracze z innych lobby. Przytrzymaj E przy czerwonym przycisku, żeby jechać od razu.",
+	act_watch_tapes = "Oglądaj taśmy",
+	obj_archive_tv = "Telewizor archiwum",
+	tv_title = "TAŚMY ZMIAN  ·  WSZYSCY W TYM LOBBY",
+	tv_loading = "Przewijanie...",
+	tv_empty = "Nikt tu jeszcze nie zachował taśmy. Zapisz ją z ekranu wypłaty po zmianie.",
+	tv_close = "ZAMKNIJ",
 }
 
 local function localeIsPolish(): boolean

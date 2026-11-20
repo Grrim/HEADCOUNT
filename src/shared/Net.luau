@@ -43,6 +43,8 @@ local NAMES = {
 	"DocsState",
 	"LockerAction",
 	"FriendsBoard",
+	"TapeShelf",
+	"TapeShelfData",
 }
 
 local known: { [string]: boolean } = {}
