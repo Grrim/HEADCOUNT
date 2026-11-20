@@ -556,8 +556,8 @@ local function archiveClutter(folder: Folder)
 			grain
 		)
 	end
-	-- The tape room, the locker room, and the two lifts.
-	for _, door in { { -10, -2 }, { 10, 18 }, { -37.5, -33.5 }, { -29, -23 } } do
+	-- The tape room and the locker room. The lifts get steel (liftLanding).
+	for _, door in { { -10, -2 }, { 10, 18 } } do
 		local a, b = door[1], door[2]
 		decor(folder, "DoorFrame", 39.3, 0, a - 0.5, 40.7, 9.5, a + 0.15, wood, grain)
 		decor(folder, "DoorFrame", 39.3, 0, b - 0.15, 40.7, 9.5, b + 0.5, wood, grain)
@@ -583,6 +583,108 @@ local function archiveClutter(folder: Folder)
 	decor(folder, "Wainscot", 39.2, 0, -39.5, 39.5, 4.5, -37.5, Palette.Wood, Enum.Material.Wood)
 	decor(folder, "Wainscot", 39.2, 0, -33.5, 39.5, 4.5, -29, Palette.Wood, Enum.Material.Wood)
 	decor(folder, "Wainscot", 39.2, 0, -23, 39.5, 4.5, -11, Palette.Wood, Enum.Material.Wood)
+end
+
+-- The two lifts from the hall: steel portals like the shift lift's (ShiftWorld), a brass
+-- threshold, a call button beside each, and a picture light over each records board above them
+-- (HubRecords keeps the boards: x 39.3, y 12.6-20.6, centred on z -30.5, -13.8 and 6.5).
+local function liftLanding(folder: Folder)
+	local steel, brass = Palette.Steel, Palette.Brass
+	local M = Enum.Material
+	for _, door in { { -37.5, -33.5, -32.6 }, { -29, -23, -30.4 } } do
+		local a, b, call = door[1], door[2], door[3]
+		decor(folder, "LiftPortal", 39.15, 0, a - 0.6, 40.7, 9.6, a + 0.15, steel, M.Metal)
+		decor(folder, "LiftPortal", 39.15, 0, b - 0.15, 40.7, 9.6, b + 0.6, steel, M.Metal)
+		decor(folder, "LiftPortal", 39.15, 8.85, a + 0.15, 40.7, 9.5, b - 0.15, steel, M.Metal)
+		decor(folder, "LiftThreshold", 39.3, 0, a + 0.15, 40.6, 0.09, b - 0.15, brass, M.Metal)
+		decor(
+			folder,
+			"LiftCallPlate",
+			39.05,
+			3.6,
+			call - 0.4,
+			39.5,
+			5.2,
+			call + 0.4,
+			steel,
+			M.Metal
+		)
+		local button = decor(
+			folder,
+			"LiftCallButton",
+			38.95,
+			4.2,
+			call - 0.2,
+			39.05,
+			4.6,
+			call + 0.2,
+			Palette.Rec,
+			M.Neon
+		)
+		button.CastShadow = false
+	end
+	for _, z in { -30.5, -13.8, 6.5 } do
+		decor(folder, "BoardLightArm", 38.7, 21.1, z - 3.05, 39.5, 21.25, z - 2.95, brass, M.Metal)
+		decor(folder, "BoardLightArm", 38.7, 21.1, z + 2.95, 39.5, 21.25, z + 3.05, brass, M.Metal)
+		decor(folder, "BoardLight", 38.3, 21, z - 6.5, 38.8, 21.4, z + 6.5, brass, M.Metal)
+		local strip = decor(
+			folder,
+			"BoardLightGlow",
+			38.35,
+			20.94,
+			z - 6.3,
+			38.75,
+			21,
+			z + 6.3,
+			Palette.Bulb,
+			M.Neon
+		)
+		strip.CastShadow = false
+	end
+end
+
+-- What makes the hall read as a built room and not a box: a cornice where the walls meet the
+-- ceiling, and beams across the ceiling between the light panels (x -26, 0, 26 by z -28, -6,
+-- 12). Beams one way sit lower than the other, so where they cross no faces share a plane.
+local function hallArchitecture(folder: Folder)
+	local trim = Palette.WoodDark
+	local M = Enum.Material
+	-- A thin moulding under a deep one, stacked rather than overlapping.
+	for _, layer in { { 25.3, 25.7, 0.35 }, { 25.7, 26, 0.7 } } do
+		local y0, y1, d = layer[1], layer[2], layer[3]
+		decor(folder, "Cornice", -39.5, y0, -39.5, 39.5, y1, -39.5 + d, trim, M.Wood)
+		decor(folder, "Cornice", -39.5, y0, 19.5 - d, 39.5, y1, 19.5, trim, M.Wood)
+		decor(folder, "Cornice", -39.5, y0, -39.5 + d, -39.5 + d, y1, 19.5 - d, trim, M.Wood)
+		decor(folder, "Cornice", 39.5 - d, y0, -39.5 + d, 39.5, y1, 19.5 - d, trim, M.Wood)
+	end
+	for _, x in { -13, 13 } do
+		decor(
+			folder,
+			"CeilingBeam",
+			x - 0.7,
+			24.6,
+			-39.5 + 0.7,
+			x + 0.7,
+			26,
+			19.5 - 0.7,
+			trim,
+			M.Wood
+		)
+	end
+	for _, z in { -17, 3 } do
+		decor(
+			folder,
+			"CeilingBeam",
+			-39.5 + 0.7,
+			24.9,
+			z - 0.6,
+			39.5 - 0.7,
+			26,
+			z + 0.6,
+			trim,
+			M.Wood
+		)
+	end
 end
 
 -- Bills from the places the expeditions go, pinned up in the hall. The spots avoid the sconces
@@ -611,6 +713,8 @@ function HubDressing.start()
 	waitingCorner(folder)
 	hallPosters(folder)
 	corridorDressing(folder)
+	liftLanding(folder)
+	hallArchitecture(folder)
 	-- Hall sconces on the wainscot (west face points east, east face points west).
 	for _, z in { -30, -20, 8 } do
 		sconce(folder, -39.2, z, 1)

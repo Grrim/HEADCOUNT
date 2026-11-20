@@ -73,11 +73,12 @@ function Build.wallX(
 	openings: { { number } },
 	color: Color3?,
 	material: Enum.Material?
-)
+): { Part }
 	local tint = color or Palette.Wall
 	local minZ, maxZ = z - THICKNESS, z + THICKNESS
+	local parts = {}
 	for _, rect in WallSpans.solve(minX, maxX, bottom, top, openings) do
-		Build.box(
+		local part = Build.box(
 			parent,
 			name,
 			rect.fromA,
@@ -89,7 +90,9 @@ function Build.wallX(
 			tint,
 			material
 		)
+		table.insert(parts, part)
 	end
+	return parts
 end
 
 -- A wall in the ZY plane at a fixed x, with openings { fromZ, toZ, bottom, top }.
@@ -104,11 +107,12 @@ function Build.wallZ(
 	openings: { { number } },
 	color: Color3?,
 	material: Enum.Material?
-)
+): { Part }
 	local tint = color or Palette.Wall
 	local minX, maxX = x - THICKNESS, x + THICKNESS
+	local parts = {}
 	for _, rect in WallSpans.solve(minZ, maxZ, bottom, top, openings) do
-		Build.box(
+		local part = Build.box(
 			parent,
 			name,
 			minX,
@@ -120,7 +124,61 @@ function Build.wallZ(
 			tint,
 			material
 		)
+		table.insert(parts, part)
 	end
+	return parts
+end
+
+-- Dressing that is only looked at: nothing walks into it, no lens or ray stops at it, and it
+-- casts no shadow. Most of what makes a room look lived in should be this.
+function Build.decor(
+	parent: Instance,
+	name: string,
+	minX: number,
+	minY: number,
+	minZ: number,
+	maxX: number,
+	maxY: number,
+	maxZ: number,
+	color: Color3,
+	material: Enum.Material?
+): Part
+	local part = Build.box(parent, name, minX, minY, minZ, maxX, maxY, maxZ, color, material)
+	part.CanCollide = false
+	part.CanQuery = false
+	part.CanTouch = false
+	part.CastShadow = false
+	return part
+end
+
+-- A part placed by its CFrame (for round or turned pieces), as decor.
+function Build.piece(
+	parent: Instance,
+	name: string,
+	cf: CFrame,
+	size: Vector3,
+	color: Color3,
+	material: Enum.Material?,
+	shape: Enum.PartType?
+): Part
+	local part = Instance.new("Part")
+	part.Name = name
+	part.Anchored = true
+	part.CanCollide = false
+	part.CanQuery = false
+	part.CanTouch = false
+	part.CastShadow = false
+	part.TopSurface = Enum.SurfaceType.Smooth
+	part.BottomSurface = Enum.SurfaceType.Smooth
+	if shape then
+		part.Shape = shape
+	end
+	part.Size = size
+	part.CFrame = cf
+	part.Color = color
+	part.Material = material or Enum.Material.SmoothPlastic
+	part.Parent = parent
+	return part
 end
 
 -- A ceiling panel that actually lights the room below it.

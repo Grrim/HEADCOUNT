@@ -58,12 +58,21 @@ local function build()
 			CFrame.new(side * 0.95, leg + torso - arm / 2, -0.15) * CFrame.Angles(math.rad(6), 0, 0),
 			SUIT
 		)
+		-- An usher's white gloves, too long in the fingers.
 		piece(
-			Vector3.new(0.3, 0.6, 0.18),
-			CFrame.new(side * 0.95, leg + torso - arm - 0.2, -0.3),
-			Palette.Skin
+			Vector3.new(0.3, 0.75, 0.2),
+			CFrame.new(side * 0.95, leg + torso - arm - 0.25, -0.3),
+			Palette.Paper
 		)
+		piece(Vector3.new(0.3, 0.2, 0.8), CFrame.new(side * 0.35, 0.1, -0.15), Palette.Ink)
 	end
+	-- A shirt front and a bow tie, like the Usher's.
+	piece(
+		Vector3.new(0.5, torso * 0.45, 0.05),
+		CFrame.new(0, leg + torso * 0.75, -0.37),
+		Palette.Paper
+	)
+	piece(Vector3.new(0.5, 0.2, 0.08), CFrame.new(0, leg + torso - 0.15, -0.4), Palette.Ink)
 	-- A long neck and a small head, with the black bar every one of them wears over the eyes.
 	local neck = HEIGHT * 0.12
 	piece(Vector3.new(0.35, neck, 0.35), CFrame.new(0, leg + torso + neck / 2, 0), Palette.Skin)

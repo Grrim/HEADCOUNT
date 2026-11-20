@@ -67,7 +67,8 @@ function TapeView.play(screen: Frame, tape: any): (() -> ())?
 	)
 	local world = Instance.new("WorldModel")
 	world.Parent = viewport
-	FloorBuild.build(floor, tape.seed).Parent = world
+	-- A tape is footage: what only a lens shows is on it.
+	FloorBuild.build(floor, tape.seed, true).Parent = world
 	local watchers: { { model: Model, base: CFrame } } = {}
 	for _, spot in floor.spots do
 		local model, base =

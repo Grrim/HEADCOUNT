@@ -12,6 +12,17 @@ Kooperacyjny horror psychologiczny na Roblox w fazie Vertical Slice (Misja 001).
 - **Publikacja na Roblox:** nic nie zostało opublikowane. `Config/Places` ma identyfikatory 0, więc teleport między miejscami nie może jeszcze działać. Publikacja wymaga wyraźnej zgody właściciela.
 - **Grywalność:** gry nie przeszedł jeszcze żaden człowiek.
 
+## Wykonane 2026-11-20 (oprawa graficzna zmiany i lobby, gałąź `claude/visuals-c524cd`)
+
+Szczegóły i lista do sprawdzenia w Studio: `docs/11_PROTOTYP.md`, sekcja „Oprawa graficzna zmiany i lobby”.
+
+- Każda głębokość ma własny wygląd (`World/FloorLooks`): dom kultury w dzień, ten sam budynek wieczorem, magazyny taśm, piętro z meblami na suficie i fałszywe lobby. Od głębokości zależą też mgła i korekcja koloru. Ściany, podłogi i lampy pokoi buduje `World/FloorBuild`, a meble `World/FloorDress` według zasad z `Core/RoomLayout`: krzyż przejść i miejsca anomalii zostają wolne.
+- Pokoje specjalne z `FloorGen` (audytorium, zebranie, druga winda) są losowane na samym końcu, więc reszta piętra się nie zmienia. To, co widać tylko w kamerze, leży w folderze `LensOnly`. Na żywym piętrze pokazuje go `Atmosphere`, a w taśmie jest widoczny zawsze.
+- Winda zmiany i obie windy lobby mają wnętrze Biura. Lobby dostało też portale wind, gzyms i belki.
+- Anomalie: ubrana stojąca postać i Patrzący bez paska na oczach. Statysta w kamerze ma rękawiczki i muszkę.
+- `lune run audit_map shift` sprawdza migotanie na piętrach. W lobby nie ma już żadnego miejsca, które migocze.
+- Bramki zielone: 146 testów (7 nowych w `tests/FloorLook.spec.luau`). **Nic z tego nie było uruchomione w Studio.**
+
 ## Wykonane 2026-11-20 (Etap 1, alfa zmiany, w kodzie)
 
 Gałąź `prototype-shift`. Kod Etapu 1 z `docs/09_GDD_V2.md` §12 bez połączenia z lobby. Szczegóły, sterowanie i lista do testu: `docs/11_PROTOTYP.md`.
@@ -114,6 +125,7 @@ Brak gita oznacza brak pełnego diffu. Wcześniejsze etapy tego samego dnia zmie
 - **Materiały:** `Surfaces.apply` przydziela je według koloru z palety, więc wymiana nie wymaga zmian w kodzie poziomów. Beton w piwnicy zostaje bez zmian.
 - **Kalibracja widowni:** `Props.sitter` ma `SCALE` 2.4 i `LIFT` 0.2, krzesło ma skalę 1.5 i siedzisko na wysokości 1.65.
 - **Ukryte drzwi:** część `StageBack` w otworach drzwi archiwum to celowa zaślepka z mechaniki kadru, a nie błąd.
+- **Wygląd piętra zmiany** zależy tylko od ziarna i głębokości, bo taśma odbudowuje piętro w ViewportFrame. `World/FloorBuild` losuje wyłącznie z własnego `Random` piętra. Ozdoby to `Build.decor`: nie zatrzymują promieni kamery ani gracza. Meble mają po jednym niewidocznym bloku kolizji. Nic nie może zależeć od świateł, bo ViewportFrame ich nie ma.
 - **Lada w lobby:** została brylą z fornirem. Wygenerowany model wyglądał gorzej i został usunięty.
 - **Generator assetów:** `assets.py` leży w scratchpadzie poprzedniej sesji, poza projektem, i może zniknąć. Źródłem prawdy są pliki w `src/shared/Models` i `src/materials`. Nowy model można dodać ręcznie według `docs/06_ASSETS.md`.
 
