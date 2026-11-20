@@ -4,6 +4,11 @@
 --
 -- Every ride stages one harmless omen (docs/09_GDD_V2.md §2.8): the light stutters, something
 -- walks across the roof of the cabin, or the indicator shows a floor that does not exist.
+--
+-- On the floors themselves: lamps tagged "Flicker" (World/FloorBuild) stutter now and then, and
+-- what a special room keeps for the lens ("LensOnly", World/SpecialRooms: the full house in the
+-- auditorium, the meeting in session) shows only through the lens, on a tape, or cut out of frame.
+local CollectionService = game:GetService("CollectionService")
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -81,6 +86,62 @@ local function wrongFloor()
 end
 
 local OMENS = { flicker, stepsOnRoof, wrongFloor }
+
+-- A tagged lamp on the floor: its light and its glowing parts go out and come back, in bursts.
+local function stutter(holder: Instance)
+	task.spawn(function()
+		local light = holder:FindFirstChildWhichIsA("Light", true)
+		local glows = {}
+		for _, item in holder:GetDescendants() do
+			if item:IsA("BasePart") and item.Material == Enum.Material.Neon then
+				table.insert(glows, item)
+			end
+		end
+		while holder.Parent do
+			task.wait(random:NextNumber(2, 9))
+			for _ = 1, random:NextInteger(2, 6) do
+				if not holder.Parent then
+					return
+				end
+				if light then
+					light.Enabled = false
+				end
+				for _, glow in glows do
+					glow.Material = Enum.Material.SmoothPlastic
+				end
+				task.wait(random:NextNumber(0.04, 0.18))
+				if light then
+					light.Enabled = true
+				end
+				for _, glow in glows do
+					glow.Material = Enum.Material.Neon
+				end
+				task.wait(random:NextNumber(0.05, 0.35))
+			end
+		end
+	end)
+end
+
+-- What only the lens shows, shown or hidden as a whole. Parts keep their own transparency in an
+-- attribute; hidden, they are all fully transparent.
+local lensLayers: { [Instance]: boolean } = {}
+
+local function showLayer(layer: Instance, show: boolean)
+	if lensLayers[layer] == show then
+		return
+	end
+	lensLayers[layer] = show
+	for _, part in layer:GetDescendants() do
+		if part:IsA("BasePart") then
+			local own = part:GetAttribute("LensTransparency")
+			part.Transparency = if show then (if typeof(own) == "number" then own else 0) else 1
+		end
+	end
+end
+
+local function lensSees(): boolean
+	return LensView.raised or controllers.Audience.offFrame or controllers.ShiftPlayback.active()
+end
 
 local function startRide(seconds: number)
 	riding = true
@@ -171,6 +232,31 @@ function Atmosphere.start()
 		applyCut(player:GetAttribute("OffFrame") == true)
 	end)
 	applyCut(player:GetAttribute("OffFrame") == true)
+
+	for _, holder in CollectionService:GetTagged("Flicker") do
+		stutter(holder)
+	end
+	CollectionService:GetInstanceAddedSignal("Flicker"):Connect(stutter)
+	local function addLayer(layer: Instance)
+		lensLayers[layer] = true
+		showLayer(layer, false)
+		layer.Destroying:Connect(function()
+			lensLayers[layer] = nil
+		end)
+	end
+	for _, layer in CollectionService:GetTagged("LensOnly") do
+		-- Its parts may still be arriving; let them land first.
+		task.defer(addLayer, layer)
+	end
+	CollectionService:GetInstanceAddedSignal("LensOnly"):Connect(function(layer)
+		task.defer(addLayer, layer)
+	end)
+	RunService.RenderStepped:Connect(function()
+		local show = lensSees()
+		for layer in lensLayers do
+			showLayer(layer, show)
+		end
+	end)
 
 	-- The cabin shudders while it moves.
 	RunService.RenderStepped:Connect(function()

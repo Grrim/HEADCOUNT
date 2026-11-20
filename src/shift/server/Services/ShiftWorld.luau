@@ -176,17 +176,24 @@ function ShiftWorld.buildFloor(floor: FloorGen.Floor, seed: number)
 	ShiftWorld.applyDepth(floor.depth)
 end
 
--- The air and grade of a depth: each floor down is darker and stranger.
+-- The air and grade of a depth (World/FloorLooks): each floor down is darker and stranger.
 function ShiftWorld.applyDepth(depth: number)
 	local look = lookFor(depth)
 	Lighting.Ambient = look.ambient
+	Lighting.OutdoorAmbient = look.outdoor
+	Lighting.ExposureCompensation = look.exposure
 	local atmosphere = Lighting:FindFirstChildOfClass("Atmosphere")
 	if atmosphere then
 		atmosphere.Density = look.density
+		atmosphere.Haze = look.haze
+		atmosphere.Color = look.air
+		atmosphere.Decay = look.decay
 	end
 	local grade = Lighting:FindFirstChild("WorldGrade")
 	if grade and grade:IsA("ColorCorrectionEffect") then
 		grade.TintColor = look.tint
+		grade.Saturation = look.saturation
+		grade.Contrast = look.contrast
 	end
 end
 
