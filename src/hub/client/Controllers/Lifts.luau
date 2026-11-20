@@ -1,13 +1,15 @@
 --!strict
 -- The signs over the two lifts, in this player's language: the solo lift shows your deepest
--- return from the shift, the crew lift who is aboard and when it leaves. Above them, the records
--- board's headings, and this player's own line lit up if they made the list. The servers only set
+-- return from the shift, the crew lift who is aboard and when it leaves. Above them, the headings
+-- of the all-time and weekly records boards (with the time left until the weekly one starts
+-- over), and this player's own line lit up if they made a list. The servers only set
 -- numbers and names (HubLifts, HubRecords); the words are written here.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
 local Palette = require(ReplicatedStorage.Shared.Config.Palette)
+local Records = require(ReplicatedStorage.Shared.Core.Records)
 local Strings = require(ReplicatedStorage.Shared.Strings)
 
 local Lifts = {}
@@ -59,15 +61,21 @@ local function renderRecords(board: Instance)
 		return if found and found:IsA("TextLabel") then found else nil
 	end
 	local title, columns, note = text("RecordsTitle"), text("RecordsColumns"), text("RecordsNote")
+	local weekly = board:GetAttribute("Kind") == "week"
 	if title then
-		title.Text = Strings.get("records_title")
+		title.Text = if weekly
+			then Strings.get("records_week_title", Records.untilReset(os.time()))
+			else Strings.get("records_title")
 	end
 	if columns then
-		columns.Text = Strings.get("records_columns")
+		columns.Text = Strings.get(if weekly then "records_week_columns" else "records_columns")
 	end
 	local state = board:GetAttribute("State")
 	if note then
 		local key = if typeof(state) == "string" then NOTES[state] else nil
+		if weekly and state == "empty" then
+			key = "records_week_empty"
+		end
 		note.Text = if key then Strings.get(key) else ""
 	end
 	for _, row in gui:GetChildren() do
@@ -98,12 +106,14 @@ function Lifts.start()
 			renderSolo(solo)
 		end)
 	end
-	task.spawn(function()
-		local records = map:WaitForChild("RecordsBoard", 60)
-		if records then
-			watchRecords(records)
-		end
-	end)
+	for _, name in { "RecordsBoard", "WeeklyRecordsBoard" } do
+		task.spawn(function()
+			local records = map:WaitForChild(name, 60)
+			if records then
+				watchRecords(records)
+			end
+		end)
+	end
 	if crew then
 		renderCrew(crew)
 		crew.AttributeChanged:Connect(function()

@@ -41,4 +41,50 @@ return {
 		assert(data.earned == 150 and data.frames == 50)
 		assert(Wallet.migrate({ data = { earned = 77 } }).data.earned == 77)
 	end,
+
+	["weeks start on Monday 00:00 UTC"] = function()
+		-- 2026-11-16 was a Monday; 2026-11-22 a Sunday.
+		local monday = 1_794_787_200
+		assert(Records.week(monday) == Records.week(monday + 6 * 86400 + 86399))
+		assert(Records.week(monday) == Records.week(monday - 1) + 1)
+		assert(Records.weekEnds(Records.week(monday)) == monday + 7 * 86400)
+		assert(
+			Records.weeklyStore(Records.week(monday))
+				~= Records.weeklyStore(Records.week(monday - 1))
+		)
+		assert(Records.untilReset(monday) == "7d 0h")
+		assert(Records.untilReset(monday + 7 * 86400 - 3700) == "1h 1m")
+		assert(Records.untilReset(monday + 7 * 86400 - 30) == "1m")
+	end,
+
+	["a new week starts the weekly standing from nothing"] = function()
+		local data = Wallet.default()
+		Wallet.recordShift(data, 100, 4, true, 10)
+		Wallet.recordShift(data, 50, 2, true, 10)
+		assert(data.weekDeepest == 4 and data.weekEarned == 150)
+		Wallet.recordShift(data, 20, 1, true, 11)
+		assert(data.week == 11 and data.weekDeepest == 1 and data.weekEarned == 20)
+		assert(data.deepest == 4 and data.earned == 170, "a new week touched the all-time standing")
+		Wallet.recordShift(data, 5, 5, false, 11)
+		assert(data.weekDeepest == 1, "a shift that never came back up set a weekly depth")
+	end,
+
+	["frames earned before the saved wallet arrived are added, this week's too"] = function()
+		local saved = Wallet.default()
+		Wallet.recordShift(saved, 300, 3, true, 9)
+		local early = Wallet.default()
+		Wallet.recordShift(early, 40, 2, true, 10)
+		local merged = Wallet.merge(saved, early)
+		assert(merged.frames == 340 and merged.earned == 340 and merged.deepest == 3)
+		assert(merged.week == 10 and merged.weekEarned == 40 and merged.weekDeepest == 2)
+		local same = Wallet.default()
+		Wallet.recordShift(same, 10, 4, true, 10)
+		Wallet.merge(merged, same)
+		assert(merged.weekEarned == 50 and merged.weekDeepest == 4)
+		local untouched = Wallet.merge(merged, Wallet.default())
+		assert(
+			untouched.week == 10 and untouched.weekEarned == 50,
+			"an empty early wallet reset the week"
+		)
+	end,
 }

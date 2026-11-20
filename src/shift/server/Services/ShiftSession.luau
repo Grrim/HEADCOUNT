@@ -17,6 +17,7 @@ local FloorGen = require(ReplicatedStorage.Shared.Core.FloorGen)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Palette = require(ReplicatedStorage.Shared.Config.Palette)
 local RateLimit = require(ReplicatedStorage.Shared.Core.RateLimit)
+local Records = require(ReplicatedStorage.Shared.Core.Records)
 local Shift = require(ReplicatedStorage.Shared.Core.Shift)
 local Upgrades = require(ReplicatedStorage.Shared.Core.Upgrades)
 local Wallet = require(ReplicatedStorage.Shared.Core.Wallet)
@@ -516,7 +517,13 @@ local function payEveryone()
 	local payout = Shift.payout(shift)
 	local returned = shift.result == "returned"
 	for _, player in Players:GetPlayers() do
-		Wallet.recordShift(services.ShiftBank.data(player), payout, shift.deepest, returned)
+		Wallet.recordShift(
+			services.ShiftBank.data(player),
+			payout,
+			shift.deepest,
+			returned,
+			Records.week(os.time())
+		)
 		services.ShiftBank.changed(player)
 		services.ShiftRecords.submit(player)
 		track(player, "ShiftEnd", math.floor(os.clock() - shiftStarted), {

@@ -87,16 +87,7 @@ local function entryOf(player: Player): Entry
 end
 
 -- Adds what was earned on the fresh wallet before the record arrived onto the record.
-local function merge(record: Wallet.Data, early: Wallet.Data): Wallet.Data
-	record.frames += early.frames
-	record.earned += early.earned
-	record.shifts += early.shifts
-	record.deepest = math.max(record.deepest, early.deepest)
-	for kind, stars in early.archive do
-		record.archive[kind] = math.max(record.archive[kind] or 0, stars)
-	end
-	return record
-end
+local merge = Wallet.merge
 
 local function snapshot(data: Wallet.Data): Wallet.Data
 	local copy = table.clone(data)

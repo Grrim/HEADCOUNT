@@ -25,6 +25,10 @@ export type Data = {
 	deepest: number,
 	shifts: number,
 	archive: { [string]: number },
+	-- This week's standing for the weekly board (Core/Records.week), reset when a new week starts.
+	week: number,
+	weekDeepest: number,
+	weekEarned: number,
 }
 
 export type Lock = { id: string, at: number }
@@ -39,6 +43,9 @@ function Wallet.default(): Data
 		deepest = 0,
 		shifts = 0,
 		archive = {},
+		week = 0,
+		weekDeepest = 0,
+		weekEarned = 0,
 	}
 end
 
@@ -61,6 +68,9 @@ function Wallet.migrate(raw: any): Record
 			data.earned = math.max(count(stored.earned, 0, 1e12) or 0, data.frames)
 			data.deepest = count(stored.deepest, 0, 100) or 0
 			data.shifts = count(stored.shifts, 0, 1e9) or 0
+			data.week = count(stored.week, 0, 1e7) or 0
+			data.weekDeepest = count(stored.weekDeepest, 0, 100) or 0
+			data.weekEarned = count(stored.weekEarned, 0, 1e12) or 0
 			if typeof(stored.levels) == "table" then
 				for key, value in stored.levels do
 					local level = count(value, 1, 20)
@@ -124,7 +134,23 @@ function Wallet.release(raw: any, data: Data, session: string, now: number): Rec
 end
 
 -- After a shift: the pay, and the depth only when the team came back up in the lift.
-function Wallet.recordShift(data: Data, pay: number, deepest: number, returned: boolean)
+-- A new week wipes last week's standing.
+function Wallet.rollWeek(data: Data, week: number)
+	if data.week ~= week then
+		data.week = week
+		data.weekDeepest = 0
+		data.weekEarned = 0
+	end
+end
+
+-- `week` (Core/Records.week) also counts the shift towards that week's board.
+function Wallet.recordShift(
+	data: Data,
+	pay: number,
+	deepest: number,
+	returned: boolean,
+	week: number?
+)
 	local paid = math.max(0, math.floor(pay))
 	data.frames += paid
 	data.earned += paid
@@ -132,6 +158,34 @@ function Wallet.recordShift(data: Data, pay: number, deepest: number, returned: 
 	if returned then
 		data.deepest = math.max(data.deepest, deepest)
 	end
+	if week then
+		Wallet.rollWeek(data, week)
+		data.weekEarned += paid
+		if returned then
+			data.weekDeepest = math.max(data.weekDeepest, deepest)
+		end
+	end
+end
+
+-- What was earned on a fresh wallet before the saved one arrived, added onto the saved one.
+-- Levels are not merged: buying waits for the saved wallet.
+function Wallet.merge(record: Data, early: Data): Data
+	record.frames += early.frames
+	record.earned += early.earned
+	record.shifts += early.shifts
+	record.deepest = math.max(record.deepest, early.deepest)
+	for kind, stars in early.archive do
+		record.archive[kind] = math.max(record.archive[kind] or 0, stars)
+	end
+	if early.week > record.week then
+		record.week = early.week
+		record.weekDeepest = early.weekDeepest
+		record.weekEarned = early.weekEarned
+	elseif early.week == record.week then
+		record.weekDeepest = math.max(record.weekDeepest, early.weekDeepest)
+		record.weekEarned += early.weekEarned
+	end
+	return record
 end
 
 -- Keeps the best stars per kind of anomaly. Returns true for a new kind or a better shot.

@@ -10,6 +10,37 @@ local Records = {}
 
 Records.SPAN = 10_000_000
 Records.SHOWN = 10
+Records.STORE = "ShiftRecords_v1"
+
+-- Weekly boards: a week starts on Monday 00:00 UTC. The Unix epoch was a Thursday, so the first
+-- Monday came four days later. Each week has a store of its own and starts empty.
+Records.WEEK = 7 * 86400
+local FIRST_MONDAY = 4 * 86400
+
+function Records.week(now: number): number
+	return (math.floor(now) - FIRST_MONDAY) // Records.WEEK
+end
+
+-- When this week's board starts over (Unix time).
+function Records.weekEnds(week: number): number
+	return FIRST_MONDAY + (week + 1) * Records.WEEK
+end
+
+function Records.weeklyStore(week: number): string
+	return `ShiftRecords_w{week}`
+end
+
+-- "3d 4h", "5h 12m", "9m": how long until the weekly board starts over.
+function Records.untilReset(now: number): string
+	local left = math.max(0, Records.weekEnds(Records.week(now)) - math.floor(now))
+	local days, hours, minutes = left // 86400, (left % 86400) // 3600, (left % 3600) // 60
+	if days > 0 then
+		return `{days}d {hours}h`
+	elseif hours > 0 then
+		return `{hours}h {minutes}m`
+	end
+	return `{math.max(1, minutes)}m`
+end
 
 function Records.score(deepest: number, earned: number): number
 	local depth = math.max(0, math.floor(deepest))
