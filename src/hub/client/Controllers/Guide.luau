@@ -50,6 +50,14 @@ local function tagged(tag: string): () -> BasePart?
 	end
 end
 
+local function named(name: string): () -> BasePart?
+	return function()
+		local map = Workspace:FindFirstChild("Map")
+		local found = map and map:FindFirstChild(name)
+		return if found and found:IsA("BasePart") then found else nil
+	end
+end
+
 local function lensKey(): string
 	local device = Ui.device()
 	return if device == "touch"
@@ -74,6 +82,15 @@ local STEPS: { [string]: Step } = {
 		targetName = "guide_terminal",
 	},
 	chosen = { title = "guide_chosen", line = "guide_chosen_line" },
+	-- The quick way to a first shift (docs/09_GDD_V2.md §3): straight to the lifts.
+	lift = {
+		title = "guide_lift",
+		line = "guide_lift_line",
+		target = named("SoloLiftSign"),
+		targetName = "guide_lifts",
+	},
+	solo_in = { title = "guide_solo_in", line = "guide_solo_in_line" },
+	crew_in = { title = "guide_crew_in", line = "guide_crew_in_line" },
 }
 
 local function showChip(step: Step)

@@ -3,6 +3,7 @@
 -- the lens. Doors, sitters and the hidden room are local to this client, because each player is
 -- on their own timeline here. Nothing in this file can grant progress beyond its own intro flag.
 local CollectionService = game:GetService("CollectionService")
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
@@ -51,9 +52,43 @@ local function guide(step: string)
 	end
 end
 
--- Until the player has opened the terminal once, the guide points at it.
+-- Where the guide sends a player once the camera is theirs: to the lifts and a first shift, the
+-- quickest way into the game. Someone who went to the terminal first gets its hint instead.
+-- Inside a lift cabin the guide says what to do there; stepping out points at the lifts again.
+local onward = false
+local cabin = ""
+
 local function pointToTerminal()
-	guide(if terminalVisited then "chosen" else "go")
+	onward = true
+	if cabin == "solo" then
+		guide("solo_in")
+	elseif cabin == "crew" then
+		guide("crew_in")
+	else
+		guide(if terminalVisited then "chosen" else "lift")
+	end
+end
+
+-- Which lift cabin the player stands in, read off the cabins' floors: "solo", "crew" or "".
+-- The doorway (the first stud past the hall wall) does not count.
+local function cabinOf(map: Instance, position: Vector3): string
+	for name, floorName in { solo = "SoloLiftFloor", crew = "CrewLiftFloor" } do
+		local floor = map:FindFirstChild(floorName)
+		if floor and floor:IsA("BasePart") then
+			local half = floor.Size / 2
+			local centre = floor.Position
+			if
+				position.X > centre.X - half.X + 1
+				and position.X < centre.X + half.X
+				and position.Z > centre.Z - half.Z
+				and position.Z < centre.Z + half.Z
+				and position.Y < 12
+			then
+				return name
+			end
+		end
+	end
+	return ""
 end
 
 -- The camcorder is a holder box with its visible parts inside; taking it hides them all.
@@ -257,6 +292,20 @@ function Intro.start()
 	if not introComplete then
 		guide("take")
 	end
+	task.spawn(function()
+		while true do
+			task.wait(0.3)
+			local character = Players.LocalPlayer.Character
+			local root = character and character:FindFirstChild("HumanoidRootPart")
+			local now = if root and root:IsA("BasePart") then cabinOf(map, root.Position) else ""
+			if now ~= cabin then
+				cabin = now
+				if onward then
+					pointToTerminal()
+				end
+			end
+		end
+	end)
 	Net.get("DocsState").OnClientEvent:Connect(function(state)
 		applyMemory(state.flags)
 	end)

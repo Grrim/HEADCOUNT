@@ -421,6 +421,13 @@ local EN: { [string]: string } = {
 	records_friends_title = "YOU AND YOUR FRIENDS",
 	records_friends_columns = "ALL-TIME FLOOR AND FRAMES  ·  W: THIS WEEK'S FLOOR",
 	records_friends_empty = "None of you has come back up yet. Take a friend down in the crew lift.",
+	guide_lift = "Take the lift down to your first shift.",
+	guide_lift_line = "SOLO goes alone. CREW leaves with whoever steps in. Friends' parties and story files: the terminal.",
+	guide_lifts = "Lifts",
+	guide_solo_in = "Hold E at the red button to go down.",
+	guide_solo_in_line = "Alone: the Bureau sets your quota for one.",
+	guide_crew_in = "Stay in the cabin. It leaves with everyone in it.",
+	guide_crew_in_line = "Players from other lobbies can join. Hold E at the red button to leave now.",
 }
 
 local PL: { [string]: string } = {
@@ -767,6 +774,13 @@ local PL: { [string]: string } = {
 	records_friends_title = "TY I TWOI ZNAJOMI",
 	records_friends_columns = "PIĘTRO I KLATKI OD POCZĄTKU  ·  W: PIĘTRO W TYM TYGODNIU",
 	records_friends_empty = "Nikt z was jeszcze nie wrócił. Zabierz znajomego windą ekipy.",
+	guide_lift = "Zjedź windą na swoją pierwszą zmianę.",
+	guide_lift_line = "SOLO jedzie sam. EKIPA odjeżdża z tymi, którzy wejdą. Drużyny znajomych i teczki fabularne: terminal.",
+	guide_lifts = "Windy",
+	guide_solo_in = "Przytrzymaj E przy czerwonym przycisku, żeby zjechać.",
+	guide_solo_in_line = "Sam: Biuro ustala normę na jedną osobę.",
+	guide_crew_in = "Zostań w kabinie. Odjedzie ze wszystkimi w środku.",
+	guide_crew_in_line = "Mogą dołączyć gracze z innych lobby. Przytrzymaj E przy czerwonym przycisku, żeby jechać od razu.",
 }
 
 local function localeIsPolish(): boolean
