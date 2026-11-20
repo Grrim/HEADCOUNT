@@ -20,6 +20,19 @@ local Teleports = {}
 local REJOIN_MAP = "ActiveExpedition"
 local statusRemote: RemoteEvent
 local retries: { [Player]: number } = {}
+local gaveUpListeners: { (player: Player) -> () } = {}
+
+-- Called with each player whose teleport failed for good (after it was first accepted or not),
+-- so whoever sent them can let them try again.
+function Teleports.onGaveUp(listener: (player: Player) -> ())
+	table.insert(gaveUpListeners, listener)
+end
+
+local function gaveUp(player: Player)
+	for _, listener in gaveUpListeners do
+		task.spawn(listener, player)
+	end
+end
 
 local function rejoinMap(): MemoryStoreHashMap?
 	local ok, map = pcall(function()
@@ -66,7 +79,9 @@ local function membersOf(party: Party.Party): { Player }
 end
 
 -- Returns true once the engine accepted the teleport; false after every attempt failed.
-function Teleports.launch(party: Party.Party): boolean
+-- `serverId` sends the party to a reserved server others are heading to as well (the shared crew
+-- lift); `crewSize` is everyone on the way there, from every lobby.
+function Teleports.launch(party: Party.Party, serverId: string?, crewSize: number?): boolean
 	local members = membersOf(party)
 	local placeId = Places.MISSIONS[party.missionId]
 	if not placeId or placeId == 0 or RunService:IsStudio() then
@@ -80,18 +95,18 @@ function Teleports.launch(party: Party.Party): boolean
 	end
 	PlayerData.saveAll(8)
 
-	local serverId = HttpService:GenerateGUID(false)
+	local reserved = serverId or HttpService:GenerateGUID(false)
 	local options = Instance.new("TeleportOptions")
-	options.ReservedServerId = serverId
+	options.ReservedServerId = reserved
 	options:SetTeleportData({
 		v = 1,
 		mission = party.missionId,
 		seed = Random.new():NextInteger(1, 2 ^ 30),
 		-- The shift sets its first quota for everyone on the way, not only the first to load.
-		crew = #members,
+		crew = crewSize or #members,
 	})
 	for _, member in members do
-		task.spawn(remember, member, serverId, placeId)
+		task.spawn(remember, member, reserved, placeId)
 	end
 	for attempt = 1, Config.Party.TeleportRetries do
 		local ok, err = pcall(function()
@@ -162,6 +177,7 @@ function Teleports.start()
 		if count > Config.Party.TeleportRetries then
 			retries[player] = nil
 			statusRemote:FireClient(player, "error", "err_teleport_failed")
+			gaveUp(player)
 			return
 		end
 		task.wait(3 ^ (count - 1))
