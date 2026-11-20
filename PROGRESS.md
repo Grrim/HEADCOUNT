@@ -26,6 +26,8 @@ Gałąź `prototype-shift`. Kod Etapu 1 z `docs/09_GDD_V2.md` §12 bez połącze
 
 **Lobby i teleport (ten sam dzień):** windy SOLO i EKIPA we wschodniej ścianie hali (`HubLifts`, `Core/Crew`, `Lifts`), zmiana w katalogu terminala, powrót do lobby z zapisem i zwolnieniem blokady przed teleportem (`ShiftTravel`, `ShiftBank.release/resume`). ID miejsca zmiany (`Places.MISSIONS.SHIFT`) jest 0: trzeba opublikować `build/Shift.rbxl` jako trzecie miejsce.
 
+**Tablica rekordów (ten sam dzień):** dziesięć najgłębszych powrotów nad windami w lobby (`Core/Records`, `ShiftRecords`, `HubRecords`, OrderedDataStore `ShiftRecords_v1`), remisy rozstrzyga suma zarobionych Klatek (`Wallet.earned`).
+
 **Następny krok:** właściciel otwiera `build/Shift.rbxl` i przechodzi listę z `docs/11_PROTOTYP.md` §3, najpierw solo, potem 2 graczy w Studio. Potem decyzja, czy przed lobby i teleportem (reszta Etapu 1) testujemy alfę na ludziach.
 
 ## Wykonane 2026-11-10

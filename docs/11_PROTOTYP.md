@@ -48,9 +48,11 @@ Stan na 2026-11-20. Gałąź `prototype-shift`. Etap 0 z `09_GDD_V2.md` §12 (pr
 - Lobby czyta zapis zmiany tylko do odczytu (bez blokady), żeby pokazać rekord.
 - Przegląd tej części znalazł i poprawiono m.in.: możliwą utratę zapisu przy nieudanym teleporcie z niezapisanego portfela, podwójny start z windy SOLO, przyciski wind działające przez ściany, teleport mimo nieudanego zapisu i normę pierwszej zmiany liczoną tylko dla pierwszego gracza ekipy (teraz liczy wszystkich wysłanych z lobby).
 
+- **Tablica rekordów** wysoko na wschodniej ścianie hali, nad obiema windami: dziesięć najgłębszych powrotów wszech czasów. Przy równej głębokości wyżej jest ten, kto zarobił więcej Klatek przez wszystkie zmiany (licznik `earned` w portfelu, którego wydawanie nie zmniejsza). Twój wiersz świeci jaśniej. Serwer zmiany zapisuje wynik po każdej zmianie do OrderedDataStore `ShiftRecords_v1` (wynik tylko rośnie), a lobby czyta listę raz na minutę. Bez dostępu do API tablica mówi, że rekordy widać w opublikowanej grze.
+
 **Do zrobienia przez właściciela:** opublikować `build/Shift.rbxl` jako trzecie miejsce i wpisać jego ID do `MISSIONS.SHIFT` w `src/shared/Config/Places.luau` (README, „Publikacja”). Do tego czasu windy i terminal mówią, że teleport wymaga opublikowanej gry, a w Studio teleport nie działa wcale.
 
-**Czego jeszcze nie ma:** tablicy rekordów wszystkich graczy w lobby, wspólnej kolejki windy ekipy między serwerami lobby (ekipa składa się z graczy z tego samego serwera), skrótu do windy w przewodniku dla nowych, statywu i innych ulepszeń poza baterią i kasetami, taśmy zmiany (klipu z najlepszym momentem), zadań dziennych, dźwięków i grafiki docelowej.
+**Czego jeszcze nie ma:** rekordów tygodniowych i list znajomych, wspólnej kolejki windy ekipy między serwerami lobby (ekipa składa się z graczy z tego samego serwera), skrótu do windy w przewodniku dla nowych, statywu i innych ulepszeń poza baterią i kasetami, taśmy zmiany (klipu z najlepszym momentem), zadań dziennych, dźwięków i grafiki docelowej.
 
 ## 2. Jak uruchomić (bez instalowania czegokolwiek)
 

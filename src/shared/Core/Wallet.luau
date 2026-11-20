@@ -19,6 +19,8 @@ Wallet.KINDS = { "sitter", "standing", "watcher", "extra" }
 export type Data = {
 	v: number,
 	frames: number,
+	-- Every Frame ever paid, spent or not: what the lobby's records board ranks ties by.
+	earned: number,
 	levels: { [string]: number },
 	deepest: number,
 	shifts: number,
@@ -29,7 +31,15 @@ export type Lock = { id: string, at: number }
 export type Record = { data: Data, lock: Lock? }
 
 function Wallet.default(): Data
-	return { v = Wallet.VERSION, frames = 0, levels = {}, deepest = 0, shifts = 0, archive = {} }
+	return {
+		v = Wallet.VERSION,
+		frames = 0,
+		earned = 0,
+		levels = {},
+		deepest = 0,
+		shifts = 0,
+		archive = {},
+	}
 end
 
 local function count(value: any, low: number, high: number): number?
@@ -47,6 +57,8 @@ function Wallet.migrate(raw: any): Record
 		local stored = raw.data
 		if typeof(stored) == "table" then
 			data.frames = count(stored.frames, 0, 1e9) or 0
+			-- Records saved before `earned` existed: at least what they still hold was earned.
+			data.earned = math.max(count(stored.earned, 0, 1e12) or 0, data.frames)
 			data.deepest = count(stored.deepest, 0, 100) or 0
 			data.shifts = count(stored.shifts, 0, 1e9) or 0
 			if typeof(stored.levels) == "table" then
@@ -113,7 +125,9 @@ end
 
 -- After a shift: the pay, and the depth only when the team came back up in the lift.
 function Wallet.recordShift(data: Data, pay: number, deepest: number, returned: boolean)
-	data.frames += math.max(0, math.floor(pay))
+	local paid = math.max(0, math.floor(pay))
+	data.frames += paid
+	data.earned += paid
 	data.shifts += 1
 	if returned then
 		data.deepest = math.max(data.deepest, deepest)

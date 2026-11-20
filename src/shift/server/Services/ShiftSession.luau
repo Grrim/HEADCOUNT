@@ -518,6 +518,7 @@ local function payEveryone()
 	for _, player in Players:GetPlayers() do
 		Wallet.recordShift(services.ShiftBank.data(player), payout, shift.deepest, returned)
 		services.ShiftBank.changed(player)
+		services.ShiftRecords.submit(player)
 		track(player, "ShiftEnd", math.floor(os.clock() - shiftStarted), {
 			`{shift.result}`,
 			`depth {shift.deepest}`,

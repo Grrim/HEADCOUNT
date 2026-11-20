@@ -410,6 +410,11 @@ local EN: { [string]: string } = {
 	lift_go_alone = "Go down alone",
 	lift_go_now = "Leave now",
 	err_in_party = "You're in an expedition party. Leave it at the terminal first.",
+	records_title = "DEEPEST RETURNS",
+	records_columns = "WHO  ·  FLOOR CAME BACK FROM  ·  FRAMES EARNED",
+	records_loading = "Reading the records...",
+	records_empty = "Nobody has come back up yet. Be the first.",
+	records_offline = "The records show in the published game.",
 }
 
 local PL: { [string]: string } = {
@@ -745,6 +750,11 @@ local PL: { [string]: string } = {
 	lift_go_alone = "Zjedź sam",
 	lift_go_now = "Jedź teraz",
 	err_in_party = "Jesteś w drużynie ekspedycji. Najpierw wyjdź z niej przy terminalu.",
+	records_title = "NAJGŁĘBSZE POWROTY",
+	records_columns = "KTO  ·  Z JAKIEGO PIĘTRA WRÓCIŁ  ·  ZAROBIONE KLATKI",
+	records_loading = "Czytanie rekordów...",
+	records_empty = "Nikt jeszcze nie wrócił na górę. Bądź pierwszy.",
+	records_offline = "Rekordy widać w opublikowanej grze.",
 }
 
 local function localeIsPolish(): boolean
