@@ -5,6 +5,11 @@
 -- The tripod (docs/09_GDD_V2.md §5) starts at nothing: its first level is bought. Set down, it
 -- holds whatever it frames for that many seconds, once a floor. It is the solo player's way to
 -- keep the Registrar still with nobody else to film him, so alone it costs less (§7, §13).
+--
+-- Every other piece of kit pays for itself in some way, so none of them is simply better:
+--   lens    zoom: shots rate as if taken closer, but the frame (what the lens holds still) narrows
+--   night   night vision through the lens on dark floors, and the battery drains faster for it
+--   torch   a longer, brighter beam, which the Usher also notices from farther away
 local Upgrades = {}
 
 export type Upgrade = {
@@ -25,7 +30,25 @@ Upgrades.LIST = {
 		costs = { 120, 220, 380 },
 		soloCosts = { 60, 140, 260 },
 	},
+	{ id = "lens", name = "Lens", values = { 1, 1.25, 1.5, 1.8 }, costs = { 100, 200, 340 } },
+	{ id = "night", name = "Night vision", values = { 0, 1, 2, 3 }, costs = { 90, 180, 300 } },
+	{ id = "torch", name = "Torch", values = { 40, 55, 70, 85 }, costs = { 50, 120, 220 } },
 } :: { Upgrade }
+
+-- How far the Usher notices a lit torch of this range (16 studs for the standard torch).
+function Upgrades.torchNotice(range: number): number
+	return 16 + math.max(0, range - 40) / 5
+end
+
+-- Battery drained per second of raised lens with this much night vision.
+function Upgrades.drain(night: number): number
+	return 1 + 0.1 * math.max(0, night)
+end
+
+-- The lens's framing half-angle at this zoom: a longer lens holds a narrower cone.
+function Upgrades.halfAngle(base: number, zoom: number): number
+	return base / math.max(1, zoom)
+end
 
 local function find(id: string): Upgrade?
 	for _, upgrade in Upgrades.LIST do

@@ -56,6 +56,23 @@ local CUT_LINES = {
 	usher = "THE USHER SAW YOUR LIGHT",
 }
 
+-- What a level of each upgrade means, in the words a player would use.
+local function describe(upgrade: { [string]: any }): string
+	local value = upgrade.value
+	if upgrade.id == "tripod" then
+		return if value > 0 then `{value} s` else "none"
+	elseif upgrade.id == "lens" then
+		return `x{value} zoom`
+	elseif upgrade.id == "night" then
+		return if value > 0 then `level {value}` else "none"
+	elseif upgrade.id == "torch" then
+		return `{value} studs`
+	elseif upgrade.id == "battery" then
+		return `{value} s`
+	end
+	return tostring(value)
+end
+
 local function stars(count: number): string
 	return string.rep("★", count) .. string.rep("☆", 5 - count)
 end
@@ -212,9 +229,7 @@ local function showResults(data: { [string]: any })
 			Size = UDim2.new(0.62, 0, 1, 0),
 			TextSize = 17,
 			TextYAlignment = Enum.TextYAlignment.Center,
-			Text = `{upgrade.name}  {if upgrade.id == "tripod"
-				then (if upgrade.value > 0 then `{upgrade.value} s` else "none")
-				else upgrade.value}  (level {upgrade.level}/{upgrade.maxLevel})`,
+			Text = `{upgrade.name}  {describe(upgrade)}  (level {upgrade.level}/{upgrade.maxLevel})`,
 		}, row)
 		if upgrade.cost then
 			local affordable = (data.money or 0) >= upgrade.cost

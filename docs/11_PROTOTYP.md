@@ -63,7 +63,13 @@ Stan na 2026-11-20. Gałąź `prototype-shift`. Etap 0 z `09_GDD_V2.md` §12 (pr
 
 - **Statyw (G, na kontrolerze D-pad w dół, na telefonie przycisk TRIPOD):** trzecie ulepszenie. Na starcie go nie ma; poziomy dają 12, 20 i 30 s filmowania. Raz na piętro (nowy w windzie) stawiasz go tam, gdzie stoisz, wycelowany tam, gdzie patrzysz. Dopóki ma baterię, wszystko, co ma w kadrze, jest trzymane jak podniesioną kamerą: Kadrowy stoi i nie blokuje drzwi windy, Statysta stoi. Statyw nic nie nagrywa, nie płaci, nikogo nie ratuje i nie ściera Statysty; kupuje czas. Nie świeci, więc Bileter go nie widzi. Gdy bateria się skończy, lampka gaśnie, a właściciel dostaje komunikat. Gracz sam na serwerze płaci za statyw mniej (60 / 140 / 260 zamiast 120 / 220 / 380), zgodnie z §7 i §13 GDD.
 
-**Czego jeszcze nie ma:** ulepszeń poza baterią, kasetami i statywem (obiektyw, noktowizja, latarka), taśmy zmiany (klipu z najlepszym momentem), zadań dziennych, dźwięków i grafiki docelowej.
+- **Obiektyw, noktowizja i latarka:** trzy kolejne ulepszenia. Każde coś kosztuje w grze, więc żadne nie jest po prostu lepsze:
+  - **Obiektyw** (x1,25 / x1,5 / x1,8): ujęcia oceniane są tak, jakby kamera stała tyle razy bliżej (więcej gwiazdek z bezpiecznej odległości), ale kadr się zwęża. Węższe pole widzenia ma też serwer: stożek kadrowania kurczy się w tej samej proporcji, więc trudniej utrzymać w kadrze Kadrowego czy kolegę do ratunku. W Misji 001 nic się nie zmienia.
+  - **Noktowizja** (poziomy 1–3): przez podniesioną kamerę ciemność jest jaśniejsza (ekspozycja w górę, zielony, wyblakły obraz), a bateria schodzi o 10% szybciej na poziom.
+  - **Latarka** (zasięg 55 / 70 / 85 studs zamiast 40): dłuższy, jaśniejszy i szerszy snop, ale Bileter zauważa ją z dalej (16 → 19 / 22 / 25 studs).
+  - Ekran wypłaty pokazuje każde ulepszenie w jego jednostkach (s, x zoom, poziom, studs).
+
+**Czego jeszcze nie ma:** taśmy zmiany (klipu z najlepszym momentem), zadań dziennych, dźwięków i grafiki docelowej.
 
 ## 2. Jak uruchomić (bez instalowania czegokolwiek)
 

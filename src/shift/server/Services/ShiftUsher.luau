@@ -16,6 +16,7 @@ local FloorGen = require(ReplicatedStorage.Shared.Core.FloorGen)
 local Graph = require(ReplicatedStorage.Shared.Core.Graph)
 local Net = require(ReplicatedStorage.Shared.Net)
 local RateLimit = require(ReplicatedStorage.Shared.Core.RateLimit)
+local Upgrades = require(ReplicatedStorage.Shared.Core.Upgrades)
 
 local ShiftUsher = {}
 
@@ -23,7 +24,6 @@ local CFG = Config.Shift
 local STEP = 0.1
 local WALK_SPEED = 5
 local HUNT_SPEED = 11
-local NOTICE_RANGE = 16
 local TOUCH_RANGE = 2.2
 local CATCH_RANGE = 3
 local NOTICE_BEFORE_CATCH = 0.9
@@ -57,6 +57,12 @@ local function torchOn(player: Player): boolean
 	return light ~= nil and light:IsA("SpotLight") and light.Enabled
 end
 
+-- The torch's beam reaches as far as its upgrade (the TorchRange attribute; 40 studs standard).
+local function torchRange(player: Player): number
+	local range = player:GetAttribute("TorchRange")
+	return if typeof(range) == "number" then range else 40
+end
+
 local function toggleLight(player: Player)
 	if not lightLimit:allow(player, os.clock()) then
 		return
@@ -66,20 +72,24 @@ local function toggleLight(player: Player)
 	if not head then
 		return
 	end
-	local light = head:FindFirstChild("Flashlight")
-	if light and light:IsA("SpotLight") then
+	local existing = head:FindFirstChild("Flashlight")
+	local light: SpotLight
+	if existing and existing:IsA("SpotLight") then
+		light = existing
 		light.Enabled = not light.Enabled
-		return
+	else
+		light = Instance.new("SpotLight")
+		light.Name = "Flashlight"
+		light.Face = Enum.NormalId.Front
+		light.Shadows = true
+		light.Color = Color3.fromRGB(255, 236, 200)
+		light.Parent = head
 	end
-	local created = Instance.new("SpotLight")
-	created.Name = "Flashlight"
-	created.Face = Enum.NormalId.Front
-	created.Angle = 50
-	created.Range = 40
-	created.Brightness = 2.2
-	created.Shadows = true
-	created.Color = Color3.fromRGB(255, 236, 200)
-	created.Parent = head
+	-- An upgrade bought between shifts shows the next time it is switched on.
+	local range = torchRange(player)
+	light.Range = range
+	light.Brightness = 2.2 + (range - 40) / 40
+	light.Angle = 50 + (range - 40) / 6
 end
 
 local function canSee(from: Vector3, to: Vector3): boolean
@@ -232,12 +242,10 @@ function ShiftUsher.start()
 				and not services.ShiftWorld.inLift(root.Position)
 			then
 				local distance = (root.Position - chest).Magnitude
+				-- A stronger torch carries farther, and so does the Usher's notice of it.
+				local notice = Upgrades.torchNotice(torchRange(player))
 				local noticed = distance < TOUCH_RANGE
-					or (
-						torchOn(player)
-						and distance < NOTICE_RANGE
-						and canSee(chest, root.Position)
-					)
+					or (torchOn(player) and distance < notice and canSee(chest, root.Position))
 				if noticed and distance < bestDistance then
 					best, bestDistance = player, distance
 				end

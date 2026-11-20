@@ -8,6 +8,7 @@ local Config = require(ReplicatedStorage.Shared.Config.Game)
 local Framing = require(ReplicatedStorage.Shared.Core.Framing)
 local Net = require(ReplicatedStorage.Shared.Net)
 local RateLimit = require(ReplicatedStorage.Shared.Core.RateLimit)
+local Upgrades = require(ReplicatedStorage.Shared.Core.Upgrades)
 
 local Lens = {}
 
@@ -34,6 +35,16 @@ function Lens.clear(player: Player)
 	views[player] = nil
 end
 
+-- The cosine of this player's framing half-angle. A zoom lens (the shift's "lens" upgrade, set
+-- as the LensZoom attribute) frames a narrower cone; everyone else frames the standard one.
+function Lens.cosFor(player: Player): number
+	local zoom = player:GetAttribute("LensZoom")
+	if typeof(zoom) == "number" and zoom > 1 then
+		return math.cos(math.rad(Upgrades.halfAngle(Config.Lens.FramingHalfAngle, zoom)))
+	end
+	return COS
+end
+
 -- Is this point in this player's frame, with nothing solid between lens and subject?
 function Lens.frames(player: Player, target: Vector3): boolean
 	if not Lens.isRaised(player) or player:GetAttribute("OffFrame") == true then
@@ -53,7 +64,7 @@ function Lens.frames(player: Player, target: Vector3): boolean
 			target.X,
 			target.Y,
 			target.Z,
-			COS,
+			Lens.cosFor(player),
 			Config.Lens.FramingRange
 		)
 	then

@@ -31,7 +31,6 @@ local LIMITS: Tape.Limits = {
 	maxSpeed = TAPE.MaxSpeed,
 	maxStartDistance = TAPE.MaxStartDistance,
 }
-local COS = math.cos(math.rad(Config.Lens.FramingHalfAngle))
 -- Tapes a camera keeps for watching; the oldest goes first.
 local KEPT = 3
 -- How far a sample may be from where the head was at about that moment, and how loose "about".
@@ -184,8 +183,19 @@ local function onStop(player: Player, raw: unknown)
 	end
 	local map = Workspace:FindFirstChild("Map")
 	rayParams.FilterDescendantsInstances = if map then { map } else {}
-	local shots =
-		Footage.score(samples, targets, TAPE.SampleHz, COS, Config.Lens.FramingRange, blocked)
+	-- A zoom lens frames narrower and rates distance as if it stood closer.
+	local zoom = player:GetAttribute("LensZoom")
+	local magnify = if typeof(zoom) == "number" then zoom else 1
+	local cos = services.Lens.cosFor(player)
+	local shots = Footage.score(
+		samples,
+		targets,
+		TAPE.SampleHz,
+		cos,
+		Config.Lens.FramingRange,
+		blocked,
+		magnify
+	)
 	for _, shot in shots do
 		local anomaly = byId[shot.id]
 		if anomaly then
@@ -205,7 +215,7 @@ local function onStop(player: Player, raw: unknown)
 		)
 	end
 	-- A tape that framed a code door says so: that is the tape worth watching.
-	local doors = services.ShiftDoors.framedBy(samples, COS, SHIFT.CodeReadRange)
+	local doors = services.ShiftDoors.framedBy(samples, cos, SHIFT.CodeReadRange)
 	scoredRemote:FireClient(player, {
 		shots = report,
 		added = added,
@@ -247,7 +257,9 @@ local function onPlay(player: Player)
 	playing[player] = os.clock() + TAPE.MaxPlaySeconds
 	services.Lens.clear(player)
 	local codes = {}
-	for _, door in services.ShiftDoors.framedBy(clip.track, COS, SHIFT.CodeReadRange) do
+	for _, door in
+		services.ShiftDoors.framedBy(clip.track, services.Lens.cosFor(player), SHIFT.CodeReadRange)
+	do
 		table.insert(codes, { id = door.id, code = door.code })
 	end
 	playRemote:FireClient(player, {

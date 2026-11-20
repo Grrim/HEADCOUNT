@@ -124,6 +124,14 @@ local function onTripod()
 	end
 end
 
+-- The lens upgrades this player owns, as the server set them.
+local function refreshGear()
+	local zoom = player:GetAttribute("LensZoom")
+	local night = player:GetAttribute("NightVision")
+	LensView.setZoom(if typeof(zoom) == "number" then zoom else 1)
+	LensView.setNight(if typeof(night) == "number" then night else 0)
+end
+
 local function refreshTripod()
 	local left = player:GetAttribute("Tripods")
 	Input.setState("Tripod", if typeof(left) == "number" and left > 0 then "idle" else "disabled")
@@ -188,6 +196,9 @@ function ShiftCamera.start()
 	Input.bind("Tripod", onTripod, { Enum.KeyCode.G, Enum.KeyCode.DPadDown }, "TRIPOD", 5)
 	player:GetAttributeChangedSignal("Tripods"):Connect(refreshTripod)
 	refreshTripod()
+	player:GetAttributeChangedSignal("LensZoom"):Connect(refreshGear)
+	player:GetAttributeChangedSignal("NightVision"):Connect(refreshGear)
+	refreshGear()
 	LensView.setRecordLimit(Config.Shift.RecordSeconds)
 	LensView.onChanged(function(raised)
 		Input.setState("Lens", if raised then "active" else "idle")

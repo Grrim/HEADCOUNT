@@ -342,4 +342,34 @@ return {
 				and Upgrades.nextCost(levels, "tripod", true) == nil
 		)
 	end,
+
+	["a zoom lens rates a far shot as a nearer one"] = function()
+		local samples = {}
+		for _ = 1, 30 do
+			table.insert(samples, { 0, 0, 0, 0, 0, -1 })
+		end
+		local target = { id = 1, x = 0, y = 0, z = -30, value = 10 }
+		local bare = Footage.score(samples, { target }, 10, math.cos(math.rad(24)), 110)
+		local zoomed = Footage.score(samples, { target }, 10, math.cos(math.rad(24)), 110, nil, 1.5)
+		assert(bare[1].stars == 3 and zoomed[1].stars == 4, `{bare[1].stars} / {zoomed[1].stars}`)
+		assert(zoomed[1].distance == 20)
+	end,
+
+	["every piece of kit costs something for what it gives"] = function()
+		local levels = {}
+		assert(Upgrades.value(levels, "lens") == 1 and Upgrades.value(levels, "night") == 0)
+		assert(Upgrades.value(levels, "torch") == 40 and Upgrades.torchNotice(40) == 16)
+		levels.torch = 4
+		assert(
+			Upgrades.torchNotice(Upgrades.value(levels, "torch")) == 25,
+			"a bright torch went unseen"
+		)
+		assert(Upgrades.drain(0) == 1 and Upgrades.drain(3) == 1.3)
+		levels.lens = 4
+		assert(
+			Upgrades.halfAngle(24, Upgrades.value(levels, "lens")) < 24,
+			"zoom kept the wide frame"
+		)
+		assert(Upgrades.halfAngle(24, 0.5) == 24)
+	end,
 }

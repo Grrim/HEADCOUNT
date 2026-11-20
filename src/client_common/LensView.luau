@@ -318,6 +318,20 @@ local function applyFrameColor()
 	end
 end
 
+-- The shift's lens upgrades: a zoom narrows the view, night vision lifts the dark through the lens.
+-- Both stay at their defaults in Mission 001.
+local zoom = 1
+local night = 0
+local baseExposure: number? = nil
+
+function LensView.setZoom(value: number)
+	zoom = math.max(1, value)
+end
+
+function LensView.setNight(level: number)
+	night = math.max(0, level)
+end
+
 local function tweenGrade(values: { [string]: any }, seconds: number)
 	TweenService:Create(grade, TweenInfo.new(seconds), values):Play()
 end
@@ -327,7 +341,14 @@ local function applyView()
 	local raised = LensView.raised
 	gui.Enabled = raised
 	if raised then
-		tweenGrade(Grades.Lens, 0.05)
+		local values = table.clone(Grades.Lens)
+		if night > 0 then
+			-- Night vision: green, flat and bright, the dark lifted at the cost of colour.
+			values.Brightness = ((values.Brightness :: number?) or 0) + 0.04 * night
+			values.Saturation = -0.7
+			values.TintColor = Color3.new(1, 1, 1):Lerp(Color3.fromRGB(150, 255, 165), 0.3 * night)
+		end
+		tweenGrade(values, 0.05)
 	else
 		tweenGrade({
 			Contrast = 0,
@@ -336,13 +357,21 @@ local function applyView()
 			TintColor = Color3.new(1, 1, 1),
 		}, 0.05)
 	end
+	-- Night vision also opens up the exposure while the lens is up, and gives it back after.
+	if baseExposure == nil then
+		baseExposure = Lighting.ExposureCompensation
+	end
+	Lighting.ExposureCompensation = baseExposure :: number
+		+ (if raised and night > 0 then 0.45 * night else 0)
 	if camera then
-		-- The field of view lands slightly past its target and settles, like a zoom ring.
-		camera.FieldOfView = if raised then Config.Lens.Fov + 4 else Config.Lens.NormalFov - 3
+		-- The field of view lands slightly past its target and settles, like a zoom ring. A zoom
+		-- lens settles narrower.
+		local fov = Config.Lens.Fov / zoom
+		camera.FieldOfView = if raised then fov + 4 else Config.Lens.NormalFov - 3
 		TweenService:Create(
 			camera,
 			TweenInfo.new(0.32, Enum.EasingStyle.Quart, Enum.EasingDirection.Out),
-			{ FieldOfView = if raised then Config.Lens.Fov else Config.Lens.NormalFov }
+			{ FieldOfView = if raised then fov else Config.Lens.NormalFov }
 		):Play()
 	end
 end

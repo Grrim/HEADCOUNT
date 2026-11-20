@@ -10,6 +10,8 @@
 --
 -- A shot is worth the subject's value times stars / 5. The team keeps its best shot of each
 -- subject, so filming the same thing twice only pays the improvement.
+--
+-- A zoom lens rates distance as if the camera stood `zoom` times closer.
 local Framing = require("./Framing")
 
 local Footage = {}
@@ -34,8 +36,10 @@ function Footage.score(
 	sampleHz: number,
 	cosHalfFov: number,
 	range: number,
-	blocked: Blocked?
+	blocked: Blocked?,
+	zoom: number?
 ): { Shot }
+	local magnify = math.max(1, zoom or 1)
 	local shots: { Shot } = {}
 	for _, target in targets do
 		local framed = 0
@@ -72,6 +76,7 @@ function Footage.score(
 			end
 		end
 		local seconds = math.min(framed / sampleHz, Footage.HOLD_SECONDS)
+		nearest /= magnify
 		if seconds >= 1 then
 			local stars = 1
 			if seconds >= 2.5 then

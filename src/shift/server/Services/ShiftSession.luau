@@ -153,6 +153,9 @@ local function refreshKitAttributes(player: Player)
 	player:SetAttribute("HasCamera", kit.hasCamera)
 	player:SetAttribute("Carrying", Shift.carriedOf(ShiftSession.shift, player.UserId))
 	player:SetAttribute("Tripods", kit.tripods)
+	player:SetAttribute("LensZoom", Upgrades.value(levels, "lens"))
+	player:SetAttribute("NightVision", Upgrades.value(levels, "night"))
+	player:SetAttribute("TorchRange", Upgrades.value(levels, "torch"))
 	player:SetAttribute("TripodSeconds", Upgrades.value(levels, "tripod"))
 end
 
@@ -798,7 +801,9 @@ function ShiftSession.start()
 			local kit = kitOf(player)
 			local capacity = Upgrades.value(levelsOf(player), "battery")
 			if services.Lens.isRaised(player) and not kit.empty then
-				kit.battery = math.max(0, kit.battery - step)
+				-- Night vision runs the battery down faster.
+				local drain = Upgrades.drain(Upgrades.value(levelsOf(player), "night"))
+				kit.battery = math.max(0, kit.battery - step * drain)
 				if kit.battery <= 0 then
 					kit.empty = true
 				end
