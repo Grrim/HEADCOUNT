@@ -42,10 +42,10 @@ local floorLamps: { [string]: BasePart } = {}
 local doorProgress = 1
 
 local rgb = Color3.fromRGB
-local BRASS = rgb(176, 140, 72)
-local STEEL = rgb(132, 136, 138)
-local VENEER = rgb(150, 104, 70)
-local LIT = rgb(255, 176, 80)
+local BRASS = Palette.Brass
+local STEEL = Palette.Steel
+local VENEER = Palette.Veneer
+local LIT = Palette.LampLit
 local UNLIT = rgb(70, 64, 56)
 -- The floors on the control panel, top to bottom.
 local PANEL_FLOORS = { "0", "-1", "-2", "-3", "-4", "-5" }

@@ -17,4 +17,9 @@ return {
 	Rec = Color3.fromRGB(217, 52, 43),
 	Crt = Color3.fromRGB(182, 214, 150),
 	Ink = Color3.fromRGB(8, 10, 12),
+	-- The Bureau's lifts, in the lobby and on the shift: brass fittings, brushed steel, veneer.
+	Brass = Color3.fromRGB(176, 140, 72),
+	Steel = Color3.fromRGB(132, 136, 138),
+	Veneer = Color3.fromRGB(150, 104, 70),
+	LampLit = Color3.fromRGB(255, 176, 80),
 }

@@ -230,7 +230,8 @@ local function audit(root: any, label: string, quiet: boolean?): (number, number
 		[2500] = true,
 		[2600] = true,
 		[-200] = true,
-		-- The shift: rooms 12, lift 10.
+		-- The hub's tape and locker rooms; the shift's rooms and lift.
+		[1100] = true,
 		[1200] = true,
 		[1000] = true,
 	}

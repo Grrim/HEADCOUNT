@@ -242,7 +242,159 @@ local function camcorderModel(holder: BasePart)
 	cue.Parent = rec
 end
 
--- One lift cabin: metal box, a lamp, a button panel, and a sign over the doorway in the hall.
+-- The inside of a cabin dressed as the Bureau's lift on the shift (ShiftWorld): steel kick plate,
+-- veneer and a brass frieze, a handrail on the back wall, a brass plate behind the button with a
+-- lamp for every floor, "0" lit. Layers meet at edges: the back wall's run the full width, the
+-- side walls' start inside them, the front wall's stop at the door frame (HubDressing).
+local function cabinInterior(map: Folder, name: string, spec: any)
+	local box: Box = spec.inside
+	local front, back = 40.5, box.maxX
+	local layers: { { any } } = {
+		{ "KickPlate", 0, 0.6, 0.15, Palette.Steel, Enum.Material.Metal },
+		{ "Veneer", 0.6, 7, 0.12, Palette.Veneer, Enum.Material.Wood },
+		{ "Frieze", 7, 7.25, 0.16, Palette.Brass, Enum.Material.Metal },
+	}
+	for _, layer in layers do
+		local part, y0, y1, t, color, material =
+			layer[1], layer[2], layer[3], layer[4], layer[5], layer[6]
+		local made = {
+			Build.decor(
+				map,
+				`{name}{part}`,
+				back - t,
+				y0,
+				box.minZ,
+				back,
+				y1,
+				box.maxZ,
+				color,
+				material
+			),
+			Build.decor(
+				map,
+				`{name}{part}`,
+				front + t,
+				y0,
+				box.minZ,
+				back - t,
+				y1,
+				box.minZ + t,
+				color,
+				material
+			),
+			Build.decor(
+				map,
+				`{name}{part}`,
+				front + t,
+				y0,
+				box.maxZ - t,
+				back - t,
+				y1,
+				box.maxZ,
+				color,
+				material
+			),
+			Build.decor(
+				map,
+				`{name}{part}`,
+				front,
+				y0,
+				box.minZ,
+				front + t,
+				y1,
+				spec.open[1] - 0.5,
+				color,
+				material
+			),
+			Build.decor(
+				map,
+				`{name}{part}`,
+				front,
+				y0,
+				spec.open[2] + 0.5,
+				front + t,
+				y1,
+				box.maxZ,
+				color,
+				material
+			),
+		}
+		if part == "Veneer" then
+			for _, piece in made do
+				piece.MaterialVariant = "PK_Veneer"
+			end
+		end
+	end
+	-- A handrail along the back wall, on two posts.
+	local railX = back - 0.5
+	Build.piece(
+		map,
+		`{name}Handrail`,
+		CFrame.new(railX, 3.3, (box.minZ + box.maxZ) / 2) * CFrame.Angles(0, math.pi / 2, 0),
+		Vector3.new(box.maxZ - box.minZ - 1.2, 0.2, 0.2),
+		Palette.Brass,
+		Enum.Material.Metal,
+		Enum.PartType.Cylinder
+	)
+	for _, z in { box.minZ + 1, box.maxZ - 1 } do
+		Build.decor(
+			map,
+			`{name}HandrailPost`,
+			railX,
+			3.24,
+			z - 0.06,
+			back - 0.12,
+			3.36,
+			z + 0.06,
+			Palette.Brass,
+			Enum.Material.Metal
+		)
+	end
+	-- The brass plate behind the button, a lamp for each floor, and the Bureau's number.
+	local midZ = (box.minZ + box.maxZ) / 2
+	local plate = Build.decor(
+		map,
+		`{name}Panel`,
+		back - 0.2,
+		2.6,
+		midZ + 0.9,
+		back,
+		7,
+		midZ + 2.9,
+		Palette.Brass,
+		Enum.Material.Metal
+	)
+	local engraved = Build.label(
+		plate,
+		Enum.NormalId.Left,
+		if name == "SoloLift" then "BUREAU LIFT 1" else "BUREAU LIFT 2",
+		Palette.Ink
+	)
+	engraved.Font = Enum.Font.SpecialElite
+	engraved.Size = UDim2.fromScale(1, 0.1)
+	engraved.Position = UDim2.fromScale(0, 0.03)
+	for index = 0, 5 do
+		local y = 6.1 - math.floor(index / 2) * 0.5
+		local z = midZ + 1.5 + (index % 2) * 0.8
+		local lit = index == 0
+		Build.decor(
+			map,
+			`{name}FloorLamp`,
+			back - 0.28,
+			y - 0.15,
+			z - 0.15,
+			back - 0.2,
+			y + 0.15,
+			z + 0.15,
+			if lit then Palette.LampLit else Color3.fromRGB(70, 64, 56),
+			if lit then Enum.Material.Neon else Enum.Material.SmoothPlastic
+		)
+	end
+end
+
+-- One lift cabin: a steel box with the Bureau's interior, a lamp, the button, and a sign over the
+-- doorway in the hall. The back wall stands between the side walls so no two outer faces share a
+-- plane at the corners.
 local function liftCabin(map: Folder, name: string, spec: any, actionKey: string, objectKey: string)
 	local box: Box = spec.inside
 	local metal = Palette.Metal
@@ -255,8 +407,8 @@ local function liftCabin(map: Folder, name: string, spec: any, actionKey: string
 		box.maxX,
 		0,
 		box.maxZ,
-		Palette.WoodDark,
-		Enum.Material.Wood
+		Color3.fromRGB(46, 46, 48),
+		Enum.Material.DiamondPlate
 	)
 	Build.box(map, `{name}Ceiling`, 40.5, 9, box.minZ, box.maxX, 10, box.maxZ, Palette.Ceiling)
 	Build.wallX(
@@ -283,18 +435,19 @@ local function liftCabin(map: Folder, name: string, spec: any, actionKey: string
 		metal,
 		Enum.Material.Metal
 	)
-	Build.wallZ(
+	Build.box(
 		map,
 		`{name}Back`,
-		box.maxX + 0.5,
-		box.minZ - 1,
-		box.maxZ + 1,
+		box.maxX,
 		0,
+		box.minZ,
+		box.maxX + 1,
 		10,
-		{},
+		box.maxZ,
 		metal,
 		Enum.Material.Metal
 	)
+	cabinInterior(map, name, spec)
 	local midZ = (box.minZ + box.maxZ) / 2
 	Build.panel(map, (40.5 + box.maxX) / 2, 8.9, midZ, 3, 2, 1.3, 16, Palette.Bulb)
 	local button = Build.box(
