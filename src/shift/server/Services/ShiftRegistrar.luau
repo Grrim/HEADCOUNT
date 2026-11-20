@@ -147,6 +147,9 @@ local function apply(events: { Registrar.Event })
 		if kind == "jump" or kind == "retreat" then
 			placeAnchor(event.node :: string)
 			send(kind)
+		elseif event.id == services.ShiftTripod.ID then
+			-- The tripod's own exposure is nobody's business.
+			continue
 		elseif
 			kind == "preJump"
 			or kind == "reach"
@@ -201,8 +204,13 @@ function ShiftRegistrar.start()
 			continue
 		end
 		local watching = framers()
-		framedNow = #watching > 0
+		-- A tripod that frames him holds him as a raised lens would.
+		local tripod = services.ShiftTripod.frames(anchor.Position)
+		framedNow = #watching > 0 or tripod
 		local framedBy = {}
+		if tripod then
+			table.insert(framedBy, services.ShiftTripod.ID)
+		end
 		for _, player in watching do
 			table.insert(framedBy, player.UserId)
 			local exposure = current.exposure[player.UserId] or 0

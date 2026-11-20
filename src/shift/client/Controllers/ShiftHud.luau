@@ -212,7 +212,9 @@ local function showResults(data: { [string]: any })
 			Size = UDim2.new(0.62, 0, 1, 0),
 			TextSize = 17,
 			TextYAlignment = Enum.TextYAlignment.Center,
-			Text = `{upgrade.name}  {upgrade.value}  (level {upgrade.level}/{upgrade.maxLevel})`,
+			Text = `{upgrade.name}  {if upgrade.id == "tripod"
+				then (if upgrade.value > 0 then `{upgrade.value} s` else "none")
+				else upgrade.value}  (level {upgrade.level}/{upgrade.maxLevel})`,
 		}, row)
 		if upgrade.cost then
 			local affordable = (data.money or 0) >= upgrade.cost

@@ -39,6 +39,8 @@ type Kit = {
 	empty: boolean,
 	tapes: number,
 	hasCamera: boolean,
+	-- Tripods left on this floor: one a floor once the upgrade is bought.
+	tripods: number,
 }
 
 local ROOM_NAMES = {
@@ -75,7 +77,7 @@ local expectedCrew = 1
 local function kitOf(player: Player): Kit
 	local kit = kits[player]
 	if not kit then
-		kit = { battery = 30, empty = false, tapes = 3, hasCamera = true }
+		kit = { battery = 30, empty = false, tapes = 3, hasCamera = true, tripods = 0 }
 		kits[player] = kit
 	end
 	return kit :: Kit
@@ -150,6 +152,8 @@ local function refreshKitAttributes(player: Player)
 	player:SetAttribute("TapesMax", Upgrades.value(levels, "tapes"))
 	player:SetAttribute("HasCamera", kit.hasCamera)
 	player:SetAttribute("Carrying", Shift.carriedOf(ShiftSession.shift, player.UserId))
+	player:SetAttribute("Tripods", kit.tripods)
+	player:SetAttribute("TripodSeconds", Upgrades.value(levels, "tripod"))
 end
 
 local function refill(player: Player)
@@ -159,7 +163,20 @@ local function refill(player: Player)
 	kit.empty = false
 	kit.tapes = Upgrades.value(levels, "tapes")
 	kit.hasCamera = true
+	kit.tripods = if Upgrades.value(levels, "tripod") > 0 then 1 else 0
 	refreshKitAttributes(player)
+end
+
+-- Uses this floor's tripod, if the player has one. Returns how long it will film (0: none).
+function ShiftSession.takeTripod(player: Player): number
+	local kit = kitOf(player)
+	local seconds = Upgrades.value(levelsOf(player), "tripod")
+	if kit.tripods <= 0 or seconds <= 0 then
+		return 0
+	end
+	kit.tripods -= 1
+	refreshKitAttributes(player)
+	return seconds
 end
 
 function ShiftSession.useTape(player: Player): boolean
@@ -456,6 +473,7 @@ local function ride(down: boolean)
 		refill(player)
 	end
 	local lost = clearCameras()
+	services.ShiftTripod.clear()
 	services.ShiftTapes.clearFloor()
 	world.clearFloor()
 	clearAnomalies()
@@ -490,7 +508,7 @@ local function sendResult(player: Player)
 			level = Upgrades.level(data.levels, upgrade.id),
 			maxLevel = #upgrade.values,
 			value = Upgrades.value(data.levels, upgrade.id),
-			cost = Upgrades.nextCost(data.levels, upgrade.id),
+			cost = Upgrades.nextCost(data.levels, upgrade.id, #Players:GetPlayers() <= 1),
 		})
 	end
 	local archive = {}
@@ -543,6 +561,7 @@ local function newShift()
 	ShiftSession.floor = nil
 	clearAnomalies()
 	clearCameras()
+	services.ShiftTripod.clear()
 	services.ShiftTapes.clearFloor()
 	services.ShiftExtra.stop()
 	services.ShiftUsher.stop()
@@ -656,6 +675,7 @@ function ShiftSession.onEveryoneCut()
 		ShiftSession.broadcast("Everyone was cut out of frame. The Bureau pays a quarter.")
 		bringEveryoneIn()
 		clearCameras()
+		services.ShiftTripod.clear()
 		services.ShiftTapes.clearFloor()
 		services.ShiftWorld.clearFloor()
 		clearAnomalies()
@@ -697,7 +717,8 @@ local function onAction(player: Player, action: unknown, arg: unknown)
 			return
 		end
 		local data = services.ShiftBank.data(player)
-		local ok, money = Upgrades.buy(data.levels, data.frames, arg)
+		-- Alone on the server, the solo price (the tripod is cheaper for a player on their own).
+		local ok, money = Upgrades.buy(data.levels, data.frames, arg, #Players:GetPlayers() <= 1)
 		if ok then
 			data.frames = money
 			services.ShiftBank.changed(player)

@@ -61,7 +61,9 @@ Stan na 2026-11-20. Gałąź `prototype-shift`. Etap 0 z `09_GDD_V2.md` §12 (pr
 
 - **Przewodnik dla nowych prowadzi do wind:** po krokach z kamerą karta celu i znacznik pokazują windy (cel GDD §3: pierwsza zmiana najpóźniej 45 s od wejścia). W kabinie SOLO przewodnik mówi, żeby przytrzymać E przy przycisku; w kabinie EKIPY, że winda odjedzie ze wszystkimi w środku (także z innych lobby) albo od razu po przycisku. Po wyjściu z kabiny wraca do wind. Kto najpierw otworzy terminal, dostaje wskazówkę terminala jak dotąd. Kabinę rozpoznaje po jej podłodze, więc klient nie powiela wymiarów wind.
 
-**Czego jeszcze nie ma:** statywu i innych ulepszeń poza baterią i kasetami, taśmy zmiany (klipu z najlepszym momentem), zadań dziennych, dźwięków i grafiki docelowej.
+- **Statyw (G, na kontrolerze D-pad w dół, na telefonie przycisk TRIPOD):** trzecie ulepszenie. Na starcie go nie ma; poziomy dają 12, 20 i 30 s filmowania. Raz na piętro (nowy w windzie) stawiasz go tam, gdzie stoisz, wycelowany tam, gdzie patrzysz. Dopóki ma baterię, wszystko, co ma w kadrze, jest trzymane jak podniesioną kamerą: Kadrowy stoi i nie blokuje drzwi windy, Statysta stoi. Statyw nic nie nagrywa, nie płaci, nikogo nie ratuje i nie ściera Statysty; kupuje czas. Nie świeci, więc Bileter go nie widzi. Gdy bateria się skończy, lampka gaśnie, a właściciel dostaje komunikat. Gracz sam na serwerze płaci za statyw mniej (60 / 140 / 260 zamiast 120 / 220 / 380), zgodnie z §7 i §13 GDD.
+
+**Czego jeszcze nie ma:** ulepszeń poza baterią, kasetami i statywem (obiektyw, noktowizja, latarka), taśmy zmiany (klipu z najlepszym momentem), zadań dziennych, dźwięków i grafiki docelowej.
 
 ## 2. Jak uruchomić (bez instalowania czegokolwiek)
 
@@ -72,7 +74,7 @@ Stan na 2026-11-20. Gałąź `prototype-shift`. Etap 0 z `09_GDD_V2.md` §12 (pr
 
 Lokalnie, z narzędziami z `rokit.toml`: `python scripts/check.py`, potem `build/Shift.rbxl`.
 
-**Sterowanie:** Q albo prawy przycisk myszy podnosi kamerę, R nagrywa, **T odtwarza ostatnią taśmę**, F włącza latarkę, E obsługuje przyciski windy, zamki i podnoszenie kamery. Na kontrolerze: L2, R2, Y, D-pad góra.
+**Sterowanie:** Q albo prawy przycisk myszy podnosi kamerę, R nagrywa, **T odtwarza ostatnią taśmę**, **G stawia statyw**, F włącza latarkę, E obsługuje przyciski windy, zamki i podnoszenie kamery. Na kontrolerze: L2, R2, Y, D-pad dół, D-pad góra.
 
 **Test w kilka osób w Studio:** zakładka Test → Clients and Servers, 2–4 graczy.
 

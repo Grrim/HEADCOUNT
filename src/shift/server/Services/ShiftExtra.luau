@@ -286,6 +286,10 @@ end
 
 local function framers(at: Vector3): { [number]: number }
 	local result: { [number]: number } = {}
+	-- A tripod holds it still but is never close enough to wear it away: that takes a person.
+	if services.ShiftTripod.frames(at) then
+		result[services.ShiftTripod.ID] = 1e6
+	end
 	for _, player in services.Lens.framers(at) do
 		if services.ShiftSession.lensWorks(player) then
 			local root = rootOf(player)

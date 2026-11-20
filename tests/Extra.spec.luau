@@ -139,4 +139,16 @@ return {
 			assert(reached, `seed {seed}: never reached its mark`)
 		end
 	end,
+
+	["a tripod far off holds it still without wearing it away"] = function()
+		local graph = corridor()
+		local state = Extra.new(graph, "r2")
+		state.phase = "close"
+		state.target = 1
+		for _ = 1, 40 do
+			Extra.step(state, CONFIG, graph, 0.1, { player(1, 0, 0) }, { [-1] = 1e6 })
+		end
+		assert(state.frozen and state.x == 36, "the tripod did not hold it")
+		assert(state.phase ~= "gone" and state.reveal == 0)
+	end,
 }

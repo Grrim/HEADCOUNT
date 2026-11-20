@@ -98,6 +98,37 @@ local function onRecord()
 	end
 end
 
+-- The tripod goes down where you stand, aimed where you look (ShiftTripod decides the rest).
+local function onTripod()
+	if isCut() then
+		return
+	end
+	if controllers.ShiftHud.phase() ~= "floor" then
+		controllers.ShiftHud.toast("Set the tripod down on a floor.")
+		return
+	end
+	local left = player:GetAttribute("Tripods")
+	if typeof(left) ~= "number" or left <= 0 then
+		local seconds = player:GetAttribute("TripodSeconds")
+		controllers.ShiftHud.toast(
+			if typeof(seconds) == "number" and seconds > 0
+				then "This floor's tripod is set. The lift has another."
+				else "No tripod yet. Buy one between shifts."
+		)
+		return
+	end
+	local camera = Workspace.CurrentCamera
+	if camera then
+		Net.get("TripodPlace"):FireServer(camera.CFrame.LookVector)
+		AudioDirector.play("RecStart", 0.5, 0.8)
+	end
+end
+
+local function refreshTripod()
+	local left = player:GetAttribute("Tripods")
+	Input.setState("Tripod", if typeof(left) == "number" and left > 0 then "idle" else "disabled")
+end
+
 -- The torch is a real light on the server: the Usher has to be able to see it.
 local function onLight()
 	if isCut() then
@@ -153,6 +184,10 @@ function ShiftCamera.start()
 		Strings.get("btn_light"),
 		4
 	)
+	-- Slot 5 is the radio's in Mission 001; a shift has no radio.
+	Input.bind("Tripod", onTripod, { Enum.KeyCode.G, Enum.KeyCode.DPadDown }, "TRIPOD", 5)
+	player:GetAttributeChangedSignal("Tripods"):Connect(refreshTripod)
+	refreshTripod()
 	LensView.setRecordLimit(Config.Shift.RecordSeconds)
 	LensView.onChanged(function(raised)
 		Input.setState("Lens", if raised then "active" else "idle")

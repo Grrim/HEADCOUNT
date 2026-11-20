@@ -325,4 +325,21 @@ return {
 		Shift.finish(state)
 		assert(state.banked == 90, `banked {state.banked}`)
 	end,
+
+	["the tripod starts at nothing, and alone it costs less"] = function()
+		local levels = {}
+		assert(Upgrades.value(levels, "tripod") == 0, "everyone starts with a tripod")
+		assert(Upgrades.nextCost(levels, "tripod") == 120)
+		assert(Upgrades.nextCost(levels, "tripod", true) == 60)
+		assert(Upgrades.nextCost(levels, "battery", true) == 60, "solo changed a battery price")
+		local ok, money = Upgrades.buy(levels, 100, "tripod")
+		assert(not ok and money == 100, "the team price was not charged")
+		ok, money = Upgrades.buy(levels, 100, "tripod", true)
+		assert(ok and money == 40 and Upgrades.value(levels, "tripod") == 12)
+		levels.tripod = 4
+		assert(
+			Upgrades.value(levels, "tripod") == 30
+				and Upgrades.nextCost(levels, "tripod", true) == nil
+		)
+	end,
 }
