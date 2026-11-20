@@ -556,6 +556,14 @@ local function payEveryone()
 		)
 		services.ShiftBank.changed(player)
 		services.ShiftRecords.submit(player)
+		if returned then
+			local quests = services.ShiftQuests
+			quests.event(player, "return_depth", shift.deepest)
+			quests.event(player, "banked", shift.banked)
+			if shift.banked >= shift.quota then
+				quests.event(player, "shift_done")
+			end
+		end
 		track(player, "ShiftEnd", math.floor(os.clock() - shiftStarted), {
 			`{shift.result}`,
 			`depth {shift.deepest}`,

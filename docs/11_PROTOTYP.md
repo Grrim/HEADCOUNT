@@ -73,6 +73,8 @@ Stan na 2026-11-20. Gałąź `prototype-shift`. Etap 0 z `09_GDD_V2.md` §12 (pr
 
 - **Telewizor w szatni lobby:** stoi na wózku przy wschodniej ścianie szatni, ekranem do wejścia z hali. E otwiera panel z taśmami zmian wszystkich graczy w tym lobby (twoje pierwsze), zgodnie z §5 GDD („każdy może je obejrzeć”). Taśma gra tak samo jak na ekranie wypłaty: piętro odbudowane z ziarna w ViewportFrame (`client_common/TapeView`, wspólny dla zmiany i lobby). Serwer lobby czyta zapis zmiany każdego gracza raz przy wejściu (`HubTapes`, ten sam odczyt daje rekord na tabliczce windy) i wysyła tylko opisy taśm; ścieżkę kamery wysyła dopiero dla taśmy, którą ktoś włączy, a klient trzyma ją do końca wizyty. Taśmy zapisane po wejściu do lobby pojawią się po ponownym wejściu.
 
+- **Zadania dzienne** (§4–5 GDD): trzy dziennie, te same dla wszystkich (łatwe, średnie, trudne, losowane z daty UTC), żeby można było zapytać „zrobiłeś dzisiejsze?”. Każde da się zrobić solo. Pula: nagraj anomalie, rzadkie anomalie, ujęcie na pięć gwiazdek, wróć windą z piętra −2/−3/−5, przywieź ileś nagrań, ukończ zmiany z normą, otwórz drzwi z kodem, obejrzyj taśmę na piętrze, sfilmuj Statystę aż zniknie. Nagrody 40 / 80 / 150 Klatek, wypłacane w chwili wykonania (z komunikatem). Postęp jest w zapisanym portfelu (`Core/Quests`, `Wallet.questEvent`, `ShiftQuests`), a lista z postępem i czasem do nowych zadań stoi w prawym górnym rogu, pod listą drużyny.
+
 **Czego jeszcze nie ma:** taśmy zmiany (klipu z najlepszym momentem), zadań dziennych, dźwięków i grafiki docelowej.
 
 ## 2. Jak uruchomić (bez instalowania czegokolwiek)

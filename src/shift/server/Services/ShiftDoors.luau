@@ -271,6 +271,7 @@ local function onEntry(player: Player, entry: unknown)
 	if table.concat(digits) == door.code then
 		openDoor(door)
 		session.broadcast(`{player.DisplayName} opened the code door.`)
+		services.ShiftQuests.event(player, "door")
 		return
 	end
 	door.wrong += 1

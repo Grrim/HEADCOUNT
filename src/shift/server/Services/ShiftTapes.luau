@@ -261,6 +261,14 @@ local function onStop(player: Player, raw: unknown)
 	for _, shot in improved do
 		local anomaly = byId[shot.id]
 		session.markFilmed(shot.id, shot.stars)
+		local quests = services.ShiftQuests
+		quests.event(player, "film")
+		if anomaly and (anomaly.rarity == "rare" or anomaly.rarity == "epic") then
+			quests.event(player, "film_rare")
+		end
+		if shot.stars >= 5 then
+			quests.event(player, "five_stars")
+		end
 		table.insert(
 			report,
 			{ stars = shot.stars, rarity = anomaly and anomaly.rarity or "common" }
@@ -328,6 +336,7 @@ local function onPlay(player: Player)
 			TAPE.RegistrarMinimum
 		),
 	})
+	services.ShiftQuests.event(player, "tape_watch")
 	if Registrar.replaySteps(floorViewings) > 0 then
 		services.ShiftRegistrar.onReplay(player)
 	end

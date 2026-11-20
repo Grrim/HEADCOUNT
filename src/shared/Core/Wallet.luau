@@ -11,6 +11,7 @@
 -- A lock is stale once nobody has refreshed it for `ttl` seconds, so a crashed server can not
 -- hold a record for ever. A transform that returns nil leaves the cloud record untouched.
 local Highlight = require("./Highlight")
+local Quests = require("./Quests")
 
 local Wallet = {}
 
@@ -55,6 +56,8 @@ export type Data = {
 	rewardedWeek: number,
 	honours: { [string]: number },
 	tapes: { Tape },
+	-- Today's daily tasks: how far each has got and which are done (Core/Quests).
+	quests: Quests.Progress,
 }
 
 export type Lock = { id: string, at: number }
@@ -75,6 +78,7 @@ function Wallet.default(): Data
 		rewardedWeek = 0,
 		honours = {},
 		tapes = {},
+		quests = Quests.fresh(0),
 	}
 end
 
@@ -169,6 +173,21 @@ function Wallet.migrate(raw: any): Record
 			data.weekDeepest = count(stored.weekDeepest, 0, 100) or 0
 			data.weekEarned = count(stored.weekEarned, 0, 1e12) or 0
 			data.rewardedWeek = count(stored.rewardedWeek, 0, 1e7) or 0
+			local quests = stored.quests
+			if typeof(quests) == "table" and typeof(quests.day) == "number" then
+				data.quests.day = math.floor(quests.day)
+				for _, quest in Quests.POOL do
+					local counted = if typeof(quests.counts) == "table"
+						then count(quests.counts[quest.id], 0, quest.target)
+						else nil
+					if counted and counted > 0 then
+						data.quests.counts[quest.id] = counted
+					end
+					if typeof(quests.done) == "table" and quests.done[quest.id] == true then
+						data.quests.done[quest.id] = true
+					end
+				end
+			end
 			if typeof(stored.tapes) == "table" then
 				for _, storedTape in stored.tapes do
 					local tape = Wallet.readTape(storedTape)
@@ -305,6 +324,17 @@ function Wallet.claimWeek(data: Data, week: number, pay: number, honour: string?
 	return paid
 end
 
+-- Counts something that happened on a shift towards today's tasks and pays any it finished.
+-- Returns the tasks finished.
+function Wallet.questEvent(data: Data, now: number, event: string, amount: number): { Quests.Quest }
+	local finished = Quests.record(data.quests, Quests.day(now), event, amount)
+	for _, quest in finished do
+		data.frames += quest.reward
+		data.earned += quest.reward
+	end
+	return finished
+end
+
 -- What was earned on a fresh wallet before the saved one arrived, added onto the saved one.
 -- Levels are not merged: buying waits for the saved wallet.
 function Wallet.merge(record: Data, early: Data): Data
@@ -322,6 +352,19 @@ function Wallet.merge(record: Data, early: Data): Data
 	elseif early.week == record.week then
 		record.weekDeepest = math.max(record.weekDeepest, early.weekDeepest)
 		record.weekEarned += early.weekEarned
+	end
+	-- Today's tasks: what the early wallet counted adds to the saved one. Rewards it paid are in
+	-- its frames already, merged above.
+	local earlyQuests, savedQuests = early.quests, record.quests
+	if earlyQuests.day > savedQuests.day then
+		record.quests = earlyQuests
+	elseif earlyQuests.day == savedQuests.day then
+		for id, counted in earlyQuests.counts do
+			savedQuests.counts[id] = math.max(savedQuests.counts[id] or 0, counted)
+		end
+		for id in earlyQuests.done do
+			savedQuests.done[id] = true
+		end
 	end
 	-- Weekly rewards are only ever claimed on a saved wallet, so the early one holds none.
 	return record

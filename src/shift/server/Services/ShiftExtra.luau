@@ -274,6 +274,9 @@ local function reward(player: Player)
 		then session.addRideFootage(player, value)
 		else session.addFootage(player, value)
 	session.archive(player, "extra", 5)
+	services.ShiftQuests.event(player, "extra")
+	services.ShiftQuests.event(player, "film_rare")
+	services.ShiftQuests.event(player, "five_stars")
 	Net.get("FootageScored"):FireClient(player, {
 		shots = { { stars = 5, rarity = "legendary" } },
 		added = added,

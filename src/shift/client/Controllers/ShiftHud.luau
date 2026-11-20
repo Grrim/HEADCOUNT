@@ -6,6 +6,7 @@
 --
 -- The team list is the answer to the Extra: it can wear a teammate's face, but the list says
 -- where that teammate really is.
+local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -32,6 +33,7 @@ local cutLabel: TextLabel
 local liftHint: TextLabel
 local carryLabel: TextLabel
 local teamList: Frame
+local questList: Frame
 local results: Frame
 -- Beside the pay screen: the shift tape playing, and the tapes kept in the Archive.
 local tapePanel: Frame
@@ -491,15 +493,71 @@ local function build()
 		Text = "",
 	}, gui)
 
-	teamList = Ui.frame({
+	-- The right-hand column: the team, then today's tasks.
+	local column = Ui.frame({
 		AnchorPoint = Vector2.new(1, 0),
 		Position = UDim2.new(1, -18, 0, 18),
 		Size = UDim2.fromOffset(270, 0),
 		AutomaticSize = Enum.AutomaticSize.Y,
-		BackgroundTransparency = 0.35,
+		BackgroundTransparency = 1,
 	}, gui)
+	Ui.list(column, 8)
+	teamList = Ui.frame({
+		Size = UDim2.fromOffset(270, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
+		BackgroundTransparency = 0.35,
+		LayoutOrder = 1,
+	}, column)
 	Ui.pad(teamList, 10, 8)
 	Ui.list(teamList, 2)
+	questList = Ui.frame({
+		Size = UDim2.fromOffset(270, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
+		BackgroundTransparency = 0.35,
+		LayoutOrder = 2,
+		Visible = false,
+	}, column)
+	Ui.pad(questList, 10, 8)
+	Ui.list(questList, 2)
+end
+
+-- Today's tasks, from the Quests attribute the server keeps (ShiftQuests): done ones ticked, the
+-- rest with how far they have got and what they pay.
+local function renderQuests()
+	for _, child in questList:GetChildren() do
+		if child:IsA("TextLabel") then
+			child:Destroy()
+		end
+	end
+	local raw = player:GetAttribute("Quests")
+	local ok, quests = pcall(function()
+		return HttpService:JSONDecode(if typeof(raw) == "string" then raw else "[]")
+	end)
+	if not ok or typeof(quests) ~= "table" or #quests == 0 then
+		questList.Visible = false
+		return
+	end
+	questList.Visible = true
+	local left = math.max(0, 86400 - os.time() % 86400)
+	Ui.eyebrow(
+		`TODAY'S TASKS  ·  NEW IN {left // 3600}H {(left % 3600) // 60}M`,
+		{ LayoutOrder = 0 },
+		questList
+	)
+	for index, quest in quests do
+		local done = quest.done == true
+		Ui.mono({
+			Size = UDim2.new(1, 0, 0, 16),
+			TextSize = 12,
+			TextColor3 = if done then Ui.C.Accent else Ui.C.Text,
+			TextTransparency = if done then 0.35 else 0,
+			Text = if done
+				then `✓ {quest.text}`
+				else `○ {quest.text}  {quest.count}/{quest.target}  +{quest.reward}`,
+			TextTruncate = Enum.TextTruncate.AtEnd,
+			LayoutOrder = index,
+		}, questList)
+	end
 end
 
 function ShiftHud.start()
@@ -578,6 +636,16 @@ function ShiftHud.start()
 				}, teamList)
 			end
 			task.wait(0.5)
+		end
+	end)
+
+	player:GetAttributeChangedSignal("Quests"):Connect(renderQuests)
+	renderQuests()
+	-- The countdown to new tasks, once a minute.
+	task.spawn(function()
+		while true do
+			task.wait(60)
+			renderQuests()
 		end
 	end)
 

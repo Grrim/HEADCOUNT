@@ -95,6 +95,11 @@ local function snapshot(data: Wallet.Data): Wallet.Data
 	copy.archive = table.clone(data.archive)
 	copy.honours = table.clone(data.honours)
 	copy.tapes = table.clone(data.tapes)
+	copy.quests = {
+		day = data.quests.day,
+		counts = table.clone(data.quests.counts),
+		done = table.clone(data.quests.done),
+	}
 	return copy
 end
 
@@ -223,6 +228,14 @@ end
 -- Called with each player whose wallet has just been read.
 function ShiftBank.onLoaded(listener: (player: Player) -> ())
 	table.insert(listeners, listener)
+end
+
+-- Marks the wallet changed without saving now: the next regular save takes it.
+function ShiftBank.touch(player: Player)
+	local entry = entries[player]
+	if entry then
+		entry.dirty = true
+	end
 end
 
 -- Marks the wallet changed and saves it in the background.
