@@ -8,6 +8,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
+local Net = require(ReplicatedStorage.Shared.Net)
 local Palette = require(ReplicatedStorage.Shared.Config.Palette)
 local Records = require(ReplicatedStorage.Shared.Core.Records)
 local Strings = require(ReplicatedStorage.Shared.Strings)
@@ -61,20 +62,30 @@ local function renderRecords(board: Instance)
 		return if found and found:IsA("TextLabel") then found else nil
 	end
 	local title, columns, note = text("RecordsTitle"), text("RecordsColumns"), text("RecordsNote")
-	local weekly = board:GetAttribute("Kind") == "week"
+	local kind = board:GetAttribute("Kind")
+	local weekly = kind == "week"
+	local mine = kind == "friends"
 	if title then
 		title.Text = if weekly
 			then Strings.get("records_week_title", Records.untilReset(os.time()))
+			elseif mine then Strings.get("records_friends_title")
 			else Strings.get("records_title")
 	end
 	if columns then
-		columns.Text = Strings.get(if weekly then "records_week_columns" else "records_columns")
+		columns.Text = Strings.get(
+			if weekly
+				then "records_week_columns"
+				elseif mine then "records_friends_columns"
+				else "records_columns"
+		)
 	end
 	local state = board:GetAttribute("State")
 	if note then
 		local key = if typeof(state) == "string" then NOTES[state] else nil
 		if weekly and state == "empty" then
 			key = "records_week_empty"
+		elseif mine and state == "empty" then
+			key = "records_friends_empty"
 		end
 		note.Text = if key then Strings.get(key) else ""
 	end
@@ -106,7 +117,36 @@ function Lifts.start()
 			renderSolo(solo)
 		end)
 	end
-	for _, name in { "RecordsBoard", "WeeklyRecordsBoard" } do
+	-- The friends board is this player's alone: its rows arrive here and are written only locally.
+	local latest: any = nil
+	local function drawFriends()
+		local board = map:FindFirstChild("FriendsRecordsBoard")
+		local gui = board and board:FindFirstChild("RecordsGui")
+		if not board or not gui or typeof(latest) ~= "table" then
+			return
+		end
+		board:SetAttribute("State", latest.state)
+		for index = 1, Records.SHOWN do
+			local row = gui:FindFirstChild(`Row{index}`)
+			local entry = if typeof(latest.rows) == "table" then latest.rows[index] else nil
+			if row and row:IsA("TextLabel") then
+				row.Text = if entry then tostring(entry.text) else ""
+				row:SetAttribute("UserId", if entry then entry.id else nil)
+			end
+		end
+	end
+	Net.get("FriendsBoard").OnClientEvent:Connect(function(payload)
+		latest = payload
+		drawFriends()
+	end)
+	task.spawn(function()
+		local board = map:WaitForChild("FriendsRecordsBoard", 60)
+		if board then
+			board:WaitForChild("RecordsGui", 10)
+			drawFriends()
+		end
+	end)
+	for _, name in { "RecordsBoard", "WeeklyRecordsBoard", "FriendsRecordsBoard" } do
 		task.spawn(function()
 			local records = map:WaitForChild(name, 60)
 			if records then

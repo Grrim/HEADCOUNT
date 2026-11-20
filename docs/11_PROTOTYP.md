@@ -55,7 +55,9 @@ Stan na 2026-11-20. Gałąź `prototype-shift`. Etap 0 z `09_GDD_V2.md` §12 (pr
 
 - **Nagrody za miejsce w tygodniu:** pierwsza dziesiątka zakończonego tygodnia dostaje Klatki: 500 za 1. miejsce, 300 za 2., 200 za 3. i po 100 za miejsca 4–10, a do tego wyróżnienie (1st, 2nd, 3rd, Top 10) zliczane w portfelu i pokazywane na ekranie wypłaty. Żaden serwer nie musi działać o północy w poniedziałek: nagrodę odbiera się, gdy zapisany portfel gracza wczyta się na serwerze zmiany. Serwer sprawdza wtedy każdy nierozliczony zakończony tydzień (najwyżej trzy wstecz) i rozlicza go dokładnie raz (`Wallet.rewardedWeek`). Tydzień, którego nie dało się odczytać, zostaje na następny raz. Nagrody to tylko Klatki za grę, zgodnie z §6 GDD.
 
-**Czego jeszcze nie ma:** listy samych znajomych, wspólnej kolejki windy ekipy między serwerami lobby (ekipa składa się z graczy z tego samego serwera), skrótu do windy w przewodniku dla nowych, statywu i innych ulepszeń poza baterią i kasetami, taśmy zmiany (klipu z najlepszym momentem), zadań dziennych, dźwięków i grafiki docelowej.
+- **Lista znajomych:** trzecia tablica na tej samej ścianie, nad drzwiami pokoju taśm. Każdy gracz widzi na niej siebie i tych swoich znajomych z Roblox, którzy mają wynik, w tej samej kolejności co tablica wszech czasów, z piętrem z bieżącego tygodnia obok („W -3”). Serwer lobby co 5 minut czyta raz, dla wszystkich graczy, po 500 najlepszych wyników wszech czasów i z tego tygodnia (kilka stron zapytań). Każdemu graczowi dopasowuje znajomych do tej listy i wysyła mu tylko jego wiersze. Tablica jest rysowana lokalnie, więc na jednej tablicy każdy widzi co innego. Znajomy spoza pierwszych 500 nie jest pokazany; przy obecnej liczbie graczy to nikt. Zapytanie o wynik każdego znajomego osobno zjadłoby limit DataStore.
+
+**Czego jeszcze nie ma:** wspólnej kolejki windy ekipy między serwerami lobby (ekipa składa się z graczy z tego samego serwera), skrótu do windy w przewodniku dla nowych, statywu i innych ulepszeń poza baterią i kasetami, taśmy zmiany (klipu z najlepszym momentem), zadań dziennych, dźwięków i grafiki docelowej.
 
 ## 2. Jak uruchomić (bez instalowania czegokolwiek)
 

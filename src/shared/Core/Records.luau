@@ -97,4 +97,48 @@ function Records.line(rank: number, name: string, score: number, width: number):
 	return left .. shown .. string.rep(" ", gap) .. right
 end
 
+-- The friends board: this player and those of their friends who have a score, ranked like the
+-- all-time board (ties by this week's score, then by id so the order never wobbles). `names`
+-- holds the friends and the player themself; only scores found in the scanned top of each board
+-- are known.
+export type FriendRow = { rank: number, id: number, name: string, all: number, week: number }
+
+function Records.friendsBoard(
+	all: { [number]: number },
+	week: { [number]: number },
+	names: { [number]: string }
+): { FriendRow }
+	local rows: { FriendRow } = {}
+	for id, name in names do
+		local allScore = all[id] or 0
+		local weekScore = week[id] or 0
+		if allScore > 0 or weekScore > 0 then
+			table.insert(rows, { rank = 0, id = id, name = name, all = allScore, week = weekScore })
+		end
+	end
+	table.sort(rows, function(a, b)
+		if a.all ~= b.all then
+			return a.all > b.all
+		elseif a.week ~= b.week then
+			return a.week > b.week
+		end
+		return a.id < b.id
+	end)
+	while #rows > Records.SHOWN do
+		table.remove(rows)
+	end
+	for index, row in rows do
+		row.rank = index
+	end
+	return rows
+end
+
+-- A friends board line: like `line`, with this week's depth after the all-time standing.
+function Records.friendLine(row: FriendRow, width: number): string
+	local weekDeepest = Records.decode(row.week)
+	local tail = if row.week > 0 then `  W -{weekDeepest}` else "  W --"
+	local base = Records.line(row.rank, row.name, row.all, width - #tail)
+	return base .. tail
+end
+
 return Records

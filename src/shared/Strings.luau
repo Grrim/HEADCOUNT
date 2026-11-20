@@ -418,6 +418,9 @@ local EN: { [string]: string } = {
 	records_week_title = "THIS WEEK  ·  resets in {1}",
 	records_week_columns = "TOP 10 PAID ON MONDAY: 500 / 300 / 200 / 100 FRAMES",
 	records_week_empty = "No returns yet this week. The board is yours.",
+	records_friends_title = "YOU AND YOUR FRIENDS",
+	records_friends_columns = "ALL-TIME FLOOR AND FRAMES  ·  W: THIS WEEK'S FLOOR",
+	records_friends_empty = "None of you has come back up yet. Take a friend down in the crew lift.",
 }
 
 local PL: { [string]: string } = {
@@ -761,6 +764,9 @@ local PL: { [string]: string } = {
 	records_week_title = "TEN TYDZIEŃ  ·  reset za {1}",
 	records_week_columns = "TOP 10 DOSTAJE W PONIEDZIAŁEK: 500 / 300 / 200 / 100 KLATEK",
 	records_week_empty = "W tym tygodniu nikt jeszcze nie wrócił. Tablica jest twoja.",
+	records_friends_title = "TY I TWOI ZNAJOMI",
+	records_friends_columns = "PIĘTRO I KLATKI OD POCZĄTKU  ·  W: PIĘTRO W TYM TYGODNIU",
+	records_friends_empty = "Nikt z was jeszcze nie wrócił. Zabierz znajomego windą ekipy.",
 }
 
 local function localeIsPolish(): boolean

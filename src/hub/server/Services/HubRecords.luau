@@ -1,7 +1,8 @@
 --!strict
 -- The records boards high on the hall's east wall: the ten deepest returns from the shift of all
--- time, over the two lifts, and beside it the same for this week, which starts over every Monday
--- at 00:00 UTC (Core/Records). Ties go to Frames earned. The shift place writes the scores
+-- time, over the two lifts, beside it the same for this week, which starts over every Monday at
+-- 00:00 UTC (Core/Records), and a third board each player sees with only their friends on it
+-- (HubFriends fills it per player). Ties go to Frames earned. The shift place writes the scores
 -- (ShiftRecords); this reads the top of each list once a minute and writes the rows.
 --
 -- Headings are written by each client in its own language (Lifts), and a row carries the UserId
@@ -20,7 +21,8 @@ local REFRESH = 60
 -- Characters per row in the board's monospaced font.
 local WIDTH = 44
 
-type Board = { part: Part, rows: { TextLabel }, storeName: () -> string }
+-- A board with no store is drawn by each client for its own player (the friends board).
+type Board = { part: Part, rows: { TextLabel }, storeName: (() -> string)? }
 
 local names: { [number]: string } = {}
 local boards: { Board } = {}
@@ -41,7 +43,13 @@ local function label(parent: Instance, name: string, y: number, height: number, 
 end
 
 -- One board on the east wall, its face at x 39.5, centred on `z`, 16 studs wide.
-local function build(map: Instance, name: string, z: number, kind: string, storeName: () -> string)
+local function build(
+	map: Instance,
+	name: string,
+	z: number,
+	kind: string,
+	storeName: (() -> string)?
+)
 	local part = Instance.new("Part")
 	part.Name = name
 	part.Anchored = true
@@ -128,7 +136,11 @@ local function clear(board: Board)
 end
 
 local function refresh(board: Board)
-	local storeName = board.storeName()
+	local named = board.storeName
+	if not named then
+		return
+	end
+	local storeName = named()
 	-- A new week: last week's rows go at once, before the new list is even read.
 	if board.part:GetAttribute("Store") ~= storeName then
 		board.part:SetAttribute("Store", storeName)
@@ -179,6 +191,8 @@ function HubRecords.start()
 	build(map, "WeeklyRecordsBoard", -13.8, "week", function()
 		return Records.weeklyStore(Records.week(os.time()))
 	end)
+	-- Over the tape room door and on towards the locker room; its rows come from HubFriends.
+	build(map, "FriendsRecordsBoard", 6.5, "friends", nil)
 	while true do
 		for _, board in boards do
 			refresh(board)

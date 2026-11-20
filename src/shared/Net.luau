@@ -41,6 +41,7 @@ local NAMES = {
 	"IntroAction",
 	"DocsState",
 	"LockerAction",
+	"FriendsBoard",
 }
 
 local known: { [string]: boolean } = {}

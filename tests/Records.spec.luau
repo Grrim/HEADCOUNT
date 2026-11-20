@@ -124,4 +124,44 @@ return {
 		assert(data.honours.gold == 2 and data.honours.top10 == 5)
 		assert(data.honours.platinum == nil and data.honours.silver == nil)
 	end,
+
+	["the friends board ranks you and your friends who have a score"] = function()
+		local all =
+			{ [1] = Records.score(3, 100), [2] = Records.score(5, 10), [3] = Records.score(3, 100) }
+		local week = { [3] = Records.score(2, 40), [4] = Records.score(1, 5) }
+		local names = { [1] = "Me", [2] = "Ann", [3] = "Bo", [4] = "Cy", [5] = "Never played" }
+		local rows = Records.friendsBoard(all, week, names)
+		assert(#rows == 4, `{#rows} rows`)
+		assert(rows[1].name == "Ann" and rows[1].rank == 1)
+		assert(rows[2].name == "Bo", "a tie was not broken by this week")
+		assert(rows[3].name == "Me" and rows[4].name == "Cy")
+	end,
+
+	["a friends board never runs past its ten lines"] = function()
+		local all, names = {}, {}
+		for id = 1, 25 do
+			all[id] = Records.score(1, id)
+			names[id] = `P{id}`
+		end
+		local rows = Records.friendsBoard(all, {}, names)
+		assert(#rows == Records.SHOWN and rows[1].id == 25 and rows[10].rank == 10)
+	end,
+
+	["a friends line keeps its width and shows this week's floor"] = function()
+		local row = {
+			rank = 2,
+			id = 1,
+			name = "Ann",
+			all = Records.score(5, 900),
+			week = Records.score(3, 50),
+		}
+		local line = Records.friendLine(row, 44)
+		assert(#line == 44, `line was {#line} wide: {line}`)
+		assert(string.sub(line, -6) == "W -3" or string.sub(line, -4) == "W -3", line)
+		local quiet = Records.friendLine(
+			{ rank = 3, id = 2, name = "Bo", all = Records.score(1, 1), week = 0 },
+			44
+		)
+		assert(#quiet == 44 and string.sub(quiet, -4) == "W --", quiet)
+	end,
 }
