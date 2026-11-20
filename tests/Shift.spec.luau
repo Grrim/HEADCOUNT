@@ -3,8 +3,10 @@
 local FloorGen = require("../src/shared/Core/FloorGen")
 local Footage = require("../src/shared/Core/Footage")
 local Graph = require("../src/shared/Core/Graph")
+local Highlight = require("../src/shared/Core/Highlight")
 local Shift = require("../src/shared/Core/Shift")
 local Upgrades = require("../src/shared/Core/Upgrades")
+local Wallet = require("../src/shared/Core/Wallet")
 
 local function reachable(graph: Graph.Graph, from: string): number
 	local seen = { [from] = true }
@@ -371,5 +373,69 @@ return {
 			"zoom kept the wide frame"
 		)
 		assert(Upgrades.halfAngle(24, 0.5) == 24)
+	end,
+
+	["the shift tape keeps the eight seconds that held the subject longest"] = function()
+		local samples = {}
+		-- 5 s looking away, then 6 s at the subject, then 2 s away again.
+		for index = 1, 130 do
+			local on = index > 50 and index <= 110
+			table.insert(samples, { 0, 0, 0, if on then 0 else 1, 0, if on then -1 else 0 })
+		end
+		local first, last =
+			Highlight.window(samples, { x = 0, y = 0, z = -10 }, 10, 8, math.cos(math.rad(24)), 110)
+		assert(last - first + 1 == 80, `window of {last - first + 1}`)
+		assert(first <= 51 and last >= 110, `window {first}..{last} cut the shot`)
+		local short = { { 0, 0, 0, 0, 0, -1 } }
+		local a, b = Highlight.window(short, { x = 0, y = 0, z = -10 }, 10, 8, 0.9, 110)
+		assert(a == 1 and b == 1)
+	end,
+
+	["a packed path comes back the same, and junk does not come back"] = function()
+		local samples = { { 1.234, 5.678, -9.87, 0.123, -0.456, 0.789 }, { 2, 3, 4, 0, 0, -1 } }
+		local back = Highlight.unpack(Highlight.pack(samples))
+		assert(back and #back == 2)
+		assert(math.abs(back[1][1] - 1.2) < 1e-9 and math.abs(back[1][5] + 0.46) < 1e-9)
+		assert(Highlight.unpack({ 1, 2, 3 }) == nil and Highlight.unpack("x") == nil)
+		assert(Highlight.unpack({ 0 / 0, 0, 0, 0, 0, 0 }) == nil)
+		local long = {}
+		for _ = 1, 200 do
+			table.insert(long, { 0, 0, 0, 0, 0, -1 })
+		end
+		assert(#Highlight.pack(long) == Highlight.MAX_SAMPLES * 6, "a path ran past the limit")
+	end,
+
+	["the Archive keeps five tapes, trading its weakest for a better one"] = function()
+		local data = Wallet.default()
+		local function tape(stars: number, at: number): Wallet.Tape
+			return {
+				seed = 7,
+				depth = 2,
+				stars = stars,
+				rarity = "rare",
+				kind = "standing",
+				by = "Ann",
+				at = at,
+				hz = 10,
+				track = Highlight.pack({ { 0, 0, 0, 0, 0, -1 } }),
+			}
+		end
+		for at = 1, 5 do
+			assert(Wallet.saveTape(data, tape(if at == 3 then 2 else 4, at)))
+		end
+		local kept, why = Wallet.saveTape(data, tape(4, 1))
+		assert(not kept and why == "kept", "the same tape was kept twice")
+		kept, why = Wallet.saveTape(data, tape(2, 9))
+		assert(not kept and why == "full")
+		assert(Wallet.saveTape(data, tape(5, 10)))
+		assert(#data.tapes == 5)
+		for _, saved in data.tapes do
+			assert(saved.stars >= 4, "the weakest tape stayed")
+		end
+		local stored = Wallet.migrate({ data = data }).data
+		assert(#stored.tapes == 5 and stored.tapes[1].by == "Ann")
+		local hostile =
+			Wallet.migrate({ data = { tapes = { { seed = 1, depth = 99 }, "x" } } }).data
+		assert(#hostile.tapes == 0)
 	end,
 }

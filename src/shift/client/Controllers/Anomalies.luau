@@ -10,10 +10,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
-local Build = require(ReplicatedStorage.Shared.World.Build)
+local Figures = require(ReplicatedStorage.Shared.World.Figures)
 local LensView = require(ReplicatedStorage.ClientCommon.LensView)
 local Palette = require(ReplicatedStorage.Shared.Config.Palette)
-local Props = require(ReplicatedStorage.Shared.World.Props)
 
 local Anomalies = {}
 
@@ -23,53 +22,14 @@ local controllers: { [string]: any }
 local layer: Folder
 local figures: { [BasePart]: Figure } = {}
 
-local function inert(model: Instance)
-	for _, part in model:GetDescendants() do
-		if part:IsA("BasePart") then
-			part.Anchored = true
-			part.CanCollide = false
-			part.CanQuery = false
-			part.CanTouch = false
-		end
-	end
-end
-
-local function standing(model: Model, base: CFrame)
-	local function piece(size: Vector3, offset: CFrame, color: Color3, shape: Enum.PartType?)
-		local part = Instance.new("Part")
-		part.Size = size
-		part.CFrame = base * offset
-		part.Color = color
-		part.Material = Enum.Material.SmoothPlastic
-		if shape then
-			part.Shape = shape
-		end
-		part.Parent = model
-	end
-	piece(Vector3.new(0.7, 3, 0.8), CFrame.new(-0.45, 1.5, 0), Palette.Suit)
-	piece(Vector3.new(0.7, 3, 0.8), CFrame.new(0.45, 1.5, 0), Palette.Suit)
-	piece(Vector3.new(2, 2.8, 1), CFrame.new(0, 4.4, 0), Palette.Suit)
-	piece(Vector3.new(0.6, 2.6, 0.6), CFrame.new(-1.3, 4.2, 0), Palette.Suit)
-	piece(Vector3.new(0.6, 2.6, 0.6), CFrame.new(1.3, 4.2, 0), Palette.Suit)
-	piece(Vector3.new(1.3, 1.3, 1.3), CFrame.new(0, 6.5, 0), Palette.Skin, Enum.PartType.Ball)
-	piece(Vector3.new(1.3, 0.24, 0.1), CFrame.new(0, 6.6, -0.62), Palette.Ink)
-end
-
 local function build(marker: BasePart)
 	local kind = marker:GetAttribute("Kind")
 	local seed = marker:GetAttribute("Seed")
-	local random = Random.new(if typeof(seed) == "number" then seed else 1)
-	local yaw = random:NextNumber(0, math.pi * 2)
-	local base = CFrame.new(marker.Position) * CFrame.Angles(0, yaw, 0)
-	local model = Instance.new("Model")
-	model.Name = "Anomaly"
-	if kind == "standing" then
-		standing(model, base)
-	else
-		Build.chair(model, "Chair", base)
-		Props.sitter(model, base, random:NextInteger(1, 3))
-	end
-	inert(model)
+	local model, base = Figures.anomaly(
+		if typeof(kind) == "string" then kind else "sitter",
+		marker.Position,
+		if typeof(seed) == "number" then seed else 1
+	)
 
 	local tag = Instance.new("Part")
 	tag.Name = "Tag"

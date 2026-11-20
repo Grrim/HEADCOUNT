@@ -10,6 +10,8 @@
 --
 -- A lock is stale once nobody has refreshed it for `ttl` seconds, so a crashed server can not
 -- hold a record for ever. A transform that returns nil leaves the cloud record untouched.
+local Highlight = require("./Highlight")
+
 local Wallet = {}
 
 Wallet.VERSION = 1
@@ -19,6 +21,21 @@ Wallet.KINDS = { "sitter", "standing", "watcher", "extra" }
 Wallet.HONOURS = { "gold", "silver", "bronze", "top10" }
 -- How many finished weeks back a returning player can still collect.
 Wallet.CLAIM_WEEKS = 3
+-- Shift tapes a player can keep in their Archive.
+Wallet.TAPES = 5
+
+-- A shift tape kept in the Archive: enough to rebuild the floor and fly the camera again.
+export type Tape = {
+	seed: number,
+	depth: number,
+	stars: number,
+	rarity: string,
+	kind: string,
+	by: string,
+	at: number,
+	hz: number,
+	track: { number },
+}
 
 export type Data = {
 	v: number,
@@ -37,6 +54,7 @@ export type Data = {
 	-- the commendations won so far, counted by kind (gold, silver, bronze, top10).
 	rewardedWeek: number,
 	honours: { [string]: number },
+	tapes: { Tape },
 }
 
 export type Lock = { id: string, at: number }
@@ -56,7 +74,76 @@ function Wallet.default(): Data
 		weekEarned = 0,
 		rewardedWeek = 0,
 		honours = {},
+		tapes = {},
 	}
+end
+
+local RARITIES = { common = true, rare = true, epic = true, legendary = true }
+local FIGURES = { sitter = true, standing = true, watcher = true, extra = true }
+
+-- A tape as stored, or nil for anything that is not one.
+function Wallet.readTape(raw: any): Tape?
+	if typeof(raw) ~= "table" then
+		return nil
+	end
+	local seed, depth, stars, at, hz = raw.seed, raw.depth, raw.stars, raw.at, raw.hz
+	if
+		typeof(seed) ~= "number"
+		or typeof(depth) ~= "number"
+		or typeof(stars) ~= "number"
+		or typeof(at) ~= "number"
+		or typeof(hz) ~= "number"
+		or depth < 1
+		or depth > 20
+		or stars < 1
+		or stars > 5
+		or hz < 1
+		or hz > 30
+		or not RARITIES[raw.rarity]
+		or not FIGURES[raw.kind]
+		or typeof(raw.by) ~= "string"
+	then
+		return nil
+	end
+	if not Highlight.unpack(raw.track) then
+		return nil
+	end
+	return {
+		seed = math.floor(seed),
+		depth = math.floor(depth),
+		stars = math.floor(stars),
+		rarity = raw.rarity,
+		kind = raw.kind,
+		by = string.sub(raw.by, 1, 40),
+		at = math.floor(at),
+		hz = hz,
+		track = table.clone(raw.track),
+	}
+end
+
+-- Keeps a tape in the Archive. A full Archive gives up its weakest tape for a better one.
+-- Returns whether it was kept and, when not, why ("kept" for one already there, or "full").
+function Wallet.saveTape(data: Data, tape: Tape): (boolean, string?)
+	for _, kept in data.tapes do
+		if kept.seed == tape.seed and kept.depth == tape.depth and kept.at == tape.at then
+			return false, "kept"
+		end
+	end
+	if #data.tapes < Wallet.TAPES then
+		table.insert(data.tapes, tape)
+		return true, nil
+	end
+	local weakest, weakestIndex = math.huge, 0
+	for index, kept in data.tapes do
+		if kept.stars < weakest then
+			weakest, weakestIndex = kept.stars, index
+		end
+	end
+	if tape.stars <= weakest then
+		return false, "full"
+	end
+	data.tapes[weakestIndex] = tape
+	return true, nil
 end
 
 local function count(value: any, low: number, high: number): number?
@@ -82,6 +169,14 @@ function Wallet.migrate(raw: any): Record
 			data.weekDeepest = count(stored.weekDeepest, 0, 100) or 0
 			data.weekEarned = count(stored.weekEarned, 0, 1e12) or 0
 			data.rewardedWeek = count(stored.rewardedWeek, 0, 1e7) or 0
+			if typeof(stored.tapes) == "table" then
+				for _, storedTape in stored.tapes do
+					local tape = Wallet.readTape(storedTape)
+					if tape and #data.tapes < Wallet.TAPES then
+						table.insert(data.tapes, tape)
+					end
+				end
+			end
 			if typeof(stored.honours) == "table" then
 				for _, kind in Wallet.HONOURS do
 					data.honours[kind] = count(stored.honours[kind], 1, 1e6)

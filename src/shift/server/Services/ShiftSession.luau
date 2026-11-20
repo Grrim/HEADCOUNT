@@ -182,6 +182,11 @@ function ShiftSession.takeTripod(player: Player): number
 	return seconds
 end
 
+-- The seed the current floors are built from (Core/FloorGen, World/FloorBuild).
+function ShiftSession.seed(): number
+	return seed
+end
+
 function ShiftSession.useTape(player: Player): boolean
 	local kit = kitOf(player)
 	if kit.tapes <= 0 or not kit.hasCamera then
@@ -530,6 +535,9 @@ local function sendResult(player: Player)
 		upgrades = upgrades,
 		archive = archive,
 		honours = data.honours,
+		-- The shift's tape, and the ones this player keeps in their Archive.
+		tape = services.ShiftTapes.highlight,
+		tapes = data.tapes,
 		saved = services.ShiftBank.saving(player),
 	})
 end
@@ -559,6 +567,7 @@ end
 
 local function newShift()
 	seed = Random.new():NextInteger(1, 1000000)
+	services.ShiftTapes.resetHighlight()
 	shiftStarted = os.clock()
 	ShiftSession.shift = Shift.new(Shift.quotaFor(#Players:GetPlayers()))
 	ShiftSession.floor = nil
@@ -738,6 +747,26 @@ local function onAction(player: Player, action: unknown, arg: unknown)
 		else
 			ShiftSession.tell(player, "Finish the shift first. The lift is the only way out.")
 		end
+	elseif action == "savetape" then
+		local tape = services.ShiftTapes.highlight
+		if phase ~= "over" or not tape then
+			return
+		end
+		if not services.ShiftBank.loaded(player) or services.ShiftTravel.isLeaving(player) then
+			ShiftSession.tell(player, "Your wallet is busy. Try again in a moment.")
+			return
+		end
+		local data = services.ShiftBank.data(player)
+		local kept, why = Wallet.saveTape(data, table.clone(tape))
+		if kept then
+			services.ShiftBank.changed(player)
+			ShiftSession.tell(player, "Saved to your Archive.")
+		elseif why == "kept" then
+			ShiftSession.tell(player, "That tape is already in your Archive.")
+		else
+			ShiftSession.tell(player, "Your Archive is full of better tapes.")
+		end
+		sendResult(player)
 	elseif action == "next" then
 		if phase == "over" and not ShiftSession.busy then
 			newShift()

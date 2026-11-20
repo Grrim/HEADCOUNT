@@ -32,6 +32,10 @@ local liftHint: TextLabel
 local carryLabel: TextLabel
 local teamList: Frame
 local results: Frame
+-- Beside the pay screen: the shift tape playing, and the tapes kept in the Archive.
+local tapePanel: Frame
+local tapeScreen: Frame
+local controllers: { [string]: any }
 local lastNoticeId = 0
 local state: { [string]: any } = { phase = "ready", depth = 0, quota = 40, banked = 0, carried = 0 }
 local toastToken = 0
@@ -130,13 +134,89 @@ function ShiftHud.phase(): string
 	return state.phase or "ready"
 end
 
+local function closeTapes()
+	tapePanel.Visible = false
+	-- Alone, the pay screen stands in the middle; beside a tape panel, right of it.
+	results.Position = UDim2.fromScale(0.5, 0.5)
+	-- Clearing the screen destroys the playing copy and stops it.
+	tapeScreen:ClearAllChildren()
+end
+
 local function closeResults()
 	results.Visible = false
+	closeTapes()
+end
+
+local function tapeLabel(tape: any): string
+	return `{stars(tape.stars or 0)}  -{tape.depth}  {tape.by or ""}`
+end
+
+-- The tape panel: the shift's tape playing (if the shift had one), a button to keep it, and every
+-- tape already kept, each one a button that plays it.
+local function showTapes(data: { [string]: any })
+	local shiftTape = data.tape
+	local kept = if typeof(data.tapes) == "table" then data.tapes else {}
+	if (typeof(shiftTape) ~= "table" and #kept == 0) or Ui.compact() then
+		closeTapes()
+		return
+	end
+	tapePanel.Visible = true
+	results.Position = UDim2.fromScale(0.62, 0.5)
+	local list = tapePanel:FindFirstChild("TapeList")
+	if list then
+		list:Destroy()
+	end
+	local holder = Ui.frame({
+		Name = "TapeList",
+		Size = UDim2.new(1, 0, 0, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
+		BackgroundTransparency = 1,
+		LayoutOrder = 3,
+	}, tapePanel)
+	Ui.list(holder, 6)
+	local function playTape(tape: any)
+		controllers.ShiftTapeView.play(tapeScreen, tape)
+	end
+	if typeof(shiftTape) == "table" then
+		playTape(shiftTape)
+		Ui.primary(
+			"SAVE TO ARCHIVE",
+			{ Size = UDim2.new(1, 0, 0, 36), LayoutOrder = 1 },
+			holder,
+			function()
+				Net.get("ShiftAction"):FireServer("savetape")
+			end
+		)
+	else
+		playTape(kept[1])
+	end
+	Ui.eyebrow(`ARCHIVE TAPES  {#kept}/5`, { LayoutOrder = 2 }, holder)
+	for index, tape in kept do
+		Ui.quiet(
+			tapeLabel(tape),
+			{ Size = UDim2.new(1, 0, 0, 26), LayoutOrder = 2 + index },
+			holder,
+			function()
+				playTape(tape)
+			end
+		)
+	end
+	if typeof(shiftTape) == "table" then
+		Ui.quiet(
+			"THIS SHIFT'S TAPE",
+			{ Size = UDim2.new(1, 0, 0, 26), LayoutOrder = 20 },
+			holder,
+			function()
+				playTape(shiftTape)
+			end
+		)
+	end
 end
 
 local function showResults(data: { [string]: any })
 	results:ClearAllChildren()
 	results.Visible = true
+	showTapes(data)
 	Ui.pad(results, 22, 18)
 	Ui.list(results, 10)
 	-- A modal button frees the mouse from first person while the panel is open.
@@ -382,6 +462,26 @@ local function build()
 		Visible = false,
 	}, gui)
 
+	tapePanel = Ui.frame({
+		AnchorPoint = Vector2.new(1, 0.5),
+		Position = UDim2.new(0.62, -252, 0.5, 0),
+		Size = UDim2.fromOffset(360, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
+		BackgroundTransparency = 0.08,
+		Visible = false,
+	}, gui)
+	Ui.pad(tapePanel, 12, 12)
+	Ui.list(tapePanel, 8)
+	Ui.eyebrow("SHIFT TAPE", { LayoutOrder = 1 }, tapePanel)
+	tapeScreen = Ui.frame({
+		Size = UDim2.fromOffset(336, 189),
+		BackgroundColor3 = Color3.new(0, 0, 0),
+		ClipsDescendants = true,
+		LayoutOrder = 2,
+	}, tapePanel)
+	-- A narrow screen has no room beside the pay screen: there the tape panel is left out
+	-- (showTapes).
+
 	carryLabel = Ui.mono({
 		Position = UDim2.fromOffset(18, 86),
 		Size = UDim2.fromOffset(340, 16),
@@ -400,6 +500,10 @@ local function build()
 	}, gui)
 	Ui.pad(teamList, 10, 8)
 	Ui.list(teamList, 2)
+end
+
+function ShiftHud.init(all: { [string]: any })
+	controllers = all
 end
 
 function ShiftHud.start()

@@ -16,6 +16,9 @@ local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config.Game)
 local Footage = require(ReplicatedStorage.Shared.Core.Footage)
+local Highlight = require(ReplicatedStorage.Shared.Core.Highlight)
+local Shift = require(ReplicatedStorage.Shared.Core.Shift)
+local Wallet = require(ReplicatedStorage.Shared.Core.Wallet)
 local Net = require(ReplicatedStorage.Shared.Net)
 local RateLimit = require(ReplicatedStorage.Shared.Core.RateLimit)
 local Registrar = require(ReplicatedStorage.Shared.Core.Registrar)
@@ -58,6 +61,51 @@ local function headOf(player: Player): BasePart?
 	local character = player.Character
 	local head = character and character:FindFirstChild("Head")
 	return if head and head:IsA("BasePart") then head else nil
+end
+
+-- The shift tape: the best shot of the shift so far (by what it paid before any earlier shot of
+-- the same subject was taken off), cut to the stretch that held its subject longest.
+ShiftTapes.highlight = nil :: Wallet.Tape?
+local highlightWorth = 0
+
+function ShiftTapes.resetHighlight()
+	ShiftTapes.highlight = nil
+	highlightWorth = 0
+end
+
+local function considerHighlight(
+	player: Player,
+	samples: { Tape.Sample },
+	shot: Footage.Shot,
+	anomaly: any,
+	cos: number
+)
+	local session = services.ShiftSession
+	local worth = shot.value * Shift.multiplier(session.shift.depth)
+	if worth <= highlightWorth then
+		return
+	end
+	local p = anomaly.position
+	local first, last = Highlight.window(
+		samples,
+		{ x = p.X, y = p.Y, z = p.Z },
+		TAPE.SampleHz,
+		Highlight.SECONDS,
+		cos,
+		Config.Lens.FramingRange
+	)
+	highlightWorth = worth
+	ShiftTapes.highlight = {
+		seed = session.seed(),
+		depth = session.shift.depth,
+		stars = shot.stars,
+		rarity = anomaly.rarity,
+		kind = anomaly.kind,
+		by = player.DisplayName,
+		at = os.time(),
+		hz = TAPE.SampleHz,
+		track = Highlight.pack(samples, first, last),
+	}
 end
 
 function ShiftTapes.isPlaying(player: Player): boolean
@@ -201,6 +249,10 @@ local function onStop(player: Player, raw: unknown)
 		if anomaly then
 			session.archive(player, anomaly.kind, shot.stars)
 		end
+	end
+	local top = shots[1]
+	if top and byId[top.id] then
+		considerHighlight(player, samples, top, byId[top.id], cos)
 	end
 	local gain, improved = Footage.improve(session.best, shots)
 	local added = session.addFootage(player, gain)

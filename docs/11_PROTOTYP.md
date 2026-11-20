@@ -69,7 +69,9 @@ Stan na 2026-11-20. Gałąź `prototype-shift`. Etap 0 z `09_GDD_V2.md` §12 (pr
   - **Latarka** (zasięg 55 / 70 / 85 studs zamiast 40): dłuższy, jaśniejszy i szerszy snop, ale Bileter zauważa ją z dalej (16 → 19 / 22 / 25 studs).
   - Ekran wypłaty pokazuje każde ulepszenie w jego jednostkach (s, x zoom, poziom, studs).
 
-**Czego jeszcze nie ma:** taśmy zmiany (klipu z najlepszym momentem), zadań dziennych, dźwięków i grafiki docelowej.
+- **Taśma zmiany** (§7 GDD): serwer zapamiętuje najlepsze ujęcie zmiany (według tego, ile zapłaciło, z mnożnikiem piętra) i wycina z niego 8 s, które najdłużej trzymały obiekt w kadrze. Na ekranie wypłaty, w panelu obok, taśma gra w pętli: piętro, którego już nie ma, jest odbudowywane z ziarna i głębokości (wspólne moduły `World/FloorBuild` i `World/Figures`, tymi samymi serwer buduje piętro do gry) w ViewportFrame, ze wszystkimi postaciami, które pokazywał wizjer. Kamera leci zapisaną ścieżką, z liniami i opisem jak na kasecie. **SAVE TO ARCHIVE** zachowuje taśmę w zapisanym portfelu (do 5; pełne Archiwum oddaje najsłabszą taśmę za lepszą), a zapisane taśmy można obejrzeć przyciskami w tym samym panelu. Taśma to tylko liczby (ziarno, głębokość, spakowana ścieżka, około 3 KB), więc da się ją odtworzyć gdziekolwiek, także w przyszłości na telewizorze w szafce w lobby. Na wąskim ekranie (telefon) panel taśmy jest pomijany. Ujawnienie Statysty nie trafia na taśmę, bo nie ma nagranej ścieżki kamery.
+
+**Czego jeszcze nie ma:** telewizora w szafce w lobby z zapisanymi taśmami, taśmy zmiany (klipu z najlepszym momentem), zadań dziennych, dźwięków i grafiki docelowej.
 
 ## 2. Jak uruchomić (bez instalowania czegokolwiek)
 
