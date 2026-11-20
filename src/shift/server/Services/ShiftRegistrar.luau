@@ -78,6 +78,23 @@ function ShiftRegistrar.stop()
 	anchor.Position = Vector3.new(0, -100, 0)
 end
 
+-- The rule of every tape (Core/Registrar.onReplay): watching one pulls him one node toward the
+-- viewer. ShiftTapes leaves the first viewing on each floor free. Asleep, he does not hear it.
+function ShiftRegistrar.onReplay(player: Player)
+	local current = state
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if not running or not current or not root then
+		return
+	end
+	local p = root.Position
+	local event = Registrar.onReplay(current, graph, p.X, 0, p.Z, RULES)
+	if event and event.node then
+		placeAnchor(event.node)
+		send("jump")
+	end
+end
+
 -- True while he stands in the lift's doorway room and nobody has him in frame.
 function ShiftRegistrar.blocksDoor(): boolean
 	local current = state
@@ -114,7 +131,10 @@ local function gatherPlayers(): { Registrar.PlayerInput }
 				z = p.Z,
 				cut = player:GetAttribute("OffFrame") == true or safe,
 				sees = services.Lens.clearLine(p + Vector3.new(0, 1.5, 0), anchor.Position),
-				reachBonus = 0,
+				-- Someone stuck watching a tape gets longer to look up and frame him.
+				reachBonus = if services.ShiftTapes.isPlaying(player)
+					then SHIFT.PlaybackReachBonus
+					else 0,
 			})
 		end
 	end

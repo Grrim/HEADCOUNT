@@ -146,9 +146,12 @@ local function buildLift(map: Folder)
 		Enum.Material.Metal
 	)
 
+	-- The leaves never block a lens or a sight line: with the doors almost shut, the Registrar in
+	-- the doorway would otherwise drop out of frame and hold them open for good.
 	local function leaf(name: string): Part
 		local part =
 			Build.box(lift, name, 0, 0, 0, 3.2, DOOR_HEIGHT, 0.4, metal, Enum.Material.Metal)
+		part.CanQuery = false
 		return part
 	end
 	doorLeft = leaf("DoorLeft")

@@ -32,6 +32,9 @@
           "$path": "src/shift/client",
           "RegistrarView": {
             "$path": "src/mission/client/Controllers/RegistrarView.luau"
+          },
+          "UsherView": {
+            "$path": "src/mission/client/Controllers/UsherView.luau"
           }
         }
       }

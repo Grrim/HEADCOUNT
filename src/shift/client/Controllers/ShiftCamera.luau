@@ -1,6 +1,8 @@
 --!strict
 -- The camera on a shift: raise, record, flashlight. Raising slows you down and drains the battery
--- the server keeps; an empty battery drops the lens until it has charged back up.
+-- the server keeps; an empty battery drops the lens until it has charged back up. A player whose
+-- camera fell when they were cut has no lens until they pick one up or ride the lift. Watching
+-- tapes is ShiftPlayback's.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -25,10 +27,13 @@ local recording = false
 local track: { { number } } = {}
 local recordStart = 0
 local lastSample = 0
-local light: SpotLight? = nil
 
 local function isCut(): boolean
 	return player:GetAttribute("OffFrame") == true
+end
+
+local function hasCamera(): boolean
+	return player:GetAttribute("HasCamera") ~= false
 end
 
 local function stopRecording()
@@ -43,7 +48,7 @@ local function stopRecording()
 end
 
 local function startRecording()
-	if not LensView.raised or recording then
+	if not LensView.raised or recording or controllers.ShiftPlayback.active() then
 		return
 	end
 	if controllers.ShiftHud.phase() ~= "floor" then
@@ -66,7 +71,13 @@ local function startRecording()
 end
 
 local function onLens()
-	if isCut() then
+	if isCut() or controllers.ShiftPlayback.active() then
+		return
+	end
+	if not LensView.raised and not hasCamera() then
+		controllers.ShiftHud.toast(
+			"Your camera fell when you were cut. Pick one up, or ride the lift."
+		)
 		return
 	end
 	if not LensView.raised and player:GetAttribute("BatteryEmpty") == true then
@@ -87,25 +98,12 @@ local function onRecord()
 	end
 end
 
+-- The torch is a real light on the server: the Usher has to be able to see it.
 local function onLight()
-	local character = player.Character
-	local head = character and character:FindFirstChild("Head")
-	if not head then
+	if isCut() then
 		return
 	end
-	if not light or light.Parent ~= head then
-		local made = Instance.new("SpotLight")
-		made.Angle = 50
-		made.Range = 40
-		made.Brightness = 2.2
-		made.Color = Color3.fromRGB(255, 236, 200)
-		made.Shadows = true
-		made.Enabled = false
-		made.Parent = head
-		light = made
-	end
-	local current = light :: SpotLight
-	current.Enabled = not current.Enabled
+	Net.get("FlashlightToggle"):FireServer()
 	AudioDirector.play("Wrong", 0.25, 1.4)
 end
 
@@ -123,6 +121,10 @@ local function refreshTapes()
 	if typeof(left) == "number" and typeof(total) == "number" then
 		LensView.setTapes(math.max(0, left), total)
 	end
+end
+
+function ShiftCamera.stopRecording()
+	stopRecording()
 end
 
 function ShiftCamera.init(all: { [string]: any })
@@ -170,10 +172,14 @@ function ShiftCamera.start()
 			LensView.setRaised(false)
 		end
 	end)
+	player:GetAttributeChangedSignal("HasCamera"):Connect(function()
+		if not hasCamera() and LensView.raised then
+			LensView.setRaised(false)
+		end
+	end)
 	player:GetAttributeChangedSignal("TapesLeft"):Connect(refreshTapes)
 	player:GetAttributeChangedSignal("TapesMax"):Connect(refreshTapes)
 	player.CharacterAdded:Connect(function()
-		light = nil
 		task.defer(applyWalk)
 	end)
 	refreshTapes()

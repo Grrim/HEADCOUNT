@@ -33,6 +33,7 @@ local NAMES = {
 	"ShiftAction",
 	"FootageScored",
 	"ShiftResult",
+	"ExtraEvent",
 	-- hub
 	"PartyAction",
 	"PartyState",

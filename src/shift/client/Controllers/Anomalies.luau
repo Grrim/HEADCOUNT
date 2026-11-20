@@ -125,7 +125,7 @@ local function remove(marker: Instance)
 end
 
 local function visible(): boolean
-	return LensView.raised or controllers.Audience.offFrame
+	return LensView.raised or controllers.Audience.offFrame or controllers.ShiftPlayback.active()
 end
 
 function Anomalies.init(all: { [string]: any })

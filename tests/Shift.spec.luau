@@ -87,10 +87,12 @@ return {
 			assert(spot.room ~= floor.start, "an anomaly in the lobby")
 			perRoom[spot.room] = (perRoom[spot.room] or 0) + 1
 		end
+		local vaultRoom = floor.vault and floor.vault.room
 		for id = 1, floor.width * floor.height do
 			if id ~= floor.start then
 				local n = perRoom[id] or 0
-				assert(n >= 1 and n <= 2, `room {id} has {n}`)
+				local most = if id == vaultRoom then 3 else 2
+				assert(n >= 1 and n <= most, `room {id} has {n}`)
 			end
 		end
 	end,
@@ -227,5 +229,100 @@ return {
 		assert(Upgrades.nextCost(levels, "battery") == nil)
 		ok = Upgrades.buy(levels, 9999, "battery")
 		assert(not ok)
+	end,
+	["a vault is a dead end off the lift's floor, never the lobby, never on floor -1"] = function()
+		local vaults = 0
+		for seed = 1, 60 do
+			assert(FloorGen.generate(seed, 1).vault == nil, "a vault on the first floor")
+			for depth = 2, 5 do
+				local floor = FloorGen.generate(seed, depth)
+				local vault = floor.vault
+				if vault then
+					vaults += 1
+					assert(vault.room ~= floor.start, "the lobby locked")
+					local doorways = 0
+					for _, link in floor.links do
+						if link.a == vault.room or link.b == vault.room then
+							doorways += 1
+						end
+					end
+					assert(doorways == 1, `vault room {vault.room} has {doorways} doorways`)
+					local prize = false
+					for _, spot in floor.spots do
+						if spot.room == vault.room and spot.rarity ~= "common" then
+							prize = true
+						end
+					end
+					assert(prize, "a vault with nothing worth the code")
+				end
+			end
+		end
+		assert(vaults > 120, `only {vaults} vaults in 240 floors`)
+	end,
+
+	["locking the vault leaves every other room reachable from the lift"] = function()
+		for seed = 1, 40 do
+			for depth = 2, 5 do
+				local floor = FloorGen.generate(seed, depth)
+				local vault = floor.vault
+				if vault then
+					local open = FloorGen.openGraph(floor)
+					assert(open[`r{vault.room}`] == nil, "the vault is open to walkers")
+					assert(
+						reachable(open, `r{floor.start}`) == count(open),
+						`seed {seed} depth {depth}: the vault cut the floor in two`
+					)
+					assert(count(open) == count(FloorGen.graph(floor)) - 2)
+				end
+			end
+		end
+	end,
+
+	["a point is placed in the room it stands in, and the lift is in none"] = function()
+		local floor = FloorGen.generate(5, 2)
+		for id = 1, floor.width * floor.height do
+			local x, z = FloorGen.roomCentre(floor, id)
+			assert(FloorGen.roomAt(floor, x, z) == id)
+			assert(FloorGen.roomAt(floor, x + 17, z - 17) == id)
+		end
+		assert(FloorGen.roomAt(floor, 0, -6) == nil, "the lift counted as a room")
+	end,
+
+	["footage rides on the camera that shot it, and falls with it"] = function()
+		local state = Shift.new(40)
+		Shift.descend(state)
+		Shift.arrive(state)
+		assert(Shift.addFootage(state, 20, 1) == 20 and Shift.addFootage(state, 5, 2) == 5)
+		assert(Shift.carriedOf(state, 1) == 20 and state.carried == 25)
+		assert(Shift.drop(state, 1) == 20 and state.carried == 5)
+		assert(Shift.drop(state, 1) == 0, "nothing left to drop")
+		assert(Shift.pickUp(state, 2, 20) and Shift.carriedOf(state, 2) == 25)
+		assert(state.carried == 25)
+		assert(Shift.ascend(state) and state.banked == 25 and next(state.carriedBy) == nil)
+	end,
+
+	["a camera left on the floor is gone once the lift leaves"] = function()
+		local state = Shift.new(10)
+		Shift.descend(state)
+		Shift.arrive(state)
+		Shift.addFootage(state, 30, 7)
+		local fallen = Shift.drop(state, 7)
+		Shift.descend(state)
+		assert(state.banked == 0, "the fallen footage was banked")
+		assert(not Shift.pickUp(state, 3, fallen), "picked up during the ride")
+	end,
+
+	["something filmed in the lift counts on the ride, and only there"] = function()
+		local state = Shift.new(10)
+		Shift.descend(state)
+		Shift.arrive(state)
+		assert(Shift.addRideFootage(state, 50, 1) == 0, "a ride bonus on a floor")
+		Shift.descend(state)
+		assert(Shift.addRideFootage(state, 50, 1) == 75, "the ride to -2 pays x1.5")
+		Shift.arrive(state)
+		Shift.ascend(state)
+		assert(Shift.addRideFootage(state, 10, 1) == 15)
+		Shift.finish(state)
+		assert(state.banked == 90, `banked {state.banked}`)
 	end,
 }

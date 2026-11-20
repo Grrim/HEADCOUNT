@@ -8,6 +8,9 @@
 -- Footage shot on a floor is carried until the team rides the lift away from it; only then is it
 -- banked. Losing everyone on a floor loses what was carried, and the Bureau still pays a quarter
 -- of what was banked. Bringing back less than the quota pays the same quarter.
+--
+-- Carried footage lives on the camera that shot it (`carriedBy`, keyed by holder). A camera that
+-- falls when its owner is cut takes its footage with it, and whoever picks it up carries it on.
 local Shift = {}
 
 Shift.MAX_DEPTH = 5
@@ -22,6 +25,7 @@ export type State = {
 	quota: number,
 	banked: number,
 	carried: number,
+	carriedBy: { [number]: number },
 	result: string?,
 }
 
@@ -37,6 +41,7 @@ function Shift.new(quota: number): State
 		quota = quota,
 		banked = 0,
 		carried = 0,
+		carriedBy = {},
 		result = nil,
 	}
 end
@@ -48,6 +53,7 @@ end
 local function bank(state: State)
 	state.banked += state.carried
 	state.carried = 0
+	state.carriedBy = {}
 end
 
 function Shift.canDescend(state: State): boolean
@@ -82,6 +88,8 @@ end
 
 function Shift.finish(state: State)
 	if state.phase == "return" then
+		-- Anything filmed inside the lift on the way up still arrives with it.
+		bank(state)
 		state.phase = "over"
 		state.result = "returned"
 	end
@@ -90,19 +98,60 @@ end
 function Shift.fail(state: State)
 	if state.phase == "floor" or state.phase == "ride" then
 		state.carried = 0
+		state.carriedBy = {}
 		state.phase = "over"
 		state.result = "cut"
 	end
 end
 
--- Footage counts only on a floor, already multiplied by that floor's depth. Returns what it added.
-function Shift.addFootage(state: State, value: number): number
+local function carry(state: State, value: number, holder: number?): number
+	local added = math.floor(value * Shift.multiplier(state.depth) + 0.5)
+	local key = holder or 0
+	state.carriedBy[key] = (state.carriedBy[key] or 0) + added
+	state.carried += added
+	return added
+end
+
+-- Footage counts only on a floor, already multiplied by that floor's depth. `holder` is whose
+-- camera holds it (0 when nobody in particular). Returns what it added.
+function Shift.addFootage(state: State, value: number, holder: number?): number
 	if state.phase ~= "floor" or value <= 0 then
 		return 0
 	end
-	local added = math.floor(value * Shift.multiplier(state.depth) + 0.5)
-	state.carried += added
-	return added
+	return carry(state, value, holder)
+end
+
+-- The one thing worth filming inside the lift is whatever rode along with the team. It counts
+-- during a ride either way, and arrives with the lift.
+function Shift.addRideFootage(state: State, value: number, holder: number?): number
+	if (state.phase ~= "ride" and state.phase ~= "return") or value <= 0 then
+		return 0
+	end
+	return carry(state, value, holder)
+end
+
+-- What this holder's camera carries.
+function Shift.carriedOf(state: State, holder: number): number
+	return state.carriedBy[holder] or 0
+end
+
+-- The holder's camera fell: its footage leaves the team's hands. Returns how much it held.
+function Shift.drop(state: State, holder: number): number
+	local amount = state.carriedBy[holder] or 0
+	state.carriedBy[holder] = nil
+	state.carried -= amount
+	return amount
+end
+
+-- Someone picked a fallen camera up on a floor and carries its footage on. Returns whether it was
+-- taken: only on a floor, because a camera left behind is gone with its floor.
+function Shift.pickUp(state: State, holder: number, amount: number): boolean
+	if state.phase ~= "floor" or amount < 0 then
+		return false
+	end
+	state.carriedBy[holder] = (state.carriedBy[holder] or 0) + amount
+	state.carried += amount
+	return true
 end
 
 function Shift.quotaMet(state: State): boolean

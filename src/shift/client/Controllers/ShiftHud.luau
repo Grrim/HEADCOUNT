@@ -1,7 +1,11 @@
 --!strict
 -- What a player needs on a shift, and nothing else: the floor and its multiplier, the quota, the
--- battery, short notices, the stars a shot earned, being cut out of frame, and the pay screen with
--- upgrades between shifts. Prototype text is English only and lives here, not in Strings.
+-- battery, short notices, the stars a shot earned, being cut out of frame, the team list, and the
+-- pay screen with upgrades, the depth record and the Archive between shifts. Shift text is
+-- English only and lives here, not in Strings.
+--
+-- The team list is the answer to the Extra: it can wear a teammate's face, but the list says
+-- where that teammate really is.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -25,10 +29,25 @@ local batteryLabel: TextLabel
 local toastLabel: TextLabel
 local cutLabel: TextLabel
 local liftHint: TextLabel
+local carryLabel: TextLabel
+local teamList: Frame
 local results: Frame
 local lastNoticeId = 0
 local state: { [string]: any } = { phase = "ready", depth = 0, quota = 40, banked = 0, carried = 0 }
 local toastToken = 0
+
+local KIND_NAMES = {
+	sitter = "Sitter",
+	standing = "Stander",
+	watcher = "Watcher",
+	extra = "The Extra",
+}
+
+local CUT_LINES = {
+	registrar = "CUT OUT OF FRAME",
+	extra = "IT WASN'T WHO YOU THOUGHT",
+	usher = "THE USHER SAW YOUR LIGHT",
+}
 
 local function stars(count: number): string
 	return string.rep("★", count) .. string.rep("☆", 5 - count)
@@ -117,13 +136,17 @@ local function showResults(data: { [string]: any })
 		TextColor3 = if returned and data.met then Ui.C.Accent else Ui.C.Danger,
 		LayoutOrder = 1,
 	}, results)
+	local record = data.record or 0
 	local lines = {
 		`Footage brought back: {data.banked} / quota {data.quota}`,
-		`Deepest floor: -{data.deepest}`,
+		if returned
+			then `Deepest floor: -{data.deepest}   Deepest return: -{record}`
+			else `Deepest floor: -{data.deepest} (only a ride back up counts)`,
 		if returned and data.met
 			then `Pay: {data.payout} frames`
 			else `Pay: {data.payout} frames (the Bureau pays a quarter)`,
-		`Your frames: {data.money}`,
+		`Your frames: {data.money}`
+			.. (if data.saved then "" else "   (not saved: this server only)"),
 	}
 	for index, line in lines do
 		Ui.text({
@@ -133,6 +156,26 @@ local function showResults(data: { [string]: any })
 			LayoutOrder = 1 + index,
 		}, results)
 	end
+	local archive = data.archive or {}
+	local found = 0
+	local parts = {}
+	for _, entry in archive do
+		if (entry.stars or 0) > 0 then
+			found += 1
+			table.insert(parts, `{KIND_NAMES[entry.kind] or entry.kind} {stars(entry.stars)}`)
+		else
+			table.insert(parts, "?")
+		end
+	end
+	Ui.eyebrow(`ARCHIVE  {found}/{#archive}`, { LayoutOrder = 6 }, results)
+	Ui.mono({
+		Size = UDim2.new(1, 0, 0, 36),
+		TextSize = 13,
+		TextWrapped = true,
+		TextColor3 = Ui.C.Muted,
+		Text = table.concat(parts, "   "),
+		LayoutOrder = 7,
+	}, results)
 	Ui.eyebrow("UPGRADES", { LayoutOrder = 10 }, results)
 	for index, upgrade in data.upgrades or {} do
 		local row = Ui.frame({
@@ -283,10 +326,30 @@ local function build()
 	results = Ui.frame({
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.fromScale(0.5, 0.5),
-		Size = UDim2.fromOffset(460, 420),
+		Size = UDim2.fromOffset(480, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
 		BackgroundTransparency = 0.08,
 		Visible = false,
 	}, gui)
+
+	carryLabel = Ui.mono({
+		Position = UDim2.fromOffset(18, 86),
+		Size = UDim2.fromOffset(340, 16),
+		TextSize = 12,
+		TextColor3 = Ui.C.Muted,
+		TextStrokeTransparency = 0.6,
+		Text = "",
+	}, gui)
+
+	teamList = Ui.frame({
+		AnchorPoint = Vector2.new(1, 0),
+		Position = UDim2.new(1, -18, 0, 18),
+		Size = UDim2.fromOffset(270, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
+		BackgroundTransparency = 0.35,
+	}, gui)
+	Ui.pad(teamList, 10, 8)
+	Ui.list(teamList, 2)
 end
 
 function ShiftHud.start()
@@ -317,6 +380,11 @@ function ShiftHud.start()
 			return
 		end
 		local shots = data.shots or {}
+		if data.door then
+			task.delay(3.4, function()
+				ShiftHud.toast("That tape caught the code door. Watch it (T) to read the code.")
+			end)
+		end
 		if #shots == 0 then
 			if (data.best or 0) > 0 then
 				ShiftHud.toast("Nothing better than what the team already has.", Ui.C.Muted)
@@ -335,6 +403,34 @@ function ShiftHud.start()
 		AudioDirector.play("Paper", 0.5, 1.2)
 	end)
 
+	-- Where everyone really is, from the server's view of them, twice a second.
+	task.spawn(function()
+		while true do
+			for _, child in teamList:GetChildren() do
+				if child:IsA("TextLabel") then
+					child:Destroy()
+				end
+			end
+			local players = Players:GetPlayers()
+			teamList.Visible = #players > 0
+			Ui.eyebrow("TEAM  ·  WHERE THEY REALLY ARE", { LayoutOrder = 0 }, teamList)
+			for index, other in players do
+				local where = other:GetAttribute("Where")
+				local name = if other == player then "You" else other.DisplayName
+				Ui.mono({
+					Size = UDim2.new(1, 0, 0, 16),
+					TextSize = 12,
+					TextColor3 = if other:GetAttribute("OffFrame") == true
+						then Ui.C.Danger
+						else Ui.C.Text,
+					Text = `{name}: {if typeof(where) == "string" then where else "?"}`,
+					LayoutOrder = index,
+				}, teamList)
+			end
+			task.wait(0.5)
+		end
+	end)
+
 	RunService.Heartbeat:Connect(function()
 		local level = player:GetAttribute("Battery")
 		local empty = player:GetAttribute("BatteryEmpty") == true
@@ -349,13 +445,27 @@ function ShiftHud.start()
 		if cut then
 			local progress = player:GetAttribute("RescueProgress")
 			local selfReturn = player:GetAttribute("SelfReturnAvailable") == true
-			local line = "CUT OUT OF FRAME\nA teammate can film you back (3 s)."
+			local cause = player:GetAttribute("CutBy")
+			local title = CUT_LINES[if typeof(cause) == "string" then cause else "registrar"]
+				or CUT_LINES.registrar
+			local line = `{title}\nA teammate can film you back (3 s).`
 			if typeof(progress) == "number" and progress > 0 then
-				line = `CUT OUT OF FRAME\nBeing filmed back... {math.floor(progress * 100)}%`
+				line = `{title}\nBeing filmed back... {math.floor(progress * 100)}%`
 			elseif selfReturn then
 				line ..= "\nOr walk back into the lift after 30 s (once a shift)."
 			end
-			cutLabel.Text = line
+			cutLabel.Text = line .. "\nYour camera fell where you were cut."
+		end
+
+		local carrying = player:GetAttribute("Carrying")
+		if player:GetAttribute("HasCamera") == false then
+			carryLabel.Text = "NO CAMERA: pick one up, or ride the lift for a new one"
+			carryLabel.TextColor3 = Ui.C.Danger
+		elseif typeof(carrying) == "number" and carrying > 0 then
+			carryLabel.Text = `YOUR CAMERA HOLDS {carrying}  ·  drop it and it stays here`
+			carryLabel.TextColor3 = Ui.C.Muted
+		else
+			carryLabel.Text = ""
 		end
 
 		local phase = state.phase

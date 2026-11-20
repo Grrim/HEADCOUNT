@@ -39,17 +39,24 @@ local function setLook(player: Player, cut: boolean)
 	end
 end
 
-function ShiftOffFrame.cut(player: Player)
+-- cause: "registrar", "extra" or "usher", for the line the team reads and for analytics.
+function ShiftOffFrame.cut(player: Player, cause: string?)
 	if player:GetAttribute("OffFrame") == true then
 		return
 	end
 	player:SetAttribute("OffFrame", true)
 	player:SetAttribute("SelfReturnAvailable", not selfReturned[player])
+	player:SetAttribute("CutBy", cause or "registrar")
 	setLook(player, true)
 	cutAt[player] = os.clock()
 	rescue[player] = 0
 	services.Lens.clear(player)
-	services.ShiftSession.broadcast(`{player.DisplayName} was cut out of frame. Film them for 3 s!`)
+	services.ShiftSession.onCut(player, cause or "registrar")
+	local how = if cause == "extra"
+		then `{player.DisplayName} followed someone who wasn't there.`
+		elseif cause == "usher" then `The Usher took {player.DisplayName}.`
+		else `{player.DisplayName} was cut out of frame.`
+	services.ShiftSession.broadcast(`{how} Film them for 3 s!`)
 end
 
 function ShiftOffFrame.restore(player: Player)
@@ -103,14 +110,19 @@ end
 
 function ShiftOffFrame.init(all: { [string]: any })
 	services = all
-	Players.PlayerAdded:Connect(function(player)
+	local function onJoin(player: Player)
 		player:SetAttribute("OffFrame", false)
 		player.CharacterAdded:Connect(function()
 			if player:GetAttribute("OffFrame") == true then
 				task.defer(setLook, player, true)
 			end
 		end)
-	end)
+	end
+	Players.PlayerAdded:Connect(onJoin)
+	-- Anyone already here (common in Studio, where the player can beat the scripts).
+	for _, player in Players:GetPlayers() do
+		onJoin(player)
+	end
 	Players.PlayerRemoving:Connect(function(player)
 		cutAt[player] = nil
 		rescue[player] = nil

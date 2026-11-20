@@ -12,6 +12,20 @@ Kooperacyjny horror psychologiczny na Roblox w fazie Vertical Slice (Misja 001).
 - **Publikacja na Roblox:** nic nie zostało opublikowane. `Config/Places` ma identyfikatory 0, więc teleport między miejscami nie może jeszcze działać. Publikacja wymaga wyraźnej zgody właściciela.
 - **Grywalność:** gry nie przeszedł jeszcze żaden człowiek.
 
+## Wykonane 2026-11-20 (Etap 1, alfa zmiany, w kodzie)
+
+Gałąź `prototype-shift`. Kod Etapu 1 z `docs/09_GDD_V2.md` §12 bez połączenia z lobby. Szczegóły, sterowanie i lista do testu: `docs/11_PROTOTYP.md`.
+
+- **Statysta** (`Core/Extra`, `ShiftExtra`, `ExtraView`): od −2, kopia awatara kogoś z drużyny, wabi i cofa się, potem idzie na gracza; nie rusza się w kadrze; sfilmowany z bliska przez 2 s znika i płaci najwięcej; może wsiąść do windy (tabliczka liczy go jako osobę). Lista drużyny pokazuje, gdzie naprawdę jest każdy.
+- **Taśmy i drzwi z kodem** (`ShiftTapes`, `ShiftPlayback`, `ShiftDoors`, `ShiftKeypad`, `FloorGen.vault`): T odtwarza ostatnią taśmę, każde odtworzenie po pierwszym na piętrze przyciąga Kadrowego; od −2 ślepe pomieszczenie z anomalią rzadką lub epicką zamykają drzwi, których kod widać tylko na taśmie.
+- **Kamera spada z nagraniami** (`Core/Shift.carriedBy`): nagrania należą do kamery; wycięty ją gubi, kolega może ją podnieść i wywieźć.
+- **Bileter** (`ShiftUsher` + `UsherView` z Misji 001): od −3, widzi tylko światło latarki. Latarka jest teraz światłem na serwerze.
+- **Zapis z blokadą sesji** (`Core/Wallet`, `ShiftBank`, DataStore `Shift_v1`): Klatki, ulepszenia, rekord głębokości (tylko powrót windą) i Archiwum anomalii.
+- **Analityka**: `ShiftDescend`, `ShiftEnd`, `ShiftCut`, `UpgradeBought`.
+- Bramki zielone: 100 testów (19 nowych), selene, stylua, budowa trzech miejsc. **Nic z tego nie działało w Studio.**
+
+**Następny krok:** właściciel otwiera `build/Shift.rbxl` i przechodzi listę z `docs/11_PROTOTYP.md` §3, najpierw solo, potem 2 graczy w Studio. Potem decyzja, czy przed lobby i teleportem (reszta Etapu 1) testujemy alfę na ludziach.
+
 ## Wykonane 2026-11-10
 
 - **Prywatna wersja testowa opublikowana** (właściciel opublikował, ID odczytane z logów Studio): gra „HEADCOUNT (test)”, universe 10775647200, lobby 77620606106061 (miejsce startowe), misja 102362153460645. ID są w `Config/Places.luau`. Obie opublikowane wersje sprawdzone przez otwarcie ich z chmury w Studio: mają aktualny kod i właściwe ID. Błędy 429 przy publikacji misji dotyczyły tylko historii wersji skryptów. Gry w prawdziwym kliencie (teleport, zapis, powrót) jeszcze nikt nie przeszedł. Po każdej zmianie kodu: `rojo build` i ponowna publikacja obu plików przez Publish to Roblox As… → istniejące miejsce.

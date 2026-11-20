@@ -1,28 +1,42 @@
-# 11. Prototyp zmiany: jak go uruchomić i co sprawdzić
+# 11. Zmiana: jak ją uruchomić i co sprawdzić
 
-Stan na 2026-11-19. Prototyp Etapu 0 z `09_GDD_V2.md` §12, na gałęzi `prototype-shift`. Misja 001 i lobby są nietknięte.
+Stan na 2026-11-20. Gałąź `prototype-shift`. Etap 0 z `09_GDD_V2.md` §12 (prototyp) i kod Etapu 1 (alfa) bez połączenia z lobby. Misja 001 i lobby są nietknięte.
 
-## 1. Co jest w prototypie
+## 1. Co jest w grze
+
+### Etap 0 (prototyp)
 
 - **Osobne, trzecie miejsce: Shift** (`shift.project.json` → `build/Shift.rbxl`). Działa samo, bez teleportu.
 - **Winda:** stoi w miejscu, a za zamkniętymi drzwiami powstaje kolejne piętro.
-  - Tabliczka nad drzwiami pokazuje piętro i liczbę osób w kabinie.
+  - Tabliczka nad drzwiami pokazuje piętro i liczbę postaci w kabinie.
   - Przyciski na bocznej ścianie, przy drzwiach: **DOWN** (czerwony, niżej) i **UP** (zielony, wyżej). Oba wymagają, żeby cała drużyna była w kabinie.
   - Drzwi zamykają się przez 4 s, ale stoją, gdy Kadrowy jest w pomieszczeniu przed windą, a nikt go nie filmuje.
 - **Zjazd:** około 12 s, z jednym losowym zdarzeniem (mrugające światło, kroki na dachu albo wskaźnik pokazujący −13). Na końcu dzwonek.
-- **Piętra −1 do −5:** losowo złożone z pomieszczeń (sala z krzesłami, biuro, magazyn, szatnia, korytarz z kotarami), z pętlami. Każde piętro niżej jest ciemniejsze i ma inny kolor. Od −4 meble wiszą pod sufitem.
-- **Anomalie widać tylko w kamerze:**
-  - zwykła: ktoś siedzi na krześle,
-  - rzadka: ktoś stoi bez ruchu,
-  - epicka: siedzi i obraca się w stronę obiektywu.
-- **Nagrania:** serwer ocenia każde od jednej do pięciu gwiazdek: trzymaj anomalię w kadrze co najmniej 1 s, dłużej niż 2,5 s, bliżej niż 25 i 12 studs, i choć raz w samym środku. Drużyna dostaje zapłatę za najlepsze ujęcie każdej anomalii, więc filmowanie tej samej drugi raz daje tylko różnicę.
+- **Piętra −1 do −5:** losowo złożone z pomieszczeń, z pętlami. Każde piętro niżej jest ciemniejsze i ma inny kolor. Od −4 meble wiszą pod sufitem.
+- **Anomalie widać tylko w kamerze:** zwykła (siedzi), rzadka (stoi bez ruchu), epicka (siedzi i obraca się w stronę obiektywu).
+- **Nagrania:** serwer ocenia każde od jednej do pięciu gwiazdek. Drużyna dostaje zapłatę za najlepsze ujęcie każdej anomalii.
 - **Norma:** 40 punktów solo, +20 za każdą osobę więcej. Nagrania liczą się do normy dopiero po odjeździe windą z piętra. Mnożniki pięter: ×1, ×1,5, ×2, ×3, ×4.
-- **Kadrowy:** te same reguły co w Misji 001. Budzi się 25 s po otwarciu drzwi na −1 (12 s na głębszych piętrach), z każdym piętrem jest szybszy, a solo wolniejszy.
+- **Kadrowy:** te same reguły co w Misji 001, szybszy z każdym piętrem, solo wolniejszy.
 - **Wycięcie z kadru:** kolega przywraca cię, filmując cię przez 3 s. Solo raz na zmianę możesz po 30 s sam wrócić do windy. Gdy wszyscy są wycięci i nie ma powrotu, zmiana przepada i Biuro płaci 25% tego, co było już w windzie.
-- **Kamera:** bateria (30 s, ładuje się przy opuszczonej kamerze, w windzie trzy razy szybciej), z podniesioną kamerą idziesz wolniej, kasety odnawiają się w windzie.
-- **Wypłata i ulepszenia:** po zmianie ekran z wynikiem, Klatkami i dwoma ulepszeniami (bateria, kasety), potem **NEXT SHIFT**.
+- **Kamera:** bateria, wolniejszy chód z podniesioną kamerą, kasety odnawiają się w windzie.
 
-**Czego jeszcze nie ma (zgodnie z planem):** Statysty, odtwarzania taśm, drzwi z kodem, Biletera, zapisu postępów (pieniądze i ulepszenia znikają po zamknięciu serwera), dźwięków i grafiki docelowej, wind „dołącz do ekipy”.
+### Etap 1 (alfa), dodane 2026-11-20
+
+- **Statysta (od −2):** chodzi po piętrze jako kopia awatara kogoś z drużyny (solo: twoja), macha „chodź za mną” i cofa się, gdy za nim idziesz. Po chwili albo w ślepym zaułku odwraca się i idzie na ciebie; dotyk wycina z kadru. W kamerze, na taśmie i po wycięciu widać jego prawdziwą postać: za wysoką, z głową poza kadrem.
+  - Jak Kadrowy: **nie rusza się, gdy ktoś go filmuje.**
+  - Trzymany w kadrze z bliska (do 20 studs) przez 2 s znika. To najlepiej płatne ujęcie w grze (90 przed mnożnikiem) i wpis „The Extra” w Archiwum.
+  - Nikogo nie wycina w windzie. Jeśli nikt go nie sfilmuje, z szansą 50% wsiada z drużyną: tabliczka pokazuje o jedną osobę więcej, a po otwarciu drzwi wysiada z wami na następne piętro. Sfilmowany w kabinie znika i płaci od razu.
+  - **Lista drużyny** w prawym górnym rogu pokazuje, gdzie naprawdę jest każdy z was (pomieszczenie, winda albo „cut out of frame”).
+- **Taśmy (T):** kamera trzyma trzy ostatnie nagrania z bieżącego piętra. T odtwarza ostatnie: kamera leci nagraną ścieżką w wyglądzie VHS, a ty stoisz bezbronny. Pierwsze odtworzenie drużyny na piętrze jest darmowe, każde kolejne przyciąga Kadrowego o jeden węzeł w stronę oglądającego. Od drugiego oglądania tej samej taśmy Kadrowy stoi w jej kadrze, za każdym razem bliżej.
+- **Drzwi z kodem (od −2):** jedno ślepe pomieszczenie na piętrze może być zamknięte stalowymi drzwiami z zamkiem. W środku czeka anomalia rzadka albo epicka. Kod jest na drzwiach, ale widać go **tylko na taśmie**: nagraj drzwi, odtwórz taśmę, przeczytaj kod, wpisz go przy zamku (cyframi albo myszą). Trzy błędy zacinają zamek na 8 s. Kod nie trafia do klienta inaczej niż w odtworzeniu taśmy, która objęła drzwi.
+- **Kamera spada z nagraniami:** nagrania należą do kamery, która je nakręciła. Wycięty gubi kamerę w miejscu wycięcia razem z tym, co na niej było. Każdy może ją podnieść (E) i wywieźć windą. Bez kamery nie podniesiesz wizjera, dopóki jej nie podniesiesz albo nie dostaniesz nowej w windzie. Kamera zostawiona na piętrze przepada razem z nim.
+- **Bileter (od −3):** krąży po ciemnych piętrach i widzi tylko światło latarki. Zapalona latarka w jego zasięgu i polu widzenia ściąga go; dotyk wycina z kadru. Ciemno możesz przejść obok niego. Latarka (F) jest teraz prawdziwym światłem na serwerze, więc widzą ją też koledzy.
+- **Zapis postępów:** Klatki, poziomy ulepszeń, rekord głębokości i Archiwum zapisują się w DataStore `Shift_v1` po każdej wypłacie i zakupie, z blokadą sesji (§11.3 GDD): rekord gracza należy naraz do jednego serwera, a blokada wygasa po 150 s bez odświeżenia. Bez dostępu do API (Studio z wyłączonym API Services) wszystko działa w pamięci, a ekran wypłaty mówi „not saved”.
+- **Rekord głębokości:** liczy się tylko powrót windą. Widać go na ekranie wypłaty.
+- **Archiwum anomalii:** najlepsze gwiazdki każdego rodzaju (Sitter, Stander, Watcher, The Extra), na ekranie wypłaty z licznikiem.
+- **Analityka:** zdarzenia `ShiftDescend`, `ShiftEnd` (wynik, czas, liczba graczy), `ShiftCut` (przyczyna) i `UpgradeBought` przez `AnalyticsService:LogCustomEvent`, w `pcall`, więc błąd analityki nie psuje zmiany.
+
+**Czego jeszcze nie ma:** windy „Solo” i „dołącz do ekipy” w lobby i teleportu lobby → zmiana → lobby (świadomie poza tym zakresem), tablicy rekordów w lobby, statywu i innych ulepszeń poza baterią i kasetami, taśmy zmiany (klipu z najlepszym momentem), zadań dziennych, dźwięków i grafiki docelowej.
 
 ## 2. Jak uruchomić (bez instalowania czegokolwiek)
 
@@ -31,16 +45,20 @@ Stan na 2026-11-19. Prototyp Etapu 0 z `09_GDD_V2.md` §12, na gałęzi `prototy
 3. Otwórz **`Shift.rbxl`** w Roblox Studio i naciśnij **Play**.
 4. Pojawiasz się w windzie. Podejdź do czerwonego przycisku na bocznej ścianie przy drzwiach i przytrzymaj **E** (DOWN).
 
-**Sterowanie:** Q albo prawy przycisk myszy podnosi kamerę, R nagrywa, F włącza latarkę, E obsługuje przyciski windy.
+Lokalnie, z narzędziami z `rokit.toml`: `python scripts/check.py`, potem `build/Shift.rbxl`.
+
+**Sterowanie:** Q albo prawy przycisk myszy podnosi kamerę, R nagrywa, **T odtwarza ostatnią taśmę**, F włącza latarkę, E obsługuje przyciski windy, zamki i podnoszenie kamery. Na kontrolerze: L2, R2, Y, D-pad góra.
 
 **Test w kilka osób w Studio:** zakładka Test → Clients and Servers, 2–4 graczy.
 
-**Atrybut pomocniczy w Workspace:** `DevPauseRegistrar` (boolean) = true usypia Kadrowego, żeby spokojnie obejrzeć piętra.
+**Zapis w Studio:** Game Settings → Security → Enable Studio Access to API Services. Bez tego zapis działa tylko w pamięci.
+
+**Atrybut pomocniczy w Workspace:** `DevPauseRegistrar` (boolean) = true usypia Kadrowego, Statystę i Biletera.
 
 ## 3. Co sprawdzić (lista dla testu)
 
 **Najpierw, czy w ogóle działa:**
-- [ ] Gra startuje bez czerwonych błędów w Output (szukaj `[Loader]`).
+- [ ] Gra startuje bez czerwonych błędów w Output (szukaj `[Loader]`, `[ShiftBank]`).
 - [ ] DOWN zamyka drzwi, winda „jedzie”, drzwi otwierają się na piętro −1.
 - [ ] Przez kamerę widać postacie w pokojach, a gołym okiem ich nie ma.
 - [ ] Nagranie postaci daje gwiazdki i punkty w lewym górnym rogu.
@@ -48,14 +66,33 @@ Stan na 2026-11-19. Prototyp Etapu 0 z `09_GDD_V2.md` §12, na gałęzi `prototy
 - [ ] UP kończy zmianę i pokazuje ekran wypłaty, na którym da się kliknąć przyciski.
 - [ ] NEXT SHIFT zaczyna nową zmianę.
 
+**Etap 1:**
+- [ ] T po nagraniu odtwarza taśmę i oddaje sterowanie po końcu albo po drugim T.
+- [ ] Na −2 lub głębiej: nagranie drzwi z napisem CODE LOCK, odtworzenie pokazuje trzy cyfry na drzwiach, wpisanie ich otwiera drzwi.
+- [ ] Statysta wygląda jak gracz (sprawdź, czy kopia awatara ma ubranie, akcesoria i animację chodu i machania).
+- [ ] W kamerze zamiast kopii stoi wysoka postać. Sfilmowany z bliska przez 2 s znika i płaci.
+- [ ] Gdy wsiądzie do windy, tabliczka pokazuje o jedną osobę więcej.
+- [ ] Wycięty gubi kamerę, kolega ją podnosi i dostaje jej nagrania.
+- [ ] Na −3: Bileter idzie na zapaloną latarkę, a obok zgaszonej przechodzi.
+- [ ] Po wyjściu i ponownym wejściu (z włączonym API) Klatki i ulepszenia są zachowane.
+
 **Potem, czy jest fajne** (progi z GDD §12):
 - [ ] Czy po zmianie testerzy sami chcą zagrać kolejną? (cel: co najmniej 60%)
 - [ ] Czy po pierwszej zmianie rozumieją, że Kadrowy rusza się tylko poza kadrem? (cel: co najmniej 70%)
-- [ ] Czy przynajmniej w połowie zmian ktoś wybiera „w dół”? (to znaczy, że decyzja przy windzie działa)
+- [ ] Czy przynajmniej w połowie zmian ktoś wybiera „w dół”?
 - [ ] Ile trwa zmiana? (cel: 8–15 minut)
+- [ ] Czy Statysta rodzi paranoję („to ty?”), czy tylko irytuje?
 
-**Do strojenia** (wszystko w `src/shared/Config/Game.luau`, sekcja `Shift`): czas snu Kadrowego, przyspieszenie na piętro, bateria, wartości anomalii. Norma i mnożniki są w `src/shared/Core/Shift.luau`.
+**Do strojenia** (wszystko w `src/shared/Config/Game.luau`, sekcja `Shift`): czas snu Kadrowego, przyspieszenie na piętro, bateria, wartości anomalii, `Extra` (prędkość, czas wabienia, zasięg ujawnienia), `ExtraBoardChance`, `UsherFromDepth`, `CodeTries`. Norma i mnożniki są w `src/shared/Core/Shift.luau`.
 
 ## 4. Czego nie sprawdzono
 
-Prototyp przechodzi bramki jakości na GitHubie: budowa trzech miejsc, 81 testów logiki (16 nowych: generator pięter, przebieg zmiany, ocena nagrań, ulepszenia), selene i stylua. **Nigdy jednak nie działał w Studio.** Pierwsze uruchomienie na pewno pokaże rzeczy do poprawy: kadr, rozmiary pokoi, chód, kolizje mebli z anomaliami, czytelność HUD. Wklej błędy z Output albo zrzut ekranu, a poprawię.
+Kod przechodzi bramki jakości: budowa trzech miejsc, 100 testów logiki (19 nowych: Statysta, sejf z kodem, nagrania na kamerze, zapis z blokadą), selene i stylua. Osobny przegląd kodu pod kątem błędów, które wychodzą dopiero w grze, znalazł m.in. zablokowane drzwi windy przy Kadrowym w progu, brak powrotu do ekranu wypłaty, fałszowanie nagrań i odczyt kodu z ziarna piętra. Wszystkie znalezione problemy są poprawione: nagranie musi teraz iść za prawdziwą pozycją głowy, a kod drzwi losuje serwer osobno. **Ani prototyp, ani alfa nigdy jednak nie działały w Studio.** Najbardziej niepewne:
+
+- kopia awatara Statysty (`Character:Clone()` z animacjami ładowanymi na serwerze),
+- czy statyczne animacje R15 z `ShiftExtra` (chód, machanie) się wczytają,
+- sygnatura `AnalyticsService:LogCustomEvent` (owinięta w `pcall`, więc najwyżej nic nie zapisze),
+- zapis z blokadą na prawdziwym DataStore: po awarii serwera ponowne wejście czeka do około 2,5 min na wygaśnięcie blokady; w tym czasie gra się na świeżym portfelu, a zarobione Klatki dopisują się do zapisu, gdy blokada się zwolni (w Studio blokada jest zawsze przejmowana),
+- czytelność kodu na drzwiach w odtworzeniu.
+
+Wklej błędy z Output albo zrzut ekranu, a poprawię.

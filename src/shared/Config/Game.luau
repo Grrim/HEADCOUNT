@@ -91,9 +91,43 @@ return {
 		SelfReturnAfter = 30,
 		AllCutGrace = 75,
 		-- What a five-star shot of each kind of anomaly is worth, before the floor's multiplier.
-		Values = { common = 10, rare = 25, epic = 60 },
+		-- "legendary" is the Extra, filmed until it is gone: the best shot in the game.
+		Values = { common = 10, rare = 25, epic = 60, legendary = 90 },
 		-- Height of the point the lens has to hold, above the floor.
 		TargetHeight = 3.5,
+
+		-- Tapes: the first viewing on a floor is free, every later one pulls the Registrar a node
+		-- closer to the viewer. Someone watching a tape gets this much longer before he reaches.
+		PlaybackReachBonus = 2,
+		-- Code doors: wrong codes in a row before the keypad jams, and for how long.
+		CodeTries = 3,
+		CodeJamSeconds = 8,
+		-- How close the lens has to be for a tape to show a door's code.
+		CodeReadRange = 40,
+
+		-- The Extra (docs/09_GDD_V2.md §2.3): from this floor down, waking this long after the
+		-- doors open. When the team rides on with it still unfilmed, it boards with this chance.
+		ExtraFromDepth = 2,
+		ExtraWake = 20,
+		ExtraBoardChance = 0.5,
+		Extra = {
+			speed = 9,
+			lureDistance = 22,
+			lureSeconds = 35,
+			touchRadius = 3.2,
+			revealRange = 20,
+			revealSeconds = 2,
+			revealDecay = 0.5,
+			graceAfterCut = 15,
+		},
+
+		-- The Usher walks the dark floors and sees only torchlight.
+		UsherFromDepth = 3,
+		UsherWake = 30,
+
+		-- The saved wallet: how long a lock lasts without a refresh, and how often it is refreshed.
+		LockTtl = 150,
+		AutosaveSeconds = 45,
 	},
 	Session = {
 		WaitForPartySeconds = 25,

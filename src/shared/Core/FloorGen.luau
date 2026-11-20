@@ -3,6 +3,11 @@
 -- side of the start room. A spanning tree keeps every room reachable and a few extra doorways
 -- make loops, so a hunted player can run round instead of into a dead end. Same seed, same floor.
 --
+-- From floor -2 a dead-end room may be a vault: its one doorway holds a door with a code that only
+-- shows on a tape, and inside waits an anomaly that is never a common one. Only a room with a
+-- single doorway can be locked, so locking it never cuts the floor in two. The code is not part
+-- of the floor: anyone can rebuild a floor from its seed, so the server draws the code apart.
+--
 -- Grid rows grow towards +Z. The start room is always in row 0 and its centre sits on x = 0, so
 -- the lift, which never moves, always opens into it at z = 0.
 local Graph = require("./Graph")
@@ -12,6 +17,7 @@ local FloorGen = {}
 
 FloorGen.CELL = 36
 FloorGen.DOOR_WIDTH = 6
+FloorGen.VAULT_FROM_DEPTH = 2
 
 export type Room = { id: number, cx: number, cz: number, kind: string }
 export type Link = { a: number, b: number }
@@ -23,6 +29,7 @@ export type Spot = {
 	rarity: string,
 	kind: string,
 }
+export type Vault = { room: number, link: Link }
 export type Floor = {
 	depth: number,
 	width: number,
@@ -33,6 +40,7 @@ export type Floor = {
 	rooms: { Room },
 	links: { Link },
 	spots: { Spot },
+	vault: Vault?,
 }
 
 local KINDS = { "hall", "office", "storage", "cloakroom", "corridor" }
@@ -160,6 +168,40 @@ function FloorGen.generate(seed: number, depth: number): Floor
 		end
 	end
 
+	-- Drawn last, so the rest of a floor is the same whether or not it has a vault.
+	local vault: Vault? = nil
+	if depth >= FloorGen.VAULT_FROM_DEPTH then
+		local leaves: { { id: number, link: Link } } = {}
+		for id = 1, width * height do
+			if id ~= start then
+				local count, only = 0, nil
+				for _, link in links do
+					if link.a == id or link.b == id then
+						count += 1
+						only = link
+					end
+				end
+				if count == 1 and only then
+					table.insert(leaves, { id = id, link = only })
+				end
+			end
+		end
+		if #leaves > 0 then
+			local pick = leaves[rng:int(1, #leaves)]
+			local room = rooms[pick.id]
+			local rarity = if rng:int(1, 100) <= 35 then "epic" else "rare"
+			table.insert(spots, {
+				id = #spots + 1,
+				room = pick.id,
+				x = originX + (room.cx + 0.5) * FloorGen.CELL + rng:int(-8, 8),
+				z = originZ + (room.cz + 0.5) * FloorGen.CELL + rng:int(-8, 8),
+				rarity = rarity,
+				kind = KIND_FOR_RARITY[rarity],
+			})
+			vault = { room = pick.id, link = pick.link }
+		end
+	end
+
 	return {
 		depth = depth,
 		width = width,
@@ -170,7 +212,18 @@ function FloorGen.generate(seed: number, depth: number): Floor
 		rooms = rooms,
 		links = links,
 		spots = spots,
+		vault = vault,
 	}
+end
+
+-- The room a point stands in, or nil outside the floor (the lift is outside it).
+function FloorGen.roomAt(floor: Floor, x: number, z: number): number?
+	local cx = math.floor((x - floor.originX) / FloorGen.CELL)
+	local cz = math.floor((z - floor.originZ) / FloorGen.CELL)
+	if cx < 0 or cz < 0 or cx >= floor.width or cz >= floor.height then
+		return nil
+	end
+	return cz * floor.width + cx + 1
 end
 
 function FloorGen.roomCentre(floor: Floor, id: number): (number, number)
@@ -211,6 +264,33 @@ function FloorGen.graph(floor: Floor): Graph.Graph
 		table.insert(graph[`r{link.b}`].edges, name)
 	end
 	return graph
+end
+
+-- The graph with the vault room and its locked doorway left out: where things that walk (the
+-- Extra, the Usher) may go. The Registrar jumps, so he keeps the whole graph.
+function FloorGen.openGraph(floor: Floor): Graph.Graph
+	local graph = FloorGen.graph(floor)
+	local vault = floor.vault
+	if not vault then
+		return graph
+	end
+	local blocked = {
+		[`d{linkKey(vault.link.a, vault.link.b)}`] = true,
+		[`r{vault.room}`] = true,
+	}
+	local open: Graph.Graph = {}
+	for name, node in graph do
+		if not blocked[name] then
+			local edges = {}
+			for _, edge in node.edges do
+				if not blocked[edge] then
+					table.insert(edges, edge)
+				end
+			end
+			open[name] = { x = node.x, y = node.y, z = node.z, edges = edges }
+		end
+	end
+	return open
 end
 
 -- Where the Registrar starts a floor: as far from the lift as the building allows.
