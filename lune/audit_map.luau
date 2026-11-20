@@ -398,12 +398,20 @@ if which == "shift" then
 	-- The lift alone, then each floor beside it (the lift's front wall is the lobby's south wall).
 	local FloorGen = load(game:GetService("ReplicatedStorage").Shared.Core.FloorGen)
 	local FloorBuild = load(game:GetService("ReplicatedStorage").Shared.World.FloorBuild)
+	local Figures = load(game:GetService("ReplicatedStorage").Shared.World.Figures)
 	local seeds = tonumber(process.args[2]) or 12
 	local totalZ, totalB = 0, 0
 	for depth = 1, 5 do
 		for seed = 1, seeds do
 			local floor = FloorGen.generate(seed, depth)
-			local folder = FloorBuild.build(floor, seed)
+			-- Built for a tape, so what only a lens shows is visible and audited too, with the
+			-- anomalies' figures (World/Figures) where they stand.
+			local folder = FloorBuild.build(floor, seed, true)
+			for _, spot in floor.spots do
+				local figure =
+					Figures.anomaly(spot.kind, Vector3.new(spot.x, 0, spot.z), seed + spot.id)
+				figure.Parent = folder
+			end
 			folder.Parent = map
 			local z, b = audit(map, `shift seed {seed} depth -{depth}`, true)
 			totalZ += z
