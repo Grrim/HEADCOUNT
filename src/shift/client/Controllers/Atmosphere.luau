@@ -89,6 +89,10 @@ local OMENS = { flicker, stepsOnRoof, wrongFloor }
 
 -- A tagged lamp on the floor: its light and its glowing parts go out and come back, in bursts.
 local function stutter(holder: Instance)
+	-- A tape's copy of a floor (TapeView, in a ViewportFrame) carries the same tags; leave it be.
+	if not holder:IsDescendantOf(Workspace) then
+		return
+	end
 	task.spawn(function()
 		local light = holder:FindFirstChildWhichIsA("Light", true)
 		local glows = {}
@@ -238,6 +242,10 @@ function Atmosphere.start()
 	end
 	CollectionService:GetInstanceAddedSignal("Flicker"):Connect(stutter)
 	local function addLayer(layer: Instance)
+		-- Only the live floor: a tape shows its lens-only figures all the time (TapeView).
+		if not layer:IsDescendantOf(Workspace) then
+			return
+		end
 		lensLayers[layer] = true
 		showLayer(layer, false)
 		layer.Destroying:Connect(function()
