@@ -309,10 +309,13 @@ end
 
 local function applyFrameColor()
 	local id = Players.LocalPlayer:GetAttribute("FrameId")
-	for _, frame in Cosmetics.Frames do
-		if frame.id == id then
-			for _, part in frameParts do
-				part.BackgroundColor3 = frame.color
+	-- Frames from the lobby's achievements, and frames from the shift's Biuro Pass.
+	for _, list in { Cosmetics.Frames, Cosmetics.PassFrames } do
+		for _, frame in list do
+			if frame.id == id then
+				for _, part in frameParts do
+					part.BackgroundColor3 = frame.color
+				end
 			end
 		end
 	end

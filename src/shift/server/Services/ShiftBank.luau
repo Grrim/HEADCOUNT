@@ -95,6 +95,9 @@ local function snapshot(data: Wallet.Data): Wallet.Data
 	copy.archive = table.clone(data.archive)
 	copy.honours = table.clone(data.honours)
 	copy.tapes = table.clone(data.tapes)
+	copy.pass = table.clone(data.pass)
+	copy.cosmetics = table.clone(data.cosmetics)
+	copy.titles = table.clone(data.titles)
 	copy.quests = {
 		day = data.quests.day,
 		counts = table.clone(data.quests.counts),

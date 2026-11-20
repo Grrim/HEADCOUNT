@@ -75,6 +75,14 @@ Stan na 2026-11-20. Gałąź `prototype-shift`. Etap 0 z `09_GDD_V2.md` §12 (pr
 
 - **Zadania dzienne** (§4–5 GDD): trzy dziennie, te same dla wszystkich (łatwe, średnie, trudne, losowane z daty UTC), żeby można było zapytać „zrobiłeś dzisiejsze?”. Każde da się zrobić solo. Pula: nagraj anomalie, rzadkie anomalie, ujęcie na pięć gwiazdek, wróć windą z piętra −2/−3/−5, przywieź ileś nagrań, ukończ zmiany z normą, otwórz drzwi z kodem, obejrzyj taśmę na piętrze, sfilmuj Statystę aż zniknie. Nagrody 40 / 80 / 150 Klatek, wypłacane w chwili wykonania (z komunikatem). Postęp jest w zapisanym portfelu (`Core/Quests`, `Wallet.questEvent`, `ShiftQuests`), a lista z postępem i czasem do nowych zadań stoi w prawym górnym rogu, pod listą drużyny.
 
+- **Biuro Pass** (§4, §6 GDD): sezon 1 „Night Shift” trwa 6 tygodni od poniedziałku 16 listopada 2026 (UTC) i ma 30 poziomów po 100 XP. XP daje każdy punkt nagrań przywieziony windą, +50 za zmianę z normą i 50/100/200 za zadanie dzienne. Każdy osiągnięty poziom wypłaca nagrodę od razu (komunikat „Biuro Pass: …”):
+  - **ścieżka darmowa:** 25 Klatek co poziom (50 na 30.), a na poziomach 10, 20 i 30 ramki wizjera, na 15. tytuł,
+  - **ścieżka premium** (Game Pass): co drugi poziom ramka wizjera albo tytuł, **bez Klatek**. Klatki kupują ulepszenia, więc Klatki za Robux byłyby przewagą za pieniądze, której §6 GDD zabrania („Nigdy: ulepszenia sprzętu za Robux”). §6 wspomina też „Klatki” w Passie; zinterpretowałem to jako ścieżkę darmową. **Do decyzji właściciela.**
+  - Kupiony w trakcie sezonu Pass wypłaca od razu nagrody premium z poziomów osiągniętych wcześniej.
+  - Na ekranie wypłaty: postęp, następna nagroda na obu ścieżkach, przycisk odblokowania premium oraz wybór ramki wizjera i tytułu. Tytuł widać przy imieniu na liście drużyny.
+  - Ramki z Passa (`Cosmetics.PassFrames`) zakłada się na zmianie, nie w szafce w lobby (ta pokazuje ramki z osiągnięć).
+  - **Do zrobienia przez właściciela:** utworzyć Game Pass dla sezonu 1 i wpisać jego ID do `gamePassId` w `src/shared/Config/Pass.luau`. Do tego czasu ścieżka premium pokazuje „coming soon”. Cenę ustawia się w Creator Hub.
+
 **Czego jeszcze nie ma:** taśmy zmiany (klipu z najlepszym momentem), zadań dziennych, dźwięków i grafiki docelowej.
 
 ## 2. Jak uruchomić (bez instalowania czegokolwiek)

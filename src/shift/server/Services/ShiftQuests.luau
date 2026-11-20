@@ -32,6 +32,7 @@ function ShiftQuests.event(player: Player, event: string, amount: number?)
 	if #finished > 0 then
 		bank.changed(player)
 		for _, quest in finished do
+			services.ShiftPass.xp(player, services.ShiftPass.XP.task[quest.tier] or 0)
 			services.ShiftSession.tell(
 				player,
 				`Daily task done: {quest.text}. +{quest.reward} frames.`

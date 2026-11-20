@@ -7,6 +7,7 @@
 -- The team list is the answer to the Extra: it can wear a teammate's face, but the list says
 -- where that teammate really is.
 local HttpService = game:GetService("HttpService")
+local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -14,6 +15,7 @@ local TweenService = game:GetService("TweenService")
 
 local AudioDirector = require(ReplicatedStorage.ClientCommon.AudioDirector)
 local LensView = require(ReplicatedStorage.ClientCommon.LensView)
+local Cosmetics = require(ReplicatedStorage.Shared.Config.Cosmetics)
 local Net = require(ReplicatedStorage.Shared.Net)
 local TapeView = require(ReplicatedStorage.ClientCommon.TapeView)
 local Ui = require(ReplicatedStorage.ClientCommon.Ui)
@@ -77,6 +79,30 @@ local function describe(upgrade: { [string]: any }): string
 		return `{value} s`
 	end
 	return tostring(value)
+end
+
+-- A viewfinder frame's name and colour, from either list of frames.
+local function frameInfo(id: string): (string, Color3)
+	for _, frame in Cosmetics.PassFrames do
+		if frame.id == id then
+			return frame.name, frame.color
+		end
+	end
+	for _, frame in Cosmetics.Frames do
+		if frame.id == id then
+			return string.upper(string.sub(frame.id, 1, 1)) .. string.sub(frame.id, 2), frame.color
+		end
+	end
+	return id, Ui.C.Text
+end
+
+-- The next item after `current` in `list`, wrapping round.
+local function after(list: { string }, current: string?): string?
+	if #list == 0 then
+		return nil
+	end
+	local at = if current then table.find(list, current) else nil
+	return list[((at or 0) % #list) + 1]
 end
 
 local function stars(count: number): string
@@ -300,12 +326,134 @@ local function showResults(data: { [string]: any })
 			LayoutOrder = 8,
 		}, results)
 	end
-	Ui.eyebrow("UPGRADES", { LayoutOrder = 10 }, results)
+	-- The Biuro Pass: where the player stands this season, what comes next, the premium track.
+	local passRaw = player:GetAttribute("Pass")
+	local passOk, pass = pcall(function()
+		return HttpService:JSONDecode(
+			if typeof(passRaw) == "string" and passRaw ~= "" then passRaw else "null"
+		)
+	end)
+	if passOk and typeof(pass) == "table" then
+		Ui.eyebrow(
+			`BIURO PASS  ·  {pass.name}  ·  {pass.daysLeft} DAYS LEFT`,
+			{ LayoutOrder = 11 },
+			results
+		)
+		local track = Ui.frame({
+			Size = UDim2.new(1, 0, 0, 8),
+			BackgroundColor3 = Ui.C.Raised,
+			LayoutOrder = 12,
+		}, results)
+		local full = pass.tier >= pass.tiers
+		Ui.frame({
+			Size = UDim2.fromScale(
+				if full then 1 else math.clamp(pass.xp / pass.xpPerTier, 0, 1),
+				1
+			),
+			BackgroundColor3 = Ui.C.Accent,
+		}, track)
+		local passLines = {
+			if full
+				then `Tier {pass.tier}/{pass.tiers}: the whole track is yours.`
+				else `Tier {pass.tier}/{pass.tiers}   {pass.xp}/{pass.xpPerTier} xp to the next`,
+		}
+		if pass.nextFree then
+			table.insert(passLines, `Next free (tier {pass.nextFree.tier}): {pass.nextFree.text}`)
+		end
+		if pass.nextPremium then
+			table.insert(
+				passLines,
+				`Next premium (tier {pass.nextPremium.tier}): {pass.nextPremium.text}`
+					.. (if pass.premium then "" else "  [locked]")
+			)
+		end
+		for index, line in passLines do
+			Ui.mono({
+				Size = UDim2.new(1, 0, 0, 16),
+				TextSize = 12,
+				TextColor3 = Ui.C.Muted,
+				TextTruncate = Enum.TextTruncate.AtEnd,
+				Text = line,
+				LayoutOrder = 12 + index,
+			}, results)
+		end
+		if not pass.premium then
+			if pass.forSale then
+				Ui.button(
+					"UNLOCK THE PREMIUM TRACK (cosmetics only)",
+					{
+						Size = UDim2.new(1, 0, 0, 30),
+						TextSize = 14,
+						LayoutOrder = 17,
+					},
+					results,
+					function()
+						MarketplaceService:PromptGamePassPurchase(player, pass.gamePassId)
+					end
+				)
+			else
+				Ui.mono({
+					Size = UDim2.new(1, 0, 0, 16),
+					TextSize = 12,
+					TextColor3 = Ui.C.Faint,
+					Text = "Premium track: coming soon.",
+					LayoutOrder = 18,
+				}, results)
+			end
+		end
+	end
+
+	-- What the player wears: each button moves on to the next one they own.
+	local frames = if typeof(data.frames) == "table" then data.frames else { "paper" }
+	local titles = if typeof(data.titles) == "table" then data.titles else {}
+	local wearing = Ui.frame({
+		Size = UDim2.new(1, 0, 0, 30),
+		BackgroundTransparency = 1,
+		LayoutOrder = 19,
+	}, results)
+	local frameName, frameColor = frameInfo(data.frame or "paper")
+	Ui.button(
+		`VIEWFINDER: {frameName}  >`,
+		{
+			Size = UDim2.new(0.49, 0, 1, 0),
+			TextSize = 13,
+			TextColor3 = frameColor,
+			BorderColor3 = frameColor,
+		},
+		wearing,
+		function()
+			local nextFrame = after(frames, data.frame or "paper")
+			if nextFrame then
+				Net.get("ShiftAction"):FireServer("wearframe", nextFrame)
+			end
+		end
+	)
+	local titleList = table.clone(titles)
+	table.insert(titleList, 1, "")
+	Ui.button(
+		if data.title then `TITLE: {data.title}  >` else "TITLE: none  >",
+		{
+			AnchorPoint = Vector2.new(1, 0),
+			Position = UDim2.fromScale(1, 0),
+			Size = UDim2.new(0.49, 0, 1, 0),
+			TextSize = 13,
+			TextColor3 = if #titles > 0 then Ui.C.Text else Ui.C.Faint,
+		},
+		wearing,
+		function()
+			if #titles > 0 then
+				Net.get("ShiftAction")
+					:FireServer("weartitle", after(titleList, data.title or "") or "")
+			end
+		end
+	)
+
+	Ui.eyebrow("UPGRADES", { LayoutOrder = 30 }, results)
 	for index, upgrade in data.upgrades or {} do
 		local row = Ui.frame({
 			Size = UDim2.new(1, 0, 0, 36),
 			BackgroundTransparency = 1,
-			LayoutOrder = 10 + index,
+			LayoutOrder = 30 + index,
 		}, results)
 		Ui.text({
 			Size = UDim2.new(0.62, 0, 1, 0),
@@ -625,6 +773,11 @@ function ShiftHud.start()
 			for index, other in players do
 				local where = other:GetAttribute("Where")
 				local name = if other == player then "You" else other.DisplayName
+				-- A title from the Biuro Pass, worn by choice.
+				local title = other:GetAttribute("Title")
+				if typeof(title) == "string" and title ~= "" then
+					name ..= ` ({title})`
+				end
 				Ui.mono({
 					Size = UDim2.new(1, 0, 0, 16),
 					TextSize = 12,

@@ -11,6 +11,8 @@
 -- A lock is stale once nobody has refreshed it for `ttl` seconds, so a crashed server can not
 -- hold a record for ever. A transform that returns nil leaves the cloud record untouched.
 local Highlight = require("./Highlight")
+local Pass = require("./Pass")
+local PassConfig = require("../Config/Pass")
 local Quests = require("./Quests")
 
 local Wallet = {}
@@ -58,6 +60,13 @@ export type Data = {
 	tapes: { Tape },
 	-- Today's daily tasks: how far each has got and which are done (Core/Quests).
 	quests: Quests.Progress,
+	-- The Biuro Pass: this season's standing, and what its rewards unlocked for good.
+	pass: Pass.State,
+	cosmetics: { [string]: boolean },
+	titles: { [string]: boolean },
+	-- What the player wears: a viewfinder frame and a title (nil for none).
+	frame: string?,
+	title: string?,
 }
 
 export type Lock = { id: string, at: number }
@@ -79,7 +88,63 @@ function Wallet.default(): Data
 		honours = {},
 		tapes = {},
 		quests = Quests.fresh(0),
+		pass = Pass.fresh(""),
+		cosmetics = {},
+		titles = {},
+		frame = nil,
+		title = nil,
 	}
+end
+
+-- Viewfinder frames everyone has; the rest are unlocked (Config/Cosmetics).
+Wallet.BASE_FRAMES = { "paper", "crt", "amber" }
+
+local rewardFrames: { [string]: boolean } = {}
+local rewardTitles: { [string]: boolean } = {}
+for _, season in PassConfig.Seasons do
+	for _, track in { season.free, season.premium } do
+		for _, reward in track do
+			if reward.frame then
+				rewardFrames[reward.frame] = true
+			end
+			if reward.title then
+				rewardTitles[reward.title] = true
+			end
+		end
+	end
+end
+
+function Wallet.ownsFrame(data: Data, id: string): boolean
+	return table.find(Wallet.BASE_FRAMES, id) ~= nil or data.cosmetics[id] == true
+end
+
+-- Pays rewards: Frames into the wallet, cosmetics and titles unlocked for good.
+function Wallet.grant(data: Data, rewards: { Pass.Reward })
+	for _, reward in rewards do
+		if reward.frames then
+			data.frames += reward.frames
+			data.earned += reward.frames
+		end
+		if reward.frame then
+			data.cosmetics[reward.frame] = true
+		end
+		if reward.title then
+			data.titles[reward.title] = true
+		end
+	end
+end
+
+-- Experience towards the season's pass, and every reward it reaches. Returns those rewards.
+function Wallet.passXp(
+	data: Data,
+	season: Pass.Season,
+	amount: number,
+	premium: boolean
+): { Pass.Reward }
+	Pass.addXp(data.pass, season, amount)
+	local due = Pass.collect(data.pass, season, premium)
+	Wallet.grant(data, due)
+	return due
 end
 
 local RARITIES = { common = true, rare = true, epic = true, legendary = true }
@@ -173,6 +238,35 @@ function Wallet.migrate(raw: any): Record
 			data.weekDeepest = count(stored.weekDeepest, 0, 100) or 0
 			data.weekEarned = count(stored.weekEarned, 0, 1e12) or 0
 			data.rewardedWeek = count(stored.rewardedWeek, 0, 1e7) or 0
+			local pass = stored.pass
+			if typeof(pass) == "table" and typeof(pass.season) == "string" then
+				data.pass = {
+					season = string.sub(pass.season, 1, 16),
+					xp = count(pass.xp, 0, 1e7) or 0,
+					freePaid = count(pass.freePaid, 0, 1000) or 0,
+					premiumPaid = count(pass.premiumPaid, 0, 1000) or 0,
+				}
+			end
+			if typeof(stored.cosmetics) == "table" then
+				for id in rewardFrames do
+					if stored.cosmetics[id] == true then
+						data.cosmetics[id] = true
+					end
+				end
+			end
+			if typeof(stored.titles) == "table" then
+				for title in rewardTitles do
+					if stored.titles[title] == true then
+						data.titles[title] = true
+					end
+				end
+			end
+			if typeof(stored.frame) == "string" and Wallet.ownsFrame(data, stored.frame) then
+				data.frame = stored.frame
+			end
+			if typeof(stored.title) == "string" and data.titles[stored.title] then
+				data.title = stored.title
+			end
 			local quests = stored.quests
 			if typeof(quests) == "table" and typeof(quests.day) == "number" then
 				data.quests.day = math.floor(quests.day)
@@ -365,6 +459,18 @@ function Wallet.merge(record: Data, early: Data): Data
 		for id in earlyQuests.done do
 			savedQuests.done[id] = true
 		end
+	end
+	-- The pass: what the early wallet earned adds on; what it unlocked stays unlocked.
+	if early.pass.season == record.pass.season then
+		record.pass.xp += early.pass.xp
+	elseif early.pass.season ~= "" and early.pass.xp > 0 then
+		record.pass = early.pass
+	end
+	for id in early.cosmetics do
+		record.cosmetics[id] = true
+	end
+	for title in early.titles do
+		record.titles[title] = true
 	end
 	-- Weekly rewards are only ever claimed on a saved wallet, so the early one holds none.
 	return record

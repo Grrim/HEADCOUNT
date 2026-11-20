@@ -538,6 +538,24 @@ local function sendResult(player: Player)
 		-- The shift's tape, and the ones this player keeps in their Archive.
 		tape = services.ShiftTapes.highlight,
 		tapes = data.tapes,
+		-- What the Biuro Pass unlocked, and what is worn.
+		frames = (function()
+			local owned = table.clone(Wallet.BASE_FRAMES)
+			for id in data.cosmetics do
+				table.insert(owned, id)
+			end
+			return owned
+		end)(),
+		frame = data.frame or "paper",
+		titles = (function()
+			local owned = {}
+			for title in data.titles do
+				table.insert(owned, title)
+			end
+			table.sort(owned)
+			return owned
+		end)(),
+		title = data.title,
 		saved = services.ShiftBank.saving(player),
 	})
 end
@@ -557,6 +575,12 @@ local function payEveryone()
 		services.ShiftBank.changed(player)
 		services.ShiftRecords.submit(player)
 		if returned then
+			-- Biuro Pass experience: footage brought back, and the quota met.
+			local xp = services.ShiftPass.XP
+			services.ShiftPass.xp(
+				player,
+				shift.banked * xp.banked + (if shift.banked >= shift.quota then xp.quota else 0)
+			)
 			local quests = services.ShiftQuests
 			quests.event(player, "return_depth", shift.deepest)
 			quests.event(player, "banked", shift.banked)
@@ -755,6 +779,12 @@ local function onAction(player: Player, action: unknown, arg: unknown)
 		else
 			ShiftSession.tell(player, "Finish the shift first. The lift is the only way out.")
 		end
+	elseif action == "wearframe" or action == "weartitle" then
+		if not services.ShiftBank.loaded(player) then
+			return
+		end
+		services.ShiftPass.wear(player, if action == "wearframe" then "frame" else "title", arg)
+		sendResult(player)
 	elseif action == "savetape" then
 		local tape = services.ShiftTapes.highlight
 		if phase ~= "over" or not tape then
