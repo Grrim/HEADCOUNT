@@ -15,6 +15,10 @@ local Wallet = {}
 Wallet.VERSION = 1
 -- Ranks of the Archive, from the least to the most prized.
 Wallet.KINDS = { "sitter", "standing", "watcher", "extra" }
+-- Commendations for a place on a finished week's board, best first.
+Wallet.HONOURS = { "gold", "silver", "bronze", "top10" }
+-- How many finished weeks back a returning player can still collect.
+Wallet.CLAIM_WEEKS = 3
 
 export type Data = {
 	v: number,
@@ -29,6 +33,10 @@ export type Data = {
 	week: number,
 	weekDeepest: number,
 	weekEarned: number,
+	-- The last finished week whose board was checked for this player's place (paid or not), and
+	-- the commendations won so far, counted by kind (gold, silver, bronze, top10).
+	rewardedWeek: number,
+	honours: { [string]: number },
 }
 
 export type Lock = { id: string, at: number }
@@ -46,6 +54,8 @@ function Wallet.default(): Data
 		week = 0,
 		weekDeepest = 0,
 		weekEarned = 0,
+		rewardedWeek = 0,
+		honours = {},
 	}
 end
 
@@ -71,6 +81,12 @@ function Wallet.migrate(raw: any): Record
 			data.week = count(stored.week, 0, 1e7) or 0
 			data.weekDeepest = count(stored.weekDeepest, 0, 100) or 0
 			data.weekEarned = count(stored.weekEarned, 0, 1e12) or 0
+			data.rewardedWeek = count(stored.rewardedWeek, 0, 1e7) or 0
+			if typeof(stored.honours) == "table" then
+				for _, kind in Wallet.HONOURS do
+					data.honours[kind] = count(stored.honours[kind], 1, 1e6)
+				end
+			end
 			if typeof(stored.levels) == "table" then
 				for key, value in stored.levels do
 					local level = count(value, 1, 20)
@@ -167,6 +183,33 @@ function Wallet.recordShift(
 	end
 end
 
+-- The finished weeks whose boards this player has not been checked against yet, oldest first:
+-- at most the last few, never the week still running.
+function Wallet.weeksToClaim(data: Data, currentWeek: number): { number }
+	local weeks = {}
+	local first = math.max(data.rewardedWeek + 1, currentWeek - Wallet.CLAIM_WEEKS)
+	for week = first, currentWeek - 1 do
+		table.insert(weeks, week)
+	end
+	return weeks
+end
+
+-- Settles one finished week: pays the place (nil when not on the board) once, and never again
+-- for that week or any before it. Returns the Frames paid.
+function Wallet.claimWeek(data: Data, week: number, pay: number, honour: string?): number
+	if week <= data.rewardedWeek then
+		return 0
+	end
+	data.rewardedWeek = week
+	local paid = math.max(0, math.floor(pay))
+	data.frames += paid
+	data.earned += paid
+	if honour and table.find(Wallet.HONOURS, honour) then
+		data.honours[honour] = (data.honours[honour] or 0) + 1
+	end
+	return paid
+end
+
 -- What was earned on a fresh wallet before the saved one arrived, added onto the saved one.
 -- Levels are not merged: buying waits for the saved wallet.
 function Wallet.merge(record: Data, early: Data): Data
@@ -185,6 +228,7 @@ function Wallet.merge(record: Data, early: Data): Data
 		record.weekDeepest = math.max(record.weekDeepest, early.weekDeepest)
 		record.weekEarned += early.weekEarned
 	end
+	-- Weekly rewards are only ever claimed on a saved wallet, so the early one holds none.
 	return record
 end
 

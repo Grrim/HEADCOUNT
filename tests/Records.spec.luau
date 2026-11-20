@@ -87,4 +87,41 @@ return {
 			"an empty early wallet reset the week"
 		)
 	end,
+
+	["the top of a finished week is paid, the rest of the top ten a little"] = function()
+		assert(Records.reward(1) == 500 and Records.reward(3) == 200 and Records.reward(10) == 100)
+		assert(Records.reward(11) == 0 and Records.reward(0) == 0)
+		assert(Records.honour(1) == "gold" and Records.honour(3) == "bronze")
+		assert(Records.honour(7) == "top10" and Records.honour(11) == nil)
+	end,
+
+	["a finished week is paid once, and only weeks that are over"] = function()
+		local data = Wallet.default()
+		data.rewardedWeek = 40
+		local weeks = Wallet.weeksToClaim(data, 42)
+		assert(#weeks == 1 and weeks[1] == 41, "the running week was offered")
+		assert(Wallet.claimWeek(data, 41, Records.reward(2), Records.honour(2)) == 300)
+		assert(data.frames == 300 and data.earned == 300 and data.honours.silver == 1)
+		assert(Wallet.claimWeek(data, 41, 300, "silver") == 0, "a week was paid twice")
+		assert(#Wallet.weeksToClaim(data, 42) == 0)
+		assert(Wallet.claimWeek(data, 39, 500, "gold") == 0, "an older week was paid after a newer")
+	end,
+
+	["someone back after a long break can still collect the last few weeks"] = function()
+		local data = Wallet.default()
+		local weeks = Wallet.weeksToClaim(data, 2900)
+		assert(#weeks == Wallet.CLAIM_WEEKS and weeks[1] == 2900 - Wallet.CLAIM_WEEKS)
+		assert(weeks[#weeks] == 2899)
+		assert(Wallet.claimWeek(data, 2897, 0, nil) == 0 and data.rewardedWeek == 2897)
+		local saved = Wallet.migrate({ data = data }).data
+		assert(saved.rewardedWeek == 2897)
+	end,
+
+	["commendations survive a save and junk does not"] = function()
+		local data = Wallet.migrate({
+			data = { honours = { gold = 2, top10 = 5, platinum = 9, silver = -1 } },
+		}).data
+		assert(data.honours.gold == 2 and data.honours.top10 == 5)
+		assert(data.honours.platinum == nil and data.honours.silver == nil)
+	end,
 }

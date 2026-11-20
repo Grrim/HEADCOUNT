@@ -30,6 +30,22 @@ function Records.weeklyStore(week: number): string
 	return `ShiftRecords_w{week}`
 end
 
+-- What a place on a finished week's board pays, and the commendation that goes with it. Frames
+-- only: a place on the board is earned by playing and buys nothing a player could not earn.
+Records.PAY = { 500, 300, 200, 100, 100, 100, 100, 100, 100, 100 }
+Records.HONOURS = { "gold", "silver", "bronze" }
+
+function Records.reward(place: number): number
+	return Records.PAY[place] or 0
+end
+
+function Records.honour(place: number): string?
+	if place < 1 or place > #Records.PAY then
+		return nil
+	end
+	return Records.HONOURS[place] or "top10"
+end
+
 -- "3d 4h", "5h 12m", "9m": how long until the weekly board starts over.
 function Records.untilReset(now: number): string
 	local left = math.max(0, Records.weekEnds(Records.week(now)) - math.floor(now))

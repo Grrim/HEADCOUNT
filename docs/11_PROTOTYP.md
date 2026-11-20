@@ -53,7 +53,9 @@ Stan na 2026-11-20. Gałąź `prototype-shift`. Etap 0 z `09_GDD_V2.md` §12 (pr
 
 **Do zrobienia przez właściciela:** opublikować `build/Shift.rbxl` jako trzecie miejsce i wpisać jego ID do `MISSIONS.SHIFT` w `src/shared/Config/Places.luau` (README, „Publikacja”). Do tego czasu windy i terminal mówią, że teleport wymaga opublikowanej gry, a w Studio teleport nie działa wcale.
 
-**Czego jeszcze nie ma:** listy samych znajomych, nagród za miejsce w tygodniu, wspólnej kolejki windy ekipy między serwerami lobby (ekipa składa się z graczy z tego samego serwera), skrótu do windy w przewodniku dla nowych, statywu i innych ulepszeń poza baterią i kasetami, taśmy zmiany (klipu z najlepszym momentem), zadań dziennych, dźwięków i grafiki docelowej.
+- **Nagrody za miejsce w tygodniu:** pierwsza dziesiątka zakończonego tygodnia dostaje Klatki: 500 za 1. miejsce, 300 za 2., 200 za 3. i po 100 za miejsca 4–10, a do tego wyróżnienie (1st, 2nd, 3rd, Top 10) zliczane w portfelu i pokazywane na ekranie wypłaty. Żaden serwer nie musi działać o północy w poniedziałek: nagrodę odbiera się, gdy zapisany portfel gracza wczyta się na serwerze zmiany. Serwer sprawdza wtedy każdy nierozliczony zakończony tydzień (najwyżej trzy wstecz) i rozlicza go dokładnie raz (`Wallet.rewardedWeek`). Tydzień, którego nie dało się odczytać, zostaje na następny raz. Nagrody to tylko Klatki za grę, zgodnie z §6 GDD.
+
+**Czego jeszcze nie ma:** listy samych znajomych, wspólnej kolejki windy ekipy między serwerami lobby (ekipa składa się z graczy z tego samego serwera), skrótu do windy w przewodniku dla nowych, statywu i innych ulepszeń poza baterią i kasetami, taśmy zmiany (klipu z najlepszym momentem), zadań dziennych, dźwięków i grafiki docelowej.
 
 ## 2. Jak uruchomić (bez instalowania czegokolwiek)
 

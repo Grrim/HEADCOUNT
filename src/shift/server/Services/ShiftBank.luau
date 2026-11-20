@@ -93,6 +93,7 @@ local function snapshot(data: Wallet.Data): Wallet.Data
 	local copy = table.clone(data)
 	copy.levels = table.clone(data.levels)
 	copy.archive = table.clone(data.archive)
+	copy.honours = table.clone(data.honours)
 	return copy
 end
 

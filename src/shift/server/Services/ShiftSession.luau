@@ -508,6 +508,7 @@ local function sendResult(player: Player)
 		money = data.frames,
 		upgrades = upgrades,
 		archive = archive,
+		honours = data.honours,
 		saved = services.ShiftBank.saving(player),
 	})
 end

@@ -43,6 +43,13 @@ local KIND_NAMES = {
 	extra = "The Extra",
 }
 
+local HONOUR_NAMES = {
+	gold = "1st",
+	silver = "2nd",
+	bronze = "3rd",
+	top10 = "Top 10",
+}
+
 local CUT_LINES = {
 	registrar = "CUT OUT OF FRAME",
 	extra = "IT WASN'T WHO YOU THOUGHT",
@@ -176,6 +183,24 @@ local function showResults(data: { [string]: any })
 		Text = table.concat(parts, "   "),
 		LayoutOrder = 7,
 	}, results)
+	-- Commendations for places on finished weeks' boards, best first.
+	local honours = data.honours or {}
+	local won = {}
+	for _, kind in { "gold", "silver", "bronze", "top10" } do
+		local count = honours[kind]
+		if typeof(count) == "number" and count > 0 then
+			table.insert(won, `{HONOUR_NAMES[kind]} x{count}`)
+		end
+	end
+	if #won > 0 then
+		Ui.mono({
+			Size = UDim2.new(1, 0, 0, 18),
+			TextSize = 13,
+			TextColor3 = Ui.C.Accent,
+			Text = `COMMENDATIONS  {table.concat(won, "   ")}`,
+			LayoutOrder = 8,
+		}, results)
+	end
 	Ui.eyebrow("UPGRADES", { LayoutOrder = 10 }, results)
 	for index, upgrade in data.upgrades or {} do
 		local row = Ui.frame({

@@ -416,7 +416,7 @@ local EN: { [string]: string } = {
 	records_empty = "Nobody has come back up yet. Be the first.",
 	records_offline = "The records show in the published game.",
 	records_week_title = "THIS WEEK  ·  resets in {1}",
-	records_week_columns = "WHO  ·  DEEPEST RETURN THIS WEEK  ·  FRAMES THIS WEEK",
+	records_week_columns = "TOP 10 PAID ON MONDAY: 500 / 300 / 200 / 100 FRAMES",
 	records_week_empty = "No returns yet this week. The board is yours.",
 }
 
@@ -759,7 +759,7 @@ local PL: { [string]: string } = {
 	records_empty = "Nikt jeszcze nie wrócił na górę. Bądź pierwszy.",
 	records_offline = "Rekordy widać w opublikowanej grze.",
 	records_week_title = "TEN TYDZIEŃ  ·  reset za {1}",
-	records_week_columns = "KTO  ·  NAJGŁĘBSZY POWRÓT W TYM TYGODNIU  ·  KLATKI W TYM TYGODNIU",
+	records_week_columns = "TOP 10 DOSTAJE W PONIEDZIAŁEK: 500 / 300 / 200 / 100 KLATEK",
 	records_week_empty = "W tym tygodniu nikt jeszcze nie wrócił. Tablica jest twoja.",
 }
 
