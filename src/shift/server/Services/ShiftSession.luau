@@ -525,6 +525,7 @@ local function ride(down: boolean)
 	local world = services.ShiftWorld
 	services.ShiftRegistrar.stop()
 	services.ShiftUsher.stop()
+	services.ShiftStandIn.stop()
 	if down then
 		services.ShiftExtra.depart()
 	else
@@ -568,6 +569,7 @@ local function ride(down: boolean)
 		services.ShiftRegistrar.setFloor(floor, shift.depth)
 		services.ShiftExtra.setFloor(floor, shift.depth)
 		services.ShiftUsher.setFloor(floor, shift.depth)
+		services.ShiftStandIn.setFloor(shift.depth)
 	else
 		ShiftSession.floor = nil
 	end
@@ -710,6 +712,7 @@ local function newShift()
 	services.ShiftTapes.clearFloor()
 	services.ShiftExtra.stop()
 	services.ShiftUsher.stop()
+	services.ShiftStandIn.stop()
 	services.ShiftWorld.clearFloor()
 	services.ShiftWorld.setDoors(1)
 	services.ShiftWorld.applyDepth(1)
@@ -855,6 +858,7 @@ function ShiftSession.onEveryoneCut()
 		services.ShiftRegistrar.stop()
 		services.ShiftExtra.stop()
 		services.ShiftUsher.stop()
+		services.ShiftStandIn.stop()
 		services.ShiftWorld.setDoors(1)
 		ShiftSession.broadcast("Everyone was cut out of frame. The Bureau pays a quarter.")
 		bringEveryoneIn()

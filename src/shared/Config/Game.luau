@@ -125,6 +125,12 @@ return {
 		UsherFromDepth = 3,
 		UsherWake = 30,
 
+		-- The Stand-in: from this floor down, each player's path from this many seconds ago walks
+		-- behind them, and cuts them if it steps within this many studs of where they stand.
+		StandInFromDepth = 3,
+		StandInDelay = 30,
+		StandInRadius = 2.2,
+
 		-- The saved wallet: how long a lock lasts without a refresh, and how often it is refreshed.
 		LockTtl = 150,
 		AutosaveSeconds = 45,

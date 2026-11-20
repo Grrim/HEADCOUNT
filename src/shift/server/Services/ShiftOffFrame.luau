@@ -55,6 +55,7 @@ function ShiftOffFrame.cut(player: Player, cause: string?)
 	local how = if cause == "extra"
 		then `{player.DisplayName} followed someone who wasn't there.`
 		elseif cause == "usher" then `The Usher took {player.DisplayName}.`
+		elseif cause == "standin" then `{player.DisplayName} met themself.`
 		else `{player.DisplayName} was cut out of frame.`
 	services.ShiftSession.broadcast(`{how} Film them for 3 s!`)
 end

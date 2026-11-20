@@ -67,6 +67,7 @@ local CUT_LINES = {
 	registrar = "CUT OUT OF FRAME",
 	extra = "IT WASN'T WHO YOU THOUGHT",
 	usher = "THE USHER SAW YOUR LIGHT",
+	standin = "YOUR OWN PAST CAUGHT UP WITH YOU",
 }
 
 -- What a level of each upgrade means, in the words a player would use.

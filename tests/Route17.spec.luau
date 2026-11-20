@@ -113,4 +113,20 @@ return {
 		assert(not Route17.inSync(10, 12))
 		assert(not Route17.inSync(10, nil))
 	end,
+
+	["on a shift, standing still for the delay gets you caught, walking on does not"] = function()
+		-- The shift's Stand-in: 30 s behind, 2.2 studs to catch, sampled ten times a second.
+		local still = StandIn.new(30, 2)
+		local walker = StandIn.new(30, 2)
+		local caughtStill, caughtWalker = false, false
+		for tick = 0, 400 do
+			local t = tick / 10
+			StandIn.record(still, t, 5, 3, 5, 0)
+			StandIn.record(walker, t, t * 4, 3, 0, 0)
+			caughtStill = caughtStill or StandIn.catches(still, t, 5, 5, 2.2)
+			caughtWalker = caughtWalker or StandIn.catches(walker, t, t * 4, 0, 2.2)
+		end
+		assert(caughtStill, "standing still for 40 s was never caught")
+		assert(not caughtWalker, "walking on at 4 studs a second was caught")
+	end,
 }
