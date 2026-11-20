@@ -75,6 +75,28 @@ Stan na 2026-11-20. Gałąź `prototype-shift`. Etap 0 z `09_GDD_V2.md` §12 (pr
 
 - **Zadania dzienne** (§4–5 GDD): trzy dziennie, te same dla wszystkich (łatwe, średnie, trudne, losowane z daty UTC), żeby można było zapytać „zrobiłeś dzisiejsze?”. Każde da się zrobić solo. Pula: nagraj anomalie, rzadkie anomalie, ujęcie na pięć gwiazdek, wróć windą z piętra −2/−3/−5, przywieź ileś nagrań, ukończ zmiany z normą, otwórz drzwi z kodem, obejrzyj taśmę na piętrze, sfilmuj Statystę aż zniknie. Nagrody 40 / 80 / 150 Klatek, wypłacane w chwili wykonania (z komunikatem). Postęp jest w zapisanym portfelu (`Core/Quests`, `Wallet.questEvent`, `ShiftQuests`), a lista z postępem i czasem do nowych zadań stoi w prawym górnym rogu, pod listą drużyny.
 
+### Oprawa graficzna zmiany i lobby, dodane 2026-11-20 (gałąź `claude/visuals-c524cd`)
+
+Wszystko poniżej to wygląd. Reguły gry, liczby i testy logiki się nie zmieniły. Piętro nadal powstaje z ziarna i głębokości, więc taśma odbudowuje je dokładnie tak, jak wyglądało. Jedyny wyjątek: taśmy nagrane przed tą zmianą odtworzą się już w nowym wyglądzie.
+
+- **Każda głębokość wygląda inaczej** (`World/FloorLooks`, GDD §2.8). Obok drzwi windy na każdym piętrze jest duży namalowany numer:
+  - **−1:** jasny dom kultury w dzień. Kremowe ściany z turkusową lamperią, okna z dziennym światłem i kaloryferami, świetlówki, parkiet w sali, lastryko w holu, wykładzina w biurach.
+  - **−2:** ten sam budynek wieczorem. Za oknami zmierzch, połowa świetlówek nie świeci, część mruga, na biurkach zostały zapalone lampki, krzesła stoją na stołach nogami do góry.
+  - **−3:** magazyny taśm. Beton, ściany z bloczków, żółte linie na podłodze, regały do sufitu z kodami alejek, wózki z kasetami, żarówki na kablach.
+  - **−4:** korytarze, w których wszystko jest na suficie: meble, wykładzina, lamperia, a plakaty wiszą do góry nogami. Lampy są w podłodze i świecą w górę.
+  - **−5:** coś, co wygląda jak lobby gry. Bordowa wykładzina, chodnik z zielonymi światełkami prowadzącymi donikąd, regały do sufitu, lada z dzwonkiem, uschnięte rośliny, ciepłe, ale za czerwone światło, a na ścianie przy windzie „0 / ARCHIVE 03”.
+  - Z głębokością zmienia się też powietrze: mgła, światło otoczenia i korekcja koloru (`ShiftWorld.applyDepth`).
+- **Pokoje:** listwy, lamperia, ramy drzwi, lampy w stylu piętra, meble dobrane do rodzaju pokoju (krzesła, biurka, regały, wieszaki, ławki, pianino, szafki). Meble nigdy nie stoją na krzyżu między drzwiami, bo tamtędy chodzą Kadrowy, Statysta i Bileter. Nie stoją też na miejscu anomalii (`Core/RoomLayout`, z testami).
+- **Pokoje specjalne** (GDD §8, `Core/FloorGen`, `World/SpecialRooms`). Na mniej więcej dwóch piętrach z trzech jeden pokój jest zrobiony ręcznie:
+  - **audytorium:** rzędy pustych krzeseł, ekran, kurtyna i projektor. W kamerze każde miejsce jest zajęte.
+  - **zebranie:** stół z krzesłami i tablica „HEADCOUNT 8 / 9”. W kamerze zebranie trwa, a jedno krzesło jest wolne, z kartką „NEXT”.
+  - **druga winda** (od −2): zamknięte drzwi windy w zwykłym pokoju, z tabliczką „PERSONS: …”. Nigdy się nie otwiera.
+  - Widownia i uczestnicy zebrania to tylko wygląd: nie płacą i nie są anomaliami. Anomalie w tych pokojach są takie same jak wszędzie.
+- **Winda w zmianie** (`ShiftWorld`): w środku kabina Biura z fornirem, stalą i mosiądzem. Ma poręcz, panel z lampką dla każdego piętra (świeci bieżące), tabliczkę PERSONS w ramce, ogłoszenia Biura („IF THE COUNT IS WRONG, FILM THE CABIN”) i plakaty. Na zewnątrz, na każdym piętrze, jest stalowy portal z numerem piętra nad drzwiami i przycisk przywołania. Im głębiej, tym lampa w kabinie ciemniejsza i cieplejsza.
+- **Anomalie** (`World/Figures`): stojąca postać jest teraz ubranym człowiekiem, a nie pięcioma klockami. Patrzący (epicki) jako jedyny nie ma czarnego paska na oczach: w kamerze patrzą na ciebie dwa jasne punkty. Prawdziwa postać Statysty ma białe rękawiczki, gors i muszkę.
+- **Lobby:** obie kabiny wind mają to samo wnętrze co winda w zmianie. Od strony hali mają stalowe portale, mosiężny próg i przyciski przywołania. Nad tablicami rekordów wiszą lampki, a halę wykańczają gzyms pod sufitem i belki stropowe. W lobby nie ma już żadnego miejsca, które migocze (wcześniej były 4, w narożnikach kabin).
+- **Sprawdzone bez Studio:** `lune run audit_map shift [liczba ziaren]` buduje windę i piętra −1…−5 z wielu ziaren, razem z anomaliami i tym, co widać tylko w kamerze, i szuka migotania. Na 80 piętrach migocze tylko tam, gdzie generator postawił dwie anomalie prawie w tym samym miejscu (to dane rozgrywki, nie wygląd). Piętro ma 680–1000 części (Misja 001 ma 1637).
+
 **Czego jeszcze nie ma:** taśmy zmiany (klipu z najlepszym momentem), zadań dziennych, dźwięków i grafiki docelowej.
 
 ## 2. Jak uruchomić (bez instalowania czegokolwiek)
@@ -114,6 +136,19 @@ Lokalnie, z narzędziami z `rokit.toml`: `python scripts/check.py`, potem `build
 - [ ] Wycięty gubi kamerę, kolega ją podnosi i dostaje jej nagrania.
 - [ ] Na −3: Bileter idzie na zapaloną latarkę, a obok zgaszonej przechodzi.
 - [ ] Po wyjściu i ponownym wejściu (z włączonym API) Klatki i ulepszenia są zachowane.
+
+**Oprawa (gałąź `claude/visuals-c524cd`).** Najszybciej: w Workspace ustaw `DevPauseRegistrar` = true i zjeżdżaj DOWN piętro po piętrze.
+- [ ] Na każdym piętrze, zaraz po otwarciu drzwi: czy po samym wyglądzie widać, które to piętro (numer przy windzie, ściany, światło)? Czy −2 da się przejść bez latarki, a −4 i −5 z latarką?
+- [ ] Czy coś migocze (zwłaszcza listwy przy drzwiach, okna, lamperia w rogach, portal windy)? Wystarczy zrzut ekranu z tym miejscem.
+- [ ] Materiały: tekstury `PK_*` (tapeta, płytki sufitowe, wykładzina, lastryko, fornir) na ścianach i podłogach zmiany. Czy kolory nie wyszły za ciemne albo dziwne? Odcienie są w `World/FloorLooks`.
+- [ ] Czy meble, kasety i wieszaki stoją na podłodze, a na −4 wiszą przy suficie (modele nie są przesunięte ani wbite w ściany)?
+- [ ] Czy napisy działają: duży numer przy windzie (na −4 do góry nogami), kody alejek na −3, tabliczki w windzie, „NEXT” na zebraniu?
+- [ ] Na −2 mrugają niektóre świetlówki, a lampa kabiny przy omenie „flicker” dalej działa.
+- [ ] Audytorium: gołym okiem puste krzesła, w kamerze pełna sala, która znika po opuszczeniu kamery. W taśmie zmiany na ekranie wypłaty sala jest pełna cały czas.
+- [ ] Patrzący (epicki) w kamerze ma jasne oczy zamiast paska i dalej obraca się do obiektywu.
+- [ ] Winda: lampka bieżącego piętra na panelu, tabliczka PERSONS, numer nad portalem na zewnątrz. Przyciski UP i DOWN działają jak wcześniej.
+- [ ] Lobby: wnętrza obu kabin, portale wind, lampki nad tablicami rekordów, gzyms i belki. Czy przewodnik nadal rozpoznaje, że stoisz w kabinie?
+- [ ] Telefon (albo Studio z niższą jakością grafiki): czy na −3…−5 da się coś przeczytać i ile jest FPS na najcięższym piętrze (−2)?
 
 **Potem, czy jest fajne** (progi z GDD §12):
 - [ ] Czy po zmianie testerzy sami chcą zagrać kolejną? (cel: co najmniej 60%)
