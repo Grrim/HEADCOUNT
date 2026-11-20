@@ -28,6 +28,8 @@ export type Spot = {
 	z: number,
 	rarity: string,
 	kind: string,
+	-- The anomaly of the week (Core/Nights).
+	weekly: boolean?,
 }
 export type Vault = { room: number, link: Link }
 export type Floor = {
@@ -76,7 +78,10 @@ end
 -- `guided`: a first shift's floor (docs/09_GDD_V2.md §3), with one plain anomaly right in front of
 -- the lift doors so a new player has something to film at once. It draws nothing from the
 -- floor's random, so the rest of the floor is the same either way.
-function FloorGen.generate(seed: number, depth: number, guided: boolean?): Floor
+--
+-- `weekly`: the anomaly of the week's kind (Core/Nights, §9). It may stand in one room of the
+-- floor, drawn from its own random, so the rest of the floor is the same either way too.
+function FloorGen.generate(seed: number, depth: number, guided: boolean?, weekly: string?): Floor
 	local rng = Rng.new(seed * 977 + depth * 131 + 7)
 	local width, height = sizeFor(depth)
 	local startCx = rng:int(0, width - 1)
@@ -202,6 +207,33 @@ function FloorGen.generate(seed: number, depth: number, guided: boolean?): Floor
 				kind = KIND_FOR_RARITY[rarity],
 			})
 			vault = { room = pick.id, link = pick.link }
+		end
+	end
+
+	if weekly then
+		local weeklyRng = Rng.new(seed * 613 + depth * 37 + 3)
+		if weeklyRng:int(1, 100) <= 60 then
+			local options = {}
+			for id = 1, width * height do
+				if id ~= start and not (vault and vault.room == id) then
+					table.insert(options, id)
+				end
+			end
+			local id = options[weeklyRng:int(1, #options)]
+			local room = rooms[id]
+			local rarity = if weekly == "watcher"
+				then "epic"
+				elseif weekly == "standing" then "rare"
+				else "common"
+			table.insert(spots, {
+				id = #spots + 1,
+				room = id,
+				x = originX + (room.cx + 0.5) * FloorGen.CELL + weeklyRng:int(-9, 9),
+				z = originZ + (room.cz + 0.5) * FloorGen.CELL + weeklyRng:int(-9, 9),
+				rarity = rarity,
+				kind = weekly,
+				weekly = true,
+			})
 		end
 	end
 

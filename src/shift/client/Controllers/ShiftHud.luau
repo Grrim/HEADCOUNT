@@ -17,6 +17,7 @@ local AudioDirector = require(ReplicatedStorage.ClientCommon.AudioDirector)
 local LensView = require(ReplicatedStorage.ClientCommon.LensView)
 local Cosmetics = require(ReplicatedStorage.Shared.Config.Cosmetics)
 local Net = require(ReplicatedStorage.Shared.Net)
+local Nights = require(ReplicatedStorage.Shared.Core.Nights)
 local TapeView = require(ReplicatedStorage.ClientCommon.TapeView)
 local Ui = require(ReplicatedStorage.ClientCommon.Ui)
 
@@ -36,6 +37,8 @@ local liftHint: TextLabel
 -- A new player's radio line on their first shift; it stays until the next one replaces it.
 local radioLabel: TextLabel
 local carryLabel: TextLabel
+-- Tonight's modifier and the week's anomaly (docs/09_GDD_V2.md §9).
+local nightLabel: TextLabel
 local teamList: Frame
 local questList: Frame
 local results: Frame
@@ -134,6 +137,13 @@ local function depthText(depth: number): string
 end
 
 local function render()
+	local night = Nights.byId(state.night)
+	nightLabel.Text = (if night.id == "standard" then "" else `TONIGHT: {night.name}. {night.text}`)
+		.. (
+			if typeof(state.weekly) == "string"
+				then `{if night.id == "standard" then "" else "\n"}THIS WEEK: {state.weekly} (pays double)`
+				else ""
+		)
 	local depth = state.depth or 0
 	local multiplier = state.multiplier or 1
 	floorLabel.Text = if depth == 0 then depthText(0) else `{depthText(depth)}   x{multiplier}`
@@ -158,6 +168,11 @@ local function inLift(): boolean
 	local p = root.Position
 	-- Matches ShiftWorld.inLift on the server.
 	return p.X >= -6 and p.X <= 6 and p.Z >= -12 and p.Z <= -1.3 and p.Y < 12
+end
+
+-- Tonight's modifier id, as the server set it for this shift.
+function ShiftHud.night(): string
+	return if typeof(state.night) == "string" then state.night else "standard"
 end
 
 function ShiftHud.phase(): string
@@ -676,6 +691,17 @@ local function build()
 		Size = UDim2.fromOffset(340, 16),
 		TextSize = 12,
 		TextColor3 = Ui.C.Muted,
+		TextStrokeTransparency = 0.6,
+		Text = "",
+	}, gui)
+
+	nightLabel = Ui.mono({
+		Position = UDim2.fromOffset(18, 104),
+		Size = UDim2.fromOffset(420, 32),
+		TextSize = 12,
+		TextWrapped = true,
+		TextYAlignment = Enum.TextYAlignment.Top,
+		TextColor3 = Ui.C.Radio,
 		TextStrokeTransparency = 0.6,
 		Text = "",
 	}, gui)

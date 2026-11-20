@@ -41,6 +41,8 @@ export type Tape = {
 	track: { number },
 	-- Shot on a first shift's floor (FloorGen's `guided`).
 	guided: boolean?,
+	-- The week's anomaly kind on that floor (FloorGen's `weekly`).
+	weekly: string?,
 }
 
 export type Data = {
@@ -72,6 +74,8 @@ export type Data = {
 	title: string?,
 	-- Experience for rank, for good (Core/Rank).
 	rankXp: number,
+	-- The last week whose anomaly of the week this player has filmed (and been paid for).
+	weeklyWeek: number,
 }
 
 export type Lock = { id: string, at: number }
@@ -100,6 +104,7 @@ function Wallet.default(): Data
 		frame = nil,
 		title = nil,
 		rankXp = 0,
+		weeklyWeek = 0,
 	}
 end
 
@@ -147,6 +152,18 @@ function Wallet.grant(data: Data, rewards: { Pass.Reward })
 			data.titles[reward.title] = true
 		end
 	end
+end
+
+-- The anomaly of the week filmed well: pays `reward` the first time in that week. Returns whether
+-- it paid.
+function Wallet.weeklyFound(data: Data, week: number, reward: number): boolean
+	if data.weeklyWeek >= week then
+		return false
+	end
+	data.weeklyWeek = week
+	data.frames += reward
+	data.earned += reward
+	return true
 end
 
 -- Experience towards rank. Returns the rank before and after, and the rewards of every rank
@@ -214,6 +231,7 @@ function Wallet.readTape(raw: any): Tape?
 		hz = hz,
 		track = table.clone(raw.track),
 		guided = raw.guided == true or nil,
+		weekly = if raw.weekly == "standing" or raw.weekly == "watcher" then raw.weekly else nil,
 	}
 end
 
@@ -268,6 +286,7 @@ function Wallet.migrate(raw: any): Record
 			-- Wallets from before ranks start at what they have earned, so nobody loses a floor
 			-- they could already reach.
 			data.rankXp = count(stored.rankXp, 0, 1e9) or data.earned
+			data.weeklyWeek = count(stored.weeklyWeek, 0, 1e7) or 0
 			local pass = stored.pass
 			if typeof(pass) == "table" and typeof(pass.season) == "string" then
 				data.pass = {
@@ -503,6 +522,7 @@ function Wallet.merge(record: Data, early: Data): Data
 		record.titles[title] = true
 	end
 	record.rankXp += early.rankXp
+	record.weeklyWeek = math.max(record.weeklyWeek, early.weeklyWeek)
 	-- Weekly rewards are only ever claimed on a saved wallet, so the early one holds none.
 	return record
 end

@@ -17,6 +17,8 @@ local FloorGen = require(ReplicatedStorage.Shared.Core.FloorGen)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Palette = require(ReplicatedStorage.Shared.Config.Palette)
 local RateLimit = require(ReplicatedStorage.Shared.Core.RateLimit)
+local Nights = require(ReplicatedStorage.Shared.Core.Nights)
+local Quests = require(ReplicatedStorage.Shared.Core.Quests)
 local Rank = require(ReplicatedStorage.Shared.Core.Rank)
 local Records = require(ReplicatedStorage.Shared.Core.Records)
 local Shift = require(ReplicatedStorage.Shared.Core.Shift)
@@ -67,6 +69,15 @@ ShiftSession.busy = false
 -- A first shift (docs/09_GDD_V2.md §3): everyone aboard is new, so the shift is one floor with a
 -- lower quota, a plain anomaly right by the lift and a slower Registrar.
 ShiftSession.guided = false
+-- Tonight's modifier and the week's anomaly (docs/09_GDD_V2.md §9, Core/Nights). A first shift has
+-- neither: it is for learning the rules.
+ShiftSession.night = Nights.STANDARD :: Nights.Night
+ShiftSession.weekly = nil :: Nights.Weekly?
+
+local function liveEvents()
+	ShiftSession.night = Nights.tonight(Quests.day(os.time()))
+	ShiftSession.weekly = Nights.weekly(Records.week(os.time()))
+end
 
 -- New players get three short radio lines on their first shift, each when it is needed.
 local HINTS = {
@@ -165,6 +176,8 @@ local function snapshot(notice: string?): { [string]: any }
 		canDescend = Shift.canDescend(shift),
 		maxDepth = shift.limit,
 		guided = ShiftSession.guided,
+		night = ShiftSession.night.id,
+		weekly = if ShiftSession.weekly then ShiftSession.weekly.name else nil,
 		notice = notice,
 		noticeId = noticeId,
 	}
@@ -285,14 +298,17 @@ end
 local function placeAnomalies(floor: FloorGen.Floor)
 	clearAnomalies()
 	for _, spot in floor.spots do
-		local value = (CFG.Values :: any)[spot.rarity] or CFG.Values.common
+		local value = ((CFG.Values :: any)[spot.rarity] or CFG.Values.common)
+			* ShiftSession.night.valueScale
+			* (if spot.weekly then Nights.WEEKLY_VALUE else 1)
 		local position = Vector3.new(spot.x, CFG.TargetHeight, spot.z)
 		table.insert(ShiftSession.anomalies, {
 			id = spot.id,
 			position = position,
 			rarity = spot.rarity,
 			kind = spot.kind,
-			value = value,
+			value = math.floor(value + 0.5),
+			weekly = spot.weekly == true,
 		})
 		local marker = Instance.new("Part")
 		marker.Name = `Anomaly{spot.id}`
@@ -307,6 +323,7 @@ local function placeAnomalies(floor: FloorGen.Floor)
 		marker:SetAttribute("Kind", spot.kind)
 		marker:SetAttribute("Rarity", spot.rarity)
 		marker:SetAttribute("Seed", seed + spot.id)
+		marker:SetAttribute("Weekly", spot.weekly == true)
 		marker.Parent = anomalyFolder
 	end
 end
@@ -527,9 +544,24 @@ local function ride(down: boolean)
 	updateIndicator()
 	local seconds = if down then CFG.RideSeconds else CFG.ReturnSeconds
 	if down then
-		local floor = FloorGen.generate(seed, shift.depth, ShiftSession.guided)
+		local weekly = ShiftSession.weekly
+		local floor = FloorGen.generate(
+			seed,
+			shift.depth,
+			ShiftSession.guided,
+			if weekly then weekly.kind else nil
+		)
 		ShiftSession.floor = floor
 		world.buildFloor(floor, seed)
+		-- Weak bulbs tonight: every lamp of the floor burns lower.
+		local dim = ShiftSession.night.lightScale
+		if dim ~= 1 and world.floorFolder then
+			for _, item in world.floorFolder:GetDescendants() do
+				if item:IsA("Light") then
+					item.Brightness *= dim
+				end
+			end
+		end
 		services.ShiftDoors.build(floor)
 		placeAnomalies(floor)
 		services.ShiftRegistrar.setFloor(floor, shift.depth)
@@ -650,6 +682,7 @@ end
 local function newShift()
 	seed = Random.new():NextInteger(1, 1000000)
 	ShiftSession.guided = false
+	liveEvents()
 	clearHints()
 	services.ShiftTapes.resetHighlight()
 	shiftStarted = os.clock()
@@ -743,7 +776,10 @@ local function onDown(player: Player)
 			end
 		end
 		ShiftSession.guided = everyoneNew
+		liveEvents()
 		if everyoneNew then
+			ShiftSession.night = Nights.STANDARD
+			ShiftSession.weekly = nil
 			shift.quota = Shift.FIRST_QUOTA
 			shift.limit = 1
 		else

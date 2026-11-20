@@ -59,7 +59,12 @@ function TapeView.play(screen: Frame, tape: any): (() -> ())?
 	viewport.CurrentCamera = camera
 
 	-- The floor as it was, and everything the lens showed on it.
-	local floor = FloorGen.generate(tape.seed, tape.depth, tape.guided == true)
+	local floor = FloorGen.generate(
+		tape.seed,
+		tape.depth,
+		tape.guided == true,
+		if typeof(tape.weekly) == "string" then tape.weekly else nil
+	)
 	local world = Instance.new("WorldModel")
 	world.Parent = viewport
 	FloorBuild.build(floor, tape.seed).Parent = world

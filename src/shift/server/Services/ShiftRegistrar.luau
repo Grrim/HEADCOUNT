@@ -52,7 +52,10 @@ end
 local function scale(): number
 	local players = #Players:GetPlayers()
 	local haste = 1 / (1 + SHIFT.HastePerFloor * (depth - 1))
-	return haste * (if players <= 1 then SHIFT.SoloSlower else 1)
+	-- A restless night shortens every wait.
+	return haste
+		* (if players <= 1 then SHIFT.SoloSlower else 1)
+		* services.ShiftSession.night.jumpScale
 end
 
 function ShiftRegistrar.setFloor(floor: FloorGen.Floor, floorDepth: number)

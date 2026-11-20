@@ -66,10 +66,17 @@ local function build(marker: BasePart)
 	}
 	figures[marker] = figure
 
+	-- The anomaly of the week wears its name through the lens until it has been filmed.
+	local weekly = marker:GetAttribute("Weekly") == true
+	if weekly then
+		stars.Text = "OF THE WEEK"
+		stars.TextColor3 = Palette.Rec
+	end
 	local function showStars()
 		local value = marker:GetAttribute("Stars")
 		if typeof(value) == "number" and value > 0 then
 			stars.Text = string.rep("*", value) .. string.rep(".", 5 - value)
+			stars.TextColor3 = Palette.Crt
 		end
 	end
 	marker:GetAttributeChangedSignal("Stars"):Connect(showStars)
@@ -121,7 +128,8 @@ function Anomalies.start()
 		end
 		-- Watchers turn on the spot to face whoever is filming.
 		for _, figure in figures do
-			if figure.kind == "watcher" then
+			-- On an attentive night every figure turns to the lens.
+			if figure.kind == "watcher" or controllers.ShiftHud.night() == "attentive" then
 				local position = figure.base.Position
 				local look =
 					Vector3.new(camera.CFrame.Position.X, position.Y, camera.CFrame.Position.Z)

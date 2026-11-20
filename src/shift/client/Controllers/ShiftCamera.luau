@@ -13,6 +13,7 @@ local Config = require(ReplicatedStorage.Shared.Config.Game)
 local Input = require(ReplicatedStorage.ClientCommon.Input)
 local LensView = require(ReplicatedStorage.ClientCommon.LensView)
 local Net = require(ReplicatedStorage.Shared.Net)
+local Nights = require(ReplicatedStorage.Shared.Core.Nights)
 local Strings = require(ReplicatedStorage.Shared.Strings)
 
 local ShiftCamera = {}
@@ -47,10 +48,16 @@ local function stopRecording()
 	track = {}
 end
 
+-- How long one recording may run tonight (a short-tape night stops it early).
+local function recordLimit(): number
+	return Nights.byId(controllers.ShiftHud.night()).recordSeconds or Config.Shift.RecordSeconds
+end
+
 local function startRecording()
 	if not LensView.raised or recording or controllers.ShiftPlayback.active() then
 		return
 	end
+	LensView.setRecordLimit(recordLimit())
 	if controllers.ShiftHud.phase() ~= "floor" then
 		controllers.ShiftHud.toast("Nothing to film here. Footage counts on a floor.")
 		return
@@ -235,7 +242,7 @@ function ShiftCamera.start()
 			return
 		end
 		local now = os.clock()
-		if now - recordStart >= Config.Shift.RecordSeconds then
+		if now - recordStart >= recordLimit() then
 			stopRecording()
 			return
 		end

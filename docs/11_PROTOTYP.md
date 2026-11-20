@@ -97,6 +97,11 @@ Stan na 2026-11-20. Gałąź `prototype-shift`. Etap 0 z `09_GDD_V2.md` §12 (pr
   - Ranga i postęp są na ekranie wypłaty, a przy imionach na liście drużyny jest „[R7]”.
   - **Do decyzji właściciela:** czy Misja 001 (Story Tape) ma być odblokowywana rangą (§10 i pytanie 3 w §13 GDD). Na razie zostaje otwarta dla wszystkich.
 
+- **Wydarzenia na żywo** (§9 GDD, `Core/Nights`):
+  - **Modyfikator nocy:** jeden na dzień, ten sam dla wszystkich (z daty UTC), wersja nocy z Misji 001 przeniesiona na zmianę: krótka taśma (nagranie do 7 s, także sprawdzane na serwerze), niespokojny Kadrowy (krótsze odstępy między skokami), słabe żarówki (lampy na piętrach o 45% ciemniejsze) albo uważna sala (każda postać obraca się do obiektywu, nagrania płacą 20% więcej). Pierwsza zmiana zawsze ma zwykłą noc.
+  - **Anomalia tygodnia:** na zmianę co tydzień „ta, która stoi” (rzadka) albo „ta, która patrzy” (epicka). Pojawia się na ok. 60% pięter jako dodatkowa postać, płaci podwójnie, w wizjerze ma napis „OF THE WEEK”, a pierwsze dobre ujęcie w tygodniu (od 3 gwiazdek) daje +100 Klatek. Stoi w danych piętra (`FloorGen`), więc wraca też na taśmie.
+  - Obie rzeczy widać w HUD pod normą.
+
 **Czego jeszcze nie ma:** taśmy zmiany (klipu z najlepszym momentem), zadań dziennych, dźwięków i grafiki docelowej.
 
 ## 2. Jak uruchomić (bez instalowania czegokolwiek)

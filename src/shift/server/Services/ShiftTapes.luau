@@ -17,6 +17,8 @@ local Workspace = game:GetService("Workspace")
 local Config = require(ReplicatedStorage.Shared.Config.Game)
 local Footage = require(ReplicatedStorage.Shared.Core.Footage)
 local Highlight = require(ReplicatedStorage.Shared.Core.Highlight)
+local Nights = require(ReplicatedStorage.Shared.Core.Nights)
+local Records = require(ReplicatedStorage.Shared.Core.Records)
 local Shift = require(ReplicatedStorage.Shared.Core.Shift)
 local Wallet = require(ReplicatedStorage.Shared.Core.Wallet)
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -106,6 +108,7 @@ local function considerHighlight(
 		hz = TAPE.SampleHz,
 		track = Highlight.pack(samples, first, last),
 		guided = session.guided or nil,
+		weekly = if session.weekly then session.weekly.kind else nil,
 	}
 end
 
@@ -222,6 +225,12 @@ local function onStop(player: Player, raw: unknown)
 		warn(`[ShiftTapes] refused a tape from {player.Name}: it does not follow their head`)
 		return
 	end
+	-- A short-tape night: the camera stops early, and a longer tape is not one it could have shot.
+	local limit = session.night.recordSeconds
+	if limit and (#samples - 1) / TAPE.SampleHz > limit + 0.5 then
+		warn(`[ShiftTapes] refused a tape from {player.Name}: longer than tonight allows`)
+		return
+	end
 	keep(player, samples)
 	local targets: { Footage.Target } = {}
 	local byId: { [number]: any } = {}
@@ -262,6 +271,16 @@ local function onStop(player: Player, raw: unknown)
 	for _, shot in improved do
 		local anomaly = byId[shot.id]
 		session.markFilmed(shot.id, shot.stars)
+		-- The anomaly of the week, filmed well: a bonus, once a week per player.
+		if anomaly and anomaly.weekly and shot.stars >= Nights.WEEKLY_STARS then
+			local bank = services.ShiftBank
+			if
+				Wallet.weeklyFound(bank.data(player), Records.week(os.time()), Nights.WEEKLY_REWARD)
+			then
+				bank.changed(player)
+				session.tell(player, `Anomaly of the week on tape! +{Nights.WEEKLY_REWARD} frames.`)
+			end
+		end
 		local quests = services.ShiftQuests
 		quests.event(player, "film")
 		if anomaly and (anomaly.rarity == "rare" or anomaly.rarity == "epic") then
