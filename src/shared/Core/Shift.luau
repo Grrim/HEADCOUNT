@@ -15,6 +15,10 @@ local Shift = {}
 
 Shift.MAX_DEPTH = 5
 Shift.BASE_PAY = 0.25
+-- A first shift (docs/09_GDD_V2.md §3): one floor, a quota one floor can make, and a welcome from
+-- the Bureau so the first upgrade can be bought straight after.
+Shift.FIRST_QUOTA = 25
+Shift.WELCOME = 60
 
 local MULTIPLIERS = { 1, 1.5, 2, 3, 4 }
 
@@ -27,14 +31,17 @@ export type State = {
 	carried: number,
 	carriedBy: { [number]: number },
 	result: string?,
+	-- How deep this shift may go (a first shift stops at -1).
+	limit: number,
 }
 
 function Shift.quotaFor(players: number): number
 	return 40 + 20 * (math.clamp(players, 1, 4) - 1)
 end
 
-function Shift.new(quota: number): State
+function Shift.new(quota: number, limit: number?): State
 	return {
+		limit = math.clamp(limit or Shift.MAX_DEPTH, 1, Shift.MAX_DEPTH),
 		phase = "ready",
 		depth = 0,
 		deepest = 0,
@@ -57,7 +64,7 @@ local function bank(state: State)
 end
 
 function Shift.canDescend(state: State): boolean
-	return (state.phase == "ready" or state.phase == "floor") and state.depth < Shift.MAX_DEPTH
+	return (state.phase == "ready" or state.phase == "floor") and state.depth < state.limit
 end
 
 function Shift.descend(state: State): boolean

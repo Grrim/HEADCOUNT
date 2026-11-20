@@ -105,6 +105,7 @@ local function considerHighlight(
 		at = os.time(),
 		hz = TAPE.SampleHz,
 		track = Highlight.pack(samples, first, last),
+		guided = session.guided or nil,
 	}
 end
 

@@ -63,6 +63,40 @@ ShiftSession.anomalies = {} :: { Anomaly }
 -- The team's best value per anomaly on this floor; filming one again pays only the improvement.
 ShiftSession.best = {} :: { [number]: number }
 ShiftSession.busy = false
+-- A first shift (docs/09_GDD_V2.md §3): everyone aboard is new, so the shift is one floor with a
+-- lower quota, a plain anomaly right by the lift and a slower Registrar.
+ShiftSession.guided = false
+
+-- New players get three short radio lines on their first shift, each when it is needed.
+local HINTS = {
+	raise = "RADIO: Raise your camera. (Q or right mouse)",
+	film = "RADIO: Something's sitting by the lift. Hold R to film it. Closer and longer is better.",
+	awake = "RADIO: Something on this floor is awake. It only moves when nobody's filming.",
+	quota = "RADIO: Quota made. Back in the lift and press UP to get paid.",
+}
+local newcomers: { [Player]: string } = {}
+
+local function hint(player: Player, step: string)
+	if newcomers[player] == nil or newcomers[player] == step then
+		return
+	end
+	newcomers[player] = step
+	player:SetAttribute("Hint", HINTS[step] or "")
+end
+
+local function clearHints()
+	for player in newcomers do
+		player:SetAttribute("Hint", "")
+	end
+	newcomers = {}
+end
+
+-- The Registrar has woken: newcomers hear his one rule.
+function ShiftSession.onAwake()
+	for player in newcomers do
+		hint(player, "awake")
+	end
+end
 
 local kits: { [Player]: Kit } = {}
 local seed = 0
@@ -128,7 +162,8 @@ local function snapshot(notice: string?): { [string]: any }
 		multiplier = Shift.multiplier(math.max(1, shift.depth)),
 		nextMultiplier = Shift.multiplier(shift.depth + 1),
 		canDescend = Shift.canDescend(shift),
-		maxDepth = Shift.MAX_DEPTH,
+		maxDepth = shift.limit,
+		guided = ShiftSession.guided,
 		notice = notice,
 		noticeId = noticeId,
 	}
@@ -491,7 +526,7 @@ local function ride(down: boolean)
 	updateIndicator()
 	local seconds = if down then CFG.RideSeconds else CFG.ReturnSeconds
 	if down then
-		local floor = FloorGen.generate(seed, shift.depth)
+		local floor = FloorGen.generate(seed, shift.depth, ShiftSession.guided)
 		ShiftSession.floor = floor
 		world.buildFloor(floor, seed)
 		services.ShiftDoors.build(floor)
@@ -535,6 +570,8 @@ local function sendResult(player: Player)
 		upgrades = upgrades,
 		archive = archive,
 		honours = data.honours,
+		-- Straight after a first shift: point at the first upgrade.
+		firstUpgrade = data.shifts == 1,
 		-- The shift's tape, and the ones this player keeps in their Archive.
 		tape = services.ShiftTapes.highlight,
 		tapes = data.tapes,
@@ -564,7 +601,19 @@ local function payEveryone()
 	local shift = ShiftSession.shift
 	local payout = Shift.payout(shift)
 	local returned = shift.result == "returned"
+	clearHints()
 	for _, player in Players:GetPlayers() do
+		local data = services.ShiftBank.data(player)
+		-- Only on a wallet that has been read: an unread one looks new for anyone.
+		if services.ShiftBank.loaded(player) and data.shifts == 0 then
+			-- The Bureau's welcome: enough for a first upgrade straight away (§3).
+			data.frames += Shift.WELCOME
+			data.earned += Shift.WELCOME
+			ShiftSession.tell(
+				player,
+				`The Bureau's welcome: +{Shift.WELCOME} frames for your first upgrade.`
+			)
+		end
 		Wallet.recordShift(
 			services.ShiftBank.data(player),
 			payout,
@@ -599,6 +648,8 @@ end
 
 local function newShift()
 	seed = Random.new():NextInteger(1, 1000000)
+	ShiftSession.guided = false
+	clearHints()
 	services.ShiftTapes.resetHighlight()
 	shiftStarted = os.clock()
 	ShiftSession.shift = Shift.new(Shift.quotaFor(#Players:GetPlayers()))
@@ -630,6 +681,9 @@ local function arrive()
 		line ..= " There's a code door somewhere."
 	end
 	ShiftSession.broadcast(line)
+	for player in newcomers do
+		hint(player, "raise")
+	end
 	moveDoors(0, CFG.DoorOpenSeconds)
 end
 
@@ -656,7 +710,12 @@ local function onDown(player: Player)
 		return
 	end
 	if not Shift.canDescend(shift) then
-		ShiftSession.tell(player, "This is the bottom floor. The only way is up.")
+		ShiftSession.tell(
+			player,
+			if ShiftSession.guided
+				then "Your first shift is one floor. UP ends it and pays."
+				else "This is the bottom floor. The only way is up."
+		)
 		return
 	end
 	if not everyoneAboard() then
@@ -666,6 +725,22 @@ local function onDown(player: Player)
 	if shift.phase == "ready" then
 		-- A crew from the lobby arrives over a few seconds: the quota counts who is here now.
 		shift.quota = Shift.quotaFor(math.max(#Players:GetPlayers(), expectedCrew))
+		-- Who has never finished a shift. With nobody else aboard, theirs is a guided first shift.
+		local everyoneNew = #Players:GetPlayers() > 0
+		newcomers = {}
+		for _, member in Players:GetPlayers() do
+			local bank = services.ShiftBank
+			if bank.loaded(member) and bank.data(member).shifts == 0 then
+				newcomers[member] = ""
+			else
+				everyoneNew = false
+			end
+		end
+		ShiftSession.guided = everyoneNew
+		if everyoneNew then
+			shift.quota = Shift.FIRST_QUOTA
+			shift.limit = 1
+		end
 	end
 	whileBusy(function()
 		if shift.phase == "floor" and not closeDoors() then
@@ -847,6 +922,7 @@ function ShiftSession.init(all: { [string]: any })
 		end
 	end)
 	Players.PlayerRemoving:Connect(function(player)
+		newcomers[player] = nil
 		kits[player] = nil
 		actionLimit:forget(player)
 	end)
@@ -883,6 +959,21 @@ function ShiftSession.start()
 				end
 			end
 			refreshKitAttributes(player)
+		end
+		for player, shown in newcomers do
+			if shown == "raise" and services.Lens.isRaised(player) then
+				hint(player, "film")
+			end
+		end
+		local current = ShiftSession.shift
+		if
+			ShiftSession.guided
+			and current.phase == "floor"
+			and current.banked + current.carried >= current.quota
+		then
+			for player in newcomers do
+				hint(player, "quota")
+			end
 		end
 		whereClock += step
 		if whereClock >= 0.5 then

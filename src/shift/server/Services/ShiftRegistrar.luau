@@ -64,7 +64,11 @@ function ShiftRegistrar.setFloor(floor: FloorGen.Floor, floorDepth: number)
 	state = current
 	placeAnchor(current.node)
 	anchor:SetAttribute("Awake", false)
-	local sleep = if floorDepth <= 1 then SHIFT.WakeFirstFloor else SHIFT.WakeDeeper
+	-- A first shift gives a new player longer to look round before he wakes.
+	local sleep = if services.ShiftSession.guided
+		then SHIFT.WakeFirstFloor * 1.6
+		elseif floorDepth <= 1 then SHIFT.WakeFirstFloor
+		else SHIFT.WakeDeeper
 	-- Counted from the doors opening, which comes after the ride.
 	wakeAt = os.clock() + SHIFT.RideSeconds + SHIFT.DoorOpenSeconds + sleep
 	running = true
@@ -200,6 +204,7 @@ function ShiftRegistrar.start()
 				current.dormant = false
 				anchor:SetAttribute("Awake", true)
 				services.ShiftSession.broadcast("Something on this floor is awake.")
+				services.ShiftSession.onAwake()
 			end
 			continue
 		end

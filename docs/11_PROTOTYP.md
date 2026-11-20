@@ -83,6 +83,13 @@ Stan na 2026-11-20. Gałąź `prototype-shift`. Etap 0 z `09_GDD_V2.md` §12 (pr
   - Ramki z Passa (`Cosmetics.PassFrames`) zakłada się na zmianie, nie w szafce w lobby (ta pokazuje ramki z osiągnięć).
   - **Do zrobienia przez właściciela:** utworzyć Game Pass dla sezonu 1 i wpisać jego ID do `gamePassId` w `src/shared/Config/Pass.luau`. Do tego czasu ścieżka premium pokazuje „coming soon”. Cenę ustawia się w Creator Hub.
 
+- **Pierwsza zmiana** (§3 GDD): gdy wszyscy w windzie są nowi (zapisany portfel bez ani jednej zmiany), zmiana jest prowadzona:
+  - tylko piętro −1 („Your first shift is one floor”), norma 25 zamiast 40, Kadrowy śpi 40 s zamiast 25,
+  - tuż przed drzwiami windy siedzi zwykła anomalia (`FloorGen.generate(…, guided)`, więc ta postać wraca też na taśmie z tej zmiany),
+  - nowy gracz dostaje trzy linie radia w bursztynowym pasku u góry, każdą w swoim momencie: po otwarciu drzwi „podnieś kamerę”, po podniesieniu „nagraj to, bliżej i dłużej znaczy lepiej”, po przebudzeniu Kadrowego „rusza się tylko, gdy nikt go nie filmuje”, a po zrobieniu normy „wracaj do windy i wciśnij UP”,
+  - pierwsza wypłata zawiera powitanie Biura, +60 Klatek, więc od razu stać go na pierwsze ulepszenie (bateria kosztuje 60), a ekran wypłaty mu je podsuwa.
+  - Gdy w windzie jest choć jeden weteran, zmiana jest zwykła, a nowi i tak dostają linie radia.
+
 **Czego jeszcze nie ma:** taśmy zmiany (klipu z najlepszym momentem), zadań dziennych, dźwięków i grafiki docelowej.
 
 ## 2. Jak uruchomić (bez instalowania czegokolwiek)

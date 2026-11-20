@@ -73,7 +73,10 @@ function FloorGen.rarity(roll: number, depth: number): string
 	return "common"
 end
 
-function FloorGen.generate(seed: number, depth: number): Floor
+-- `guided`: a first shift's floor (docs/09_GDD_V2.md §3), with one plain anomaly right in front of
+-- the lift doors so a new player has something to film at once. It draws nothing from the
+-- floor's random, so the rest of the floor is the same either way.
+function FloorGen.generate(seed: number, depth: number, guided: boolean?): Floor
 	local rng = Rng.new(seed * 977 + depth * 131 + 7)
 	local width, height = sizeFor(depth)
 	local startCx = rng:int(0, width - 1)
@@ -200,6 +203,18 @@ function FloorGen.generate(seed: number, depth: number): Floor
 			})
 			vault = { room = pick.id, link = pick.link }
 		end
+	end
+
+	if guided then
+		local x, z = originX + (startCx + 0.5) * FloorGen.CELL, originZ + 0.5 * FloorGen.CELL
+		table.insert(spots, {
+			id = #spots + 1,
+			room = start,
+			x = x + 5,
+			z = z + 4,
+			rarity = "common",
+			kind = KIND_FOR_RARITY.common,
+		})
 	end
 
 	return {

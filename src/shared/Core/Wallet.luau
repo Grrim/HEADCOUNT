@@ -38,6 +38,8 @@ export type Tape = {
 	at: number,
 	hz: number,
 	track: { number },
+	-- Shot on a first shift's floor (FloorGen's `guided`).
+	guided: boolean?,
 }
 
 export type Data = {
@@ -187,6 +189,7 @@ function Wallet.readTape(raw: any): Tape?
 		at = math.floor(at),
 		hz = hz,
 		track = table.clone(raw.track),
+		guided = raw.guided == true or nil,
 	}
 end
 

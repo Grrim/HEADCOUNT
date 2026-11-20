@@ -33,6 +33,8 @@ local batteryLabel: TextLabel
 local toastLabel: TextLabel
 local cutLabel: TextLabel
 local liftHint: TextLabel
+-- A new player's radio line on their first shift; it stays until the next one replaces it.
+local radioLabel: TextLabel
 local carryLabel: TextLabel
 local teamList: Frame
 local questList: Frame
@@ -448,7 +450,17 @@ local function showResults(data: { [string]: any })
 		end
 	)
 
-	Ui.eyebrow("UPGRADES", { LayoutOrder = 30 }, results)
+	Ui.eyebrow("UPGRADES", { LayoutOrder = 29 }, results)
+	if data.firstUpgrade then
+		-- Straight after a first shift (docs/09_GDD_V2.md §3): the first upgrade, bought now.
+		Ui.text({
+			Size = UDim2.new(1, 0, 0, 20),
+			TextSize = 15,
+			TextColor3 = Ui.C.Accent,
+			Text = "Your first upgrade: a bigger Battery keeps the lens up longer underground.",
+			LayoutOrder = 30,
+		}, results)
+	end
 	for index, upgrade in data.upgrades or {} do
 		local row = Ui.frame({
 			Size = UDim2.new(1, 0, 0, 36),
@@ -590,6 +602,22 @@ local function build()
 		Visible = false,
 		Text = "",
 	}, gui)
+
+	radioLabel = Ui.text({
+		AnchorPoint = Vector2.new(0.5, 0),
+		Position = UDim2.new(0.5, 0, 0, 136),
+		Size = UDim2.new(0.7, 0, 0, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
+		BackgroundColor3 = Color3.new(0, 0, 0),
+		BackgroundTransparency = 0.4,
+		TextSize = 18,
+		TextWrapped = true,
+		TextColor3 = Ui.C.Radio,
+		TextXAlignment = Enum.TextXAlignment.Center,
+		Visible = false,
+		Text = "",
+	}, gui)
+	Ui.pad(radioLabel, 10, 6)
 
 	liftHint = Ui.text({
 		AnchorPoint = Vector2.new(0.5, 1),
@@ -792,6 +820,17 @@ function ShiftHud.start()
 		end
 	end)
 
+	local function renderRadio()
+		local line = player:GetAttribute("Hint")
+		local shown = typeof(line) == "string" and line ~= ""
+		radioLabel.Visible = shown
+		if shown then
+			radioLabel.Text = line
+			AudioDirector.play("Paper", 0.35, 0.8)
+		end
+	end
+	player:GetAttributeChangedSignal("Hint"):Connect(renderRadio)
+	renderRadio()
 	player:GetAttributeChangedSignal("Quests"):Connect(renderQuests)
 	renderQuests()
 	-- The countdown to new tasks, once a minute.

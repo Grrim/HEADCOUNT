@@ -438,4 +438,30 @@ return {
 			Wallet.migrate({ data = { tapes = { { seed = 1, depth = 99 }, "x" } } }).data
 		assert(#hostile.tapes == 0)
 	end,
+
+	["a first shift stops at floor -1"] = function()
+		local state = Shift.new(Shift.FIRST_QUOTA, 1)
+		assert(Shift.descend(state))
+		Shift.arrive(state)
+		assert(
+			not Shift.canDescend(state) and not Shift.descend(state),
+			"a first shift went deeper"
+		)
+		assert(Shift.ascend(state))
+		assert(Shift.canDescend(Shift.new(40)) and Shift.new(40).limit == Shift.MAX_DEPTH)
+	end,
+
+	["a first shift's floor has something to film right by the lift, and is otherwise the same"] = function()
+		for seed = 1, 20 do
+			local plain = FloorGen.generate(seed, 1)
+			local guided = FloorGen.generate(seed, 1, true)
+			assert(#guided.spots == #plain.spots + 1)
+			local extra = guided.spots[#guided.spots]
+			assert(extra.room == guided.start and extra.rarity == "common")
+			for index, spot in plain.spots do
+				assert(guided.spots[index].x == spot.x and guided.spots[index].z == spot.z)
+			end
+			assert(FloorGen.roomAt(guided, extra.x, extra.z) == guided.start)
+		end
+	end,
 }
